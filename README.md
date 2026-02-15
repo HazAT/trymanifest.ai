@@ -330,9 +330,20 @@ The CLI is 352 lines of TypeScript. No framework. Just `process.argv`.
 
 ## Getting Started
 
+### The fast way (with an AI agent)
+
+Paste this into your agent:
+
+> Download and follow the steps from https://github.com/hazat/manifest/blob/main/SPARK.md
+
+Your agent becomes **Spark** — a Manifest onboarding guide that walks you through forking, setting up, and building your first feature step by step.
+
+### The manual way
+
 ```bash
-# Clone and install
-git clone <repo> my-app
+# 1. Fork https://github.com/hazat/manifest on GitHub
+# 2. Clone your fork:
+git clone https://github.com/YOU/manifest.git my-app
 cd my-app
 bun install
 
