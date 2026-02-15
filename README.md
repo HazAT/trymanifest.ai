@@ -370,6 +370,116 @@ bun test
 
 ---
 
+## Fork It. It's Yours.
+
+Manifest doesn't install from npm. You fork the repo and start building.
+
+```bash
+# Fork on GitHub, then:
+git clone https://github.com/you/manifest-app my-project
+cd my-project
+bun install
+bun --hot index.ts
+```
+
+The `manifest/` directory is now **your** framework. Your agent reads it, modifies it, extends it as the application grows. There's no upstream dependency to keep in sync, no version pinning, no breaking changes from a package update.
+
+This is intentional. Traditional frameworks maintain a boundary: framework code lives in `node_modules/`, application code lives in `src/`. You depend on the framework. You can't change it. When it breaks, you wait for a patch.
+
+Manifest erases that boundary. The 1,055 lines of framework code live in your project, committed to your repo, understood by your agent. When the router needs a new matching rule, the agent edits `manifest/router.ts`. When validation needs a new format, the agent edits `manifest/validator.ts`. No pull request to an upstream repo. No waiting.
+
+**What about upstream improvements?**
+
+When the Manifest base repo adds a new capability — say, SSE streaming support — you don't `git merge`. Your agent reads the upstream diff, understands the intent, and implements the idea in the context of what your project has become. That's how agents work. They don't need `git merge`, they need context. The upstream repo serves as a reference and inspiration, not a dependency.
+
+---
+
+## Extensions
+
+Extensions are shared functionality that follows Manifest conventions. Authentication, payment processing, email — things many projects need and shouldn't reinvent.
+
+An extension is just a directory of features, schemas, and services. No plugin API. No hooks. No registration. Just more files following the same rules.
+
+```
+extensions/
+├── auth/
+│   ├── EXTENSION.md              # Agent reads this to understand the extension
+│   ├── features/
+│   │   ├── Login.ts              # Standard defineFeature() — same as any feature
+│   │   ├── Register.ts
+│   │   ├── RefreshToken.ts
+│   │   └── ResetPassword.ts
+│   ├── schemas/
+│   │   └── sessions.ts           # Standard Drizzle schema
+│   └── services/
+│       └── jwt.ts                # Plain exported functions
+│
+├── stripe/
+│   ├── EXTENSION.md
+│   ├── features/
+│   │   ├── CreateCheckout.ts
+│   │   └── HandleWebhook.ts
+│   └── services/
+│       └── stripe.ts
+```
+
+### Adding an extension
+
+```bash
+# Clone into extensions/
+cd extensions
+git clone https://github.com/manifest-ext/auth
+
+# Rebuild the manifest
+bun run manifest index
+```
+
+That's it. The scanner picks up features from `extensions/*/features/`. They show up in `MANIFEST.md`. They follow the same conventions. `bun manifest check` validates them the same way.
+
+### EXTENSION.md
+
+Every extension has an `EXTENSION.md` — the agent's guide to the extension, like `MANIFEST.md` is the guide to the app:
+
+```markdown
+# Auth Extension
+
+Provides user authentication with JWT tokens and session management.
+
+## Features
+| Name | Route | Description |
+|------|-------|-------------|
+| login | POST /api/auth/login | Authenticates user, returns JWT |
+| register | POST /api/auth/register | Creates account |
+| refresh-token | POST /api/auth/refresh | Refreshes expired JWT |
+
+## Schemas
+- sessions: Active JWT sessions with expiry tracking
+
+## Services
+- jwt: Token signing and verification (RS256)
+
+## Configuration Required
+Add to config/manifest.ts:
+  jwtSecret: Bun.env.JWT_SECRET
+  jwtExpirySeconds: 3600
+
+## Side Effects
+- Inserts/updates sessions table
+- No external API calls
+```
+
+### Why this works
+
+Extensions follow the same three rules:
+
+1. **One feature, one file.** An auth extension's `Login.ts` is a complete, self-contained feature — same as any feature you write yourself.
+2. **Explicit over elegant.** No auto-registration, no decorator scanning. The scanner reads the directory. You can see what's loaded.
+3. **Self-describing.** `EXTENSION.md` tells the agent everything. No reading source code to understand what an extension provides.
+
+And because extensions are source code in your project, your agent can modify them too. If the auth extension's password policy doesn't fit your needs, the agent edits `extensions/auth/features/Register.ts`. It's just a file.
+
+---
+
 ## The Vision
 
 Manifest is not a framework for writing web applications. It's a framework for **agents** writing web applications.
