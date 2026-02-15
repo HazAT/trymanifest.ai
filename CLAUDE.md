@@ -8,15 +8,23 @@ You are working on a Manifest project. Read this file completely before writing 
 
 Manifest is a TypeScript/Bun framework where every piece of code is written to be read, understood, and modified by AI agents. The framework ships as source code inside the project — not as an npm package. You can read every line of framework code in `manifest/` (~1,000 lines total).
 
-## The Three Rules
+## Principles
 
-These are non-negotiable. Every piece of code you write must follow them.
+**Read every line you touch.** Before modifying a file, read it. Before calling a function, read its implementation. The framework is ~1,000 lines — you can read all of it. Don't guess what `createRouter()` does; open `manifest/router.ts` (76 lines) and know. This applies to agents and humans equally. If something needs your attention, read the source. The answers are in the code, not in assumptions.
 
-**1. One feature, one file.** A feature file contains everything: route, input validation, authentication, business logic, side effects declaration, and error cases. Never scatter one behavior across multiple files.
+**Trust the defaults.** The framework has made deliberate choices: `defineFeature()` for behavior, `t.string()` for inputs, JSON envelopes for responses, `Bun.serve()` for HTTP. Lean into these patterns. Don't reach for Express middleware when `handle()` already solves it. Don't add a validation library when `manifest/validator.ts` already handles it. If a proven structure exists, use it.
 
-**2. Explicit over elegant.** If something happens, it's because the code says so. No auto-discovered middleware, no decorator-triggered behavior, no convention-based magic. Verbose is correct. Terse is suspicious.
+**One feature, one file.** A feature file contains everything: route, input validation, authentication, business logic, side effects declaration, and error cases. Never scatter one behavior across multiple files.
 
-**3. Self-describing code.** Every feature, service, and schema carries machine-readable metadata. Descriptions on every input field. JSDoc on every schema column. Side effects declared before the logic. The codebase is its own documentation.
+**Explicit over elegant.** If something happens, it's because the code says so. No auto-discovered middleware, no decorator-triggered behavior, no convention-based magic. Verbose is correct. Terse is suspicious.
+
+**Self-describing code.** Every feature, service, and schema carries machine-readable metadata. Descriptions on every input field. JSDoc on every schema column. Side effects declared before the logic. The codebase is its own documentation.
+
+## Your Codebase, Your Choices
+
+Manifest has opinions about how features, schemas, and services are structured — that's the framework. It does **not** dictate how you build your application. You'll install npm packages. You'll make architectural decisions that aren't covered here. You'll do things your way.
+
+That's fine. When you add things, just try to keep them explicit and self-explanatory. If you bring in a new library, make it clear what it does and why it's there. If you add a pattern, make sure someone reading the code for the first time can follow it without tribal knowledge. The principles above are a compass, not a cage.
 
 ## Project Structure
 
@@ -73,12 +81,12 @@ export default defineFeature({
 })
 ```
 
-### Rules for features:
+### Guidelines for features:
 - **description** — Mandatory. 2-3 sentences. Written for an agent reading this cold.
-- **input fields** — Every field MUST have a `description`. No exceptions.
-- **sideEffects** — Declare ALL side effects upfront (database writes, emails, API calls). Can be an empty array, but must be present.
-- **errorCases** — List every error case with its HTTP status code.
-- **handle()** — Linear execution. All logic in one function. No calling out to hidden middleware or event emitters.
+- **input fields** — Every field needs a `description`.
+- **sideEffects** — Declare side effects upfront (database writes, emails, API calls). Can be an empty array.
+- **errorCases** — List error cases with HTTP status codes.
+- **handle()** — Linear execution. All logic in one function.
 - **imports** — All dependencies are explicit `import` statements. Follow the imports to understand what a feature touches.
 
 ### Feature types:
@@ -144,17 +152,6 @@ export const serviceName = {
 
 Features import services directly: `import { serviceName } from '../services/serviceName'`
 
-## What NOT to Do
-
-- **NEVER** use decorators. Features are plain objects via `defineFeature()`.
-- **NEVER** create middleware or event listeners. Side effects go in the feature's `handle()`.
-- **NEVER** scatter one behavior across multiple files.
-- **NEVER** use a DI container or service locator. Use explicit imports.
-- **NEVER** create base classes or inheritance hierarchies for features.
-- **NEVER** add input fields without descriptions.
-- **NEVER** forget to declare side effects in the feature definition.
-- **NEVER** use `any`. This is strict TypeScript.
-
 ## Common Commands
 
 ```bash
@@ -167,7 +164,7 @@ bun run manifest make:feature   # Scaffold a new feature
 
 ## The Framework
 
-The framework lives in `manifest/`. It's ~1,000 lines total. You can and should read it:
+The framework lives in `manifest/`. It's ~1,000 lines total. Read it:
 
 | File | Lines | What it does |
 |------|-------|-------------|
@@ -181,7 +178,7 @@ The framework lives in `manifest/`. It's ~1,000 lines total. You can and should 
 | `testing.ts` | 73 | `createTestClient()` — call features by name without HTTP. |
 | `cli/` | 352 | CLI commands: serve, index, check, make:feature. |
 
-If something in the framework doesn't work for your use case, **modify it**. It's your code.
+If something in the framework doesn't work for your use case, modify it. It's your code.
 
 ## Response Envelope
 
@@ -217,7 +214,7 @@ Extensions live in `extensions/` and follow the same conventions. Each has an `E
 
 ## When In Doubt
 
-1. Read `MANIFEST.md` — it's the index of everything.
-2. Read the feature file — it's self-contained.
-3. Read the framework source — it's 1,000 lines.
-4. Run `bun run manifest check` — it enforces conventions.
+1. Read the source. The framework is 1,000 lines. The answers are there.
+2. Read `MANIFEST.md` — it's the index of everything.
+3. Read the feature file — it's self-contained.
+4. Run `bun run manifest check` — it validates conventions.
