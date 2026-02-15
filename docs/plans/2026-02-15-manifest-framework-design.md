@@ -1,8 +1,12 @@
-# Manifest Framework Design
+# Manifest Framework
+
+> *Production is our dev environment.*
 
 ## Overview
 
 Manifest is a Symfony-based, API-only PHP framework where every piece of code is written to be read, understood, and modified by AI agents. It ships as a Docker image and is designed for self-healing applications - an AI agent runs as a sidecar in production, monitoring the app and fixing issues in real-time.
+
+Manifest is framework-first and vendor-agnostic. It integrates with error tracking tools (Sentry, Bugsnag, Flare, or custom) to feed context to the agent, but none are required. The agent can work from logs alone. The error tracking integration is pluggable - bring whatever you already use.
 
 ## Core Philosophy
 
@@ -605,7 +609,7 @@ Always prefixed with `[agent]`, always structured:
 ```
 [agent] fix: Null check in UserRegistration
 
-Sentry Issue: MYAPP-1234
+Error Tracker Issue: MYAPP-1234
 Root cause: $input->display_name could be null when OAuth provider omits the name field.
 Side effects of this fix: None.
 Features modified: user-registration
@@ -614,7 +618,7 @@ Risk: Low - adds null coalesce, no behavior change for valid inputs.
 
 ### Git as Persistence
 
-The container is stateless. Git is the brain. The agent always pushes its work. If a container dies unexpectedly, worst case is losing an uncommitted in-progress fix - which the agent redoes because the Sentry alert still exists.
+The container is stateless. Git is the brain. The agent always pushes its work. If a container dies unexpectedly, worst case is losing an uncommitted in-progress fix - which the agent redoes because the error alert still exists.
 
 ### Merge Conflicts
 
@@ -679,7 +683,7 @@ The agent should have the minimum permissions it needs:
 | Git force-push | deny | Never lose history |
 | Database | application user, not root | Agent fixes code, not schema (migrations are human-authored) |
 | Filesystem | /app directory only | No access outside the project |
-| Network | outbound to git remote + Sentry API only | No arbitrary network access |
+| Network | outbound to git remote + error tracker API only | No arbitrary network access |
 | SSH to host | deny | Agent lives inside the container, not on the host |
 
 ### What the agent should NOT have
