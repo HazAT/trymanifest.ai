@@ -8,7 +8,7 @@
  */
 
 export { defineFeature } from './feature'
-export type { FeatureDef, FeatureResult, HandleContext, FeatureOptions } from './feature'
+export type { FeatureDef, FeatureResult, HandleContext, FeatureOptions, StreamFeatureDef, StreamFeatureOptions, StreamContext, EmitFn, AnyFeatureDef } from './feature'
 
 export { t } from './types'
 export type { FieldDef, InputSchemaDef, StringFieldDef, IntegerFieldDef, NumberFieldDef, BooleanFieldDef, ArrayFieldDef } from './types'
@@ -28,4 +28,4 @@ export { createManifestServer } from './server'
 export type { ManifestServer, ManifestServerOptions } from './server'
 
 export { createTestClient } from './testing'
-export type { TestClient, TestResult } from './testing'
+export type { TestClient, TestResult, StreamEvent } from './testing'
