@@ -22,7 +22,7 @@ The core framework exists and works end-to-end.
 - [x] Convention validation
 - [x] `CLAUDE.md` / `AGENTS.md` agent context
 - [x] `SPARK.md` one-paste onboarding guide
-- [x] 45 tests, 0 TypeScript errors
+- [x] 57 tests, 0 TypeScript errors
 
 ---
 
@@ -90,15 +90,26 @@ What you need to build something beyond HelloWorld. This turns Manifest from a f
 
 ---
 
-## 🔨 Phase 2: Real-Time & Events
+## ✅ SSE Streaming (done)
 
-### SSE Streaming
+First-class Server-Sent Events support for AI agent and real-time streaming use cases.
 
-- [ ] `type: 'stream'` features with `stream()` handler instead of `handle()`
-- [ ] `emit()` helper for sending events to connected clients
+- [x] `type: 'stream'` features with `stream()` handler instead of `handle()`
+- [x] `emit()` helper — `emit(data)` for unnamed events, `emit(event, data)` for named events
+- [x] Both plain text and JSON event data
+- [x] Auto-close on function return, explicit `close()` and `fail()` helpers
+- [x] Initial `meta` event with feature name and request ID
+- [x] Server SSE execution path with graceful error handling and client disconnect support
+- [x] `createTestClient.stream()` — collects events into assertable array
+- [x] CLI: `manifest check` validates stream features, `manifest make:feature --type=stream` scaffolds them
+- [x] `manifest-sse-example` extension with TokenStream demo + frontend consumption guides (vanilla JS, SolidJS, React, Vue)
 - [ ] Heartbeat keepalive (configurable interval)
 - [ ] Connection timeout (configurable max duration)
 - [ ] Client reconnection support (`Last-Event-ID`)
+
+---
+
+## 🔨 Phase 2: Real-Time & Events
 
 ### Event-Triggered Features
 
@@ -110,25 +121,32 @@ What you need to build something beyond HelloWorld. This turns Manifest from a f
 
 ---
 
-## 🔨 Phase 3: Extensions Ecosystem
+## ✅ Extensions Ecosystem (done)
 
-The extension system is designed in the README. Now build it.
+Extensions are self-contained packages that add features, schemas, and services.
 
 ### Extension Scanner
 
-- [ ] Scanner reads `extensions/*/features/` in addition to `features/`
+- [x] Scanner reads `extensions/*/features/` in addition to `features/`
 - [ ] Scanner reads `extensions/*/schemas/` and `extensions/*/services/`
-- [ ] `MANIFEST.md` includes extension features in the index
-- [ ] `bun manifest check` validates extension features same as app features
-- [ ] `EXTENSION.md` format specification
+- [x] `MANIFEST.md` includes extension features in the index
+- [x] `bun manifest check` validates extension features same as app features
+- [x] `EXTENSION.md` format specification with YAML frontmatter
 
 ### Extension CLI
 
-- [ ] `bun manifest add:extension <repo>` — clone into `extensions/`
-- [ ] `bun manifest list:extensions` — show installed extensions
-- [ ] `bun manifest remove:extension <name>` — remove an extension directory
+- [x] `bun manifest extension make <name>` — scaffold a new extension
+- [x] `bun manifest extension install <src>` — install from a source
+- [x] `bun manifest extension list` — list installed extensions
+- [ ] `bun manifest extension remove <name>` — remove an extension directory
 
-### First-Party Extensions
+### Shipped Extensions
+
+- [x] `manifest-frontend-static` — HTML + Tailwind CSS + vanilla TypeScript
+- [x] `manifest-frontend-reactive` — SolidJS + Tailwind CSS + JSX
+- [x] `manifest-sse-example` — SSE streaming demo with frontend consumption guides
+
+### First-Party Extensions (planned)
 
 - [ ] `manifest-ext/auth` — JWT authentication, login, register, refresh, password reset
 - [ ] `manifest-ext/uploads` — File upload handling with S3/local storage
