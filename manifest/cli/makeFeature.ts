@@ -1,16 +1,13 @@
 /**
- * Scaffold a new feature file.
+ * Output an agent prompt for creating a new feature.
  *
  * Usage: bun manifest make:feature UserRegistration [--route="POST /api/users"] [--auth=none]
  *
- * Generates features/<Name>.ts with the correct structure, imports, and TODO markers.
+ * Does NOT write any files. Instead, prints a structured prompt that tells an
+ * agent exactly what file to create, the full template, and what to fill in.
  */
 
-import path from 'path'
-import { existsSync } from 'fs'
-
 export async function makeFeature(args: string[]): Promise<void> {
-  const projectDir = process.cwd()
   const className = args[0]
 
   if (!className) {
@@ -36,42 +33,53 @@ export async function makeFeature(args: string[]): Promise<void> {
     routeLine = `route: ['${method!.toUpperCase()}', '${pathParts.join(' ')}'],`
   }
 
-  const code = `// features/${className}.ts
+  const prompt = `You are creating a new feature called '${kebabName}'.
+
+Create the file \`features/${className}.ts\` with the following template:
+
+\`\`\`typescript
+// features/${className}.ts
 import { defineFeature, t } from '../manifest'
 
 export default defineFeature({
   name: '${kebabName}',
-  description: \`TODO: Describe what this feature does. Be verbose - this is read by agents.
-                Write 2-3 sentences explaining the purpose, behavior, and any important context.\`,
+  description: \\\`[FILL IN: 2-3 sentences explaining what this feature does, why it exists,
+                and any important context. Write for an agent reading this cold.]\\\`,
   ${routeLine}
   authentication: '${auth}',
   sideEffects: [
-    // TODO: List ALL side effects (database writes, emails sent, API calls made, etc.)
+    // [FILL IN: List ALL side effects — database writes, emails sent, API calls made, etc.]
   ],
   errorCases: [
-    // TODO: List ALL error cases with HTTP status codes.
+    // [FILL IN: List ALL error cases with HTTP status codes, e.g. '409 - Email already registered']
   ],
 
   input: {
-    // TODO: Define input fields. Every field MUST have a description.
+    // [FILL IN: Define input fields using t.string(), t.integer(), etc.]
+    // Every field MUST have a description explaining what it is and why it exists.
+    // Example:
+    // email: t.string({ description: 'User email address for account creation.', required: true }),
   },
 
   async handle({ input, ok, fail }) {
-    // TODO: Implement feature logic.
+    // [FILL IN: Implement the feature logic. Keep it linear — no hidden branches.]
     return ok('${className} executed')
   },
 })
-`
+\`\`\`
 
-  const featuresDir = path.join(projectDir, 'features')
-  const filePath = path.join(featuresDir, `${className}.ts`)
+## What you need to fill in
 
-  if (existsSync(filePath)) {
-    console.error(`\n  Feature already exists: features/${className}.ts\n`)
-    process.exit(1)
-  }
+1. **description** — 2-3 sentences. Explain what this feature does, why it exists, and any important context. Write for an agent that has never seen this codebase.
+2. **input fields** — Define every input field with \`t.string()\`, \`t.integer()\`, etc. Every field must have a \`description\`.
+3. **sideEffects** — List every side effect: database writes, emails, external API calls. Can be empty array if pure.
+4. **errorCases** — List every error case with HTTP status code, e.g. \`'422 - Validation failed'\`.
+5. **handle() logic** — Implement the business logic. Use \`ok()\` for success, \`fail()\` for errors.
 
-  await Bun.write(filePath, code)
-  console.log(`\n  ✓ Created features/${className}.ts`)
-  console.log(`  ✓ Run 'bun manifest check' to validate.\n`)
+## After creation
+
+- Run \`bun manifest check\` to validate the feature follows conventions.
+- Create a matching test file at \`tests/${className}.test.ts\` using \`createTestClient\` from \`../manifest/testing\`.`
+
+  console.log(prompt)
 }
