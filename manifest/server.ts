@@ -1,5 +1,4 @@
-import path from 'path'
-import { scanFeatures } from './scanner'
+import { scanAllFeatures } from './scanner'
 import { createRouter } from './router'
 import { validateInput } from './validator'
 import { toEnvelope, createResultHelpers } from './envelope'
@@ -12,8 +11,7 @@ export interface ManifestServerOptions {
 export type ManifestServer = Awaited<ReturnType<typeof createManifestServer>>
 
 export async function createManifestServer(options: ManifestServerOptions) {
-  const featuresDir = path.join(options.projectDir, 'features')
-  const registry = await scanFeatures(featuresDir)
+  const registry = await scanAllFeatures(options.projectDir)
   const router = createRouter(registry)
 
   const server = Bun.serve({

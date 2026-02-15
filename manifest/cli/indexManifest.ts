@@ -8,14 +8,14 @@
  * to the codebase.
  */
 
-import { scanFeatures } from '../scanner'
+import { scanAllFeatures } from '../scanner'
 import path from 'path'
-import { readdirSync, existsSync } from 'fs'
+import { readdirSync, readFileSync, existsSync } from 'fs'
 
 export async function indexManifest(_args: string[]): Promise<void> {
   const projectDir = process.cwd()
 
-  const registry = await scanFeatures(path.join(projectDir, 'features'))
+  const registry = await scanAllFeatures(projectDir)
   const features = Object.values(registry)
 
   const schemaCount = countFiles(path.join(projectDir, 'schemas'), '.ts')
@@ -56,7 +56,37 @@ export async function indexManifest(_args: string[]): Promise<void> {
     md += `| ${feature.name} | ${route} | ${feature.type} | ${desc} |\n`
   }
 
-  md += `\n## Known Issues\n`
+  // Extensions section
+  const extensionsDir = path.join(projectDir, 'extensions')
+  if (existsSync(extensionsDir)) {
+    const extEntries = readdirSync(extensionsDir, { withFileTypes: true })
+      .filter(d => d.isDirectory() || d.isSymbolicLink())
+    if (extEntries.length > 0) {
+      const rows: Array<{ name: string; version: string; description: string }> = []
+      for (const entry of extEntries) {
+        const mdPath = path.join(extensionsDir, entry.name, 'EXTENSION.md')
+        if (existsSync(mdPath)) {
+          const meta = parseFrontmatter(readFileSync(mdPath, 'utf-8'))
+          rows.push({
+            name: meta.name || entry.name,
+            version: meta.version || '?',
+            description: meta.description || '',
+          })
+        } else {
+          rows.push({ name: entry.name, version: '?', description: 'Missing EXTENSION.md' })
+        }
+      }
+      md += `\n## Extensions\n`
+      md += `| Name | Version | Description |\n`
+      md += `|------|---------|-------------|\n`
+      for (const row of rows) {
+        md += `| ${row.name} | ${row.version} | ${row.description} |\n`
+      }
+      md += `\n`
+    }
+  }
+
+  md += `## Known Issues\n`
   md += `- None currently.\n\n`
 
   md += `## Recent Changes\n`
@@ -76,6 +106,23 @@ export async function indexManifest(_args: string[]): Promise<void> {
   await Bun.write(manifestPath, md)
   console.log(`\n  ✓ MANIFEST.md generated with ${features.length} features indexed.`)
   console.log(`  Review MANIFEST.md for accuracy, then commit if it looks correct.\n`)
+}
+
+function parseFrontmatter(content: string): Record<string, string> {
+  const lines = content.split('\n')
+  if (lines[0]?.trim() !== '---') return {}
+
+  const result: Record<string, string> = {}
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i]!.trim()
+    if (line === '---') break
+    const colon = line.indexOf(':')
+    if (colon === -1) continue
+    const key = line.slice(0, colon).trim()
+    const value = line.slice(colon + 1).trim().replace(/^["']|["']$/g, '')
+    result[key] = value
+  }
+  return result
 }
 
 function countFiles(dir: string, ext: string): number {

@@ -13,16 +13,16 @@
  *   - Every input field has a description
  */
 
-import { scanFeatures } from '../scanner'
+import { scanAllFeatures } from '../scanner'
 import path from 'path'
-import { existsSync } from 'fs'
+import { existsSync, readdirSync } from 'fs'
 
 export async function check(_args: string[]): Promise<number> {
   const projectDir = process.cwd()
   const issues: string[] = []
   const passes: string[] = []
 
-  const registry = await scanFeatures(path.join(projectDir, 'features'))
+  const registry = await scanAllFeatures(projectDir)
   const features = Object.entries(registry)
 
   const routes = new Map<string, string>()
@@ -67,6 +67,21 @@ export async function check(_args: string[]): Promise<number> {
       }
       routes.set(routeKey, name)
     }
+  }
+
+  // Check extensions have EXTENSION.md
+  const extensionsDir = path.join(projectDir, 'extensions')
+  if (existsSync(extensionsDir)) {
+    try {
+      const entries = readdirSync(extensionsDir, { withFileTypes: true })
+        .filter(d => d.isDirectory() || d.isSymbolicLink())
+      for (const entry of entries) {
+        const mdPath = path.join(extensionsDir, entry.name, 'EXTENSION.md')
+        if (!existsSync(mdPath)) {
+          issues.push(`Extension '${entry.name}' has no EXTENSION.md. → Create extensions/${entry.name}/EXTENSION.md or run: bun manifest extension make ${entry.name}`)
+        }
+      }
+    } catch {}
   }
 
   if (existsSync(path.join(projectDir, 'MANIFEST.md'))) {
