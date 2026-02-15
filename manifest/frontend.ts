@@ -42,6 +42,14 @@ export async function buildFrontend(projectDir: string): Promise<BuildResult> {
     naming: '[dir]/[name].[ext]',
   })
 
+  // Copy HTML files from frontend/ to outDir
+  const frontendDir = path.resolve(projectDir, 'frontend')
+  for (const entry of fs.readdirSync(frontendDir)) {
+    if (entry.endsWith('.html')) {
+      fs.copyFileSync(path.join(frontendDir, entry), path.join(outDir, entry))
+    }
+  }
+
   copyPublicDir(projectDir, outDir)
 
   const outputs = result.outputs.map((o) => {
