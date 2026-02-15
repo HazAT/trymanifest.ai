@@ -40,7 +40,7 @@ export async function createManifestServer(options: ManifestServerOptions) {
         const stream = new ReadableStream({
           start(controller) {
             reloadClients.add(controller)
-            controller.enqueue('data: connected\n\n')
+            controller.enqueue('event: connected\ndata: connected\n\n')
           },
           cancel(controller) {
             reloadClients.delete(controller)
@@ -143,7 +143,7 @@ export async function createManifestServer(options: ManifestServerOptions) {
     notifyReload() {
       for (const client of reloadClients) {
         try {
-          client.enqueue('data: reload\n\n')
+          client.enqueue('event: reload\ndata: reload\n\n')
         } catch {
           reloadClients.delete(client)
         }
