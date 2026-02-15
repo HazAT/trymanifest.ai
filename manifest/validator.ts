@@ -24,7 +24,13 @@ function validateString(field: StringFieldDef, value: unknown): string | null {
         break
     }
   }
-  if (field.pattern && !new RegExp(field.pattern).test(value)) return 'invalid_format'
+  if (field.pattern) {
+    try {
+      if (!new RegExp(field.pattern).test(value)) return 'invalid_format'
+    } catch {
+      return 'invalid_pattern'
+    }
+  }
   if (field.minLength !== undefined && value.length < field.minLength) return 'min_length'
   if (field.maxLength !== undefined && value.length > field.maxLength) return 'max_length'
   return null
