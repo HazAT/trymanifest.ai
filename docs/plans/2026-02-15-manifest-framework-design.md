@@ -4,9 +4,11 @@
 
 ## Overview
 
-Manifest is a Symfony-based, API-only PHP framework where every piece of code is written to be read, understood, and modified by AI agents. It ships as a Docker image and is designed for self-healing applications - an AI agent runs as a sidecar in production, monitoring the app and fixing issues in real-time.
+Manifest is a TypeScript framework built on Bun where every piece of code is written to be read, understood, and modified by AI agents. It ships as a Docker image and is designed for self-healing applications - an AI agent runs as a sidecar in production, monitoring the app and fixing issues in real-time.
 
-Manifest is framework-first and vendor-agnostic. It integrates with error tracking tools (Sentry, Bugsnag, Flare, or custom) to feed context to the agent, but none are required. The agent can work from logs alone. The error tracking integration is pluggable - bring whatever you already use.
+Manifest is framework-first and vendor-agnostic. It integrates with error tracking tools (Sentry, Bugsnag, or custom) to feed context to the agent, but none are required. The agent can work from logs alone. The error tracking integration is pluggable - bring whatever you already use.
+
+The framework takes inspiration from Symfony's explicit, no-magic philosophy and brings it to the TypeScript ecosystem - where most frameworks hide behavior behind bundlers, decorators, and convention-based magic. Manifest does the opposite: everything is a plain typed object, every dependency is an explicit import, every side effect is declared upfront.
 
 ## Core Philosophy
 
@@ -14,17 +16,42 @@ Three rules:
 
 1. **One feature, one file.** A feature file contains everything an agent needs: route, input validation, authorization, business logic, side effects declaration, and error cases. No hunting across directories.
 
-2. **Explicit over elegant.** If something happens, it's because the code says so - not because a listener was auto-discovered, a convention was followed, or an annotation triggered behavior. Verbose is correct. Terse is suspicious.
+2. **Explicit over elegant.** If something happens, it's because the code says so - not because a middleware was auto-discovered, a decorator triggered behavior, or a bundler rewrote the code. Verbose is correct. Terse is suspicious.
 
 3. **Self-describing code.** Every feature, every service, every schema carries machine-readable metadata: what it does, what it depends on, what it affects. The codebase is its own documentation. An agent dropping into the project cold can orient itself by reading a `MANIFEST.md` at the root and the metadata on any file.
 
 ## Technical Foundation
 
-- **Base:** Symfony 7.x (HTTP kernel, DI container, console commands, event dispatcher used explicitly)
-- **Replaces:** Symfony's routing annotations, form system, auto-wiring conventions, and project structure
-- **Runtime:** PHP 8.3+
+- **Runtime:** Bun (native TypeScript, no compilation step, built-in HTTP server, test runner, hot reload)
+- **Language:** TypeScript (strict mode, no `any`)
+- **ORM:** Drizzle ORM (explicit, SQL-like, TypeScript-native, built-in migrations)
 - **API-only:** No server-rendered views. Supports modern frontends via REST, SSE, and webhooks.
-- **No compilation in production:** No cached routes, no compiled DI container. Code changes take effect on next request.
+- **No build step:** Bun runs TypeScript natively. The `.ts` files in the project ARE what runs.
+- **Hot reload in production:** `bun --hot` watches files and hot-reloads the server on change. The agent edits a file, the server picks it up instantly. No restart, no cache clear.
+
+### Why Bun?
+
+| Need | Bun provides |
+|------|-------------|
+| Native TypeScript | No tsc, no build step, .ts files run directly |
+| HTTP server | `Bun.serve()` - built-in, fast, no Express/Fastify needed |
+| Hot reload | `bun --hot` - reloads server on file change, keeps connections alive |
+| Password hashing | `Bun.password.hash()` - built-in bcrypt/argon2 |
+| Test runner | `bun test` - built-in, Jest-compatible API |
+| Package manager | `bun install` - built-in, fast |
+| File I/O | `Bun.file()`, `Bun.write()` - built-in async file API |
+| SQLite | Built-in `bun:sqlite` for local/development databases |
+
+This means Manifest has very few dependencies. Bun IS the platform.
+
+### Why Drizzle ORM?
+
+Drizzle fits the Manifest philosophy perfectly:
+- **Explicit:** You write SQL-like TypeScript. What you see is what runs. No magic query generation.
+- **Schema as code:** Schemas are TypeScript files with full type inference. No separate schema DSL.
+- **Migrations:** `drizzle-kit` generates migrations from schema changes automatically.
+- **No runtime overhead:** Drizzle generates SQL at build time, not runtime.
+- **Database agnostic:** PostgreSQL, MySQL, SQLite all supported.
 
 ## Project Structure
 
@@ -35,236 +62,255 @@ manifest-app/
 │                                  # with this codebase. Every agent reads this first.
 │
 ├── features/                      # One file per feature. This IS the application.
-│   ├── UserRegistration.php
-│   ├── UserLogin.php
-│   ├── UserProfile.php
-│   ├── CreatePost.php
-│   ├── ListPosts.php
-│   └── DeletePost.php
+│   ├── UserRegistration.ts
+│   ├── UserLogin.ts
+│   ├── UserProfile.ts
+│   ├── CreatePost.ts
+│   ├── ListPosts.ts
+│   └── DeletePost.ts
 │
-├── schemas/                       # Data schemas with full field descriptions.
-│   ├── UserSchema.php             # Defines shape, types, constraints, relationships.
-│   └── PostSchema.php             # Used by features AND generates migrations.
+├── schemas/                       # Drizzle ORM schemas. One file per table.
+│   ├── users.ts                   # Table definition + descriptions.
+│   └── posts.ts                   # Relations defined explicitly.
 │
-├── services/                      # Shared services. Explicit, no auto-discovery.
-│   ├── Mailer.php
-│   ├── PaymentGateway.php
-│   └── ImageProcessor.php
+├── services/                      # Shared services. Plain exported objects/functions.
+│   ├── mailer.ts
+│   ├── payments.ts
+│   └── imageProcessor.ts
 │
 ├── policies/                      # Authorization. One file per resource.
-│   ├── UserPolicy.php
-│   └── PostPolicy.php
+│   ├── userPolicy.ts
+│   └── postPolicy.ts
 │
-├── commands/                      # App-specific CLI commands (human or agent authored).
-│   ├── SeedDemoTenant.php
-│   └── PruneExpiredSessions.php
+├── commands/                      # CLI commands (human or agent authored).
+│   ├── seedDemoTenant.ts
+│   └── pruneExpiredSessions.ts
 │
 ├── config/
-│   ├── manifest.php               # Framework config. Flat, no nesting, commented.
-│   ├── database.php
-│   └── services.php               # Explicit service registration. No auto-wiring.
+│   ├── manifest.ts                # Framework config. Typed, flat, commented.
+│   ├── database.ts
+│   └── services.ts                # Service configuration.
 │
-├── migrations/                    # Generated from schemas, stored as code.
+├── migrations/                    # Generated by drizzle-kit from schema changes.
 ├── tests/                         # Mirrors features/ structure 1:1.
-│   ├── UserRegistrationTest.php
-│   └── CreatePostTest.php
+│   ├── UserRegistration.test.ts
+│   └── CreatePost.test.ts
 │
 ├── docker/
 │   ├── Dockerfile
 │   └── docker-compose.yml
 │
-└── public/
-    └── index.php                  # Thin entry point. Boots kernel, that's it.
+├── index.ts                       # Entry point. Boots the Manifest server.
+├── package.json
+├── tsconfig.json
+└── drizzle.config.ts              # Drizzle ORM configuration.
 ```
 
 The `features/` directory IS the application. Everything else is supporting infrastructure.
 
 ## The Feature File
 
-The heart of Manifest. A complete, self-contained unit of application behavior.
+The heart of Manifest. A complete, self-contained unit of application behavior defined as a plain typed object.
 
-```php
-<?php
+```typescript
+// features/UserRegistration.ts
+import { defineFeature, t } from 'manifest'
+import { db } from '../config/database'
+import { users } from '../schemas/users'
+import { mailer } from '../services/mailer'
+import { eq } from 'drizzle-orm'
 
-namespace App\Features;
+export default defineFeature({
+  name: 'user-registration',
+  description: `Creates a new user account. Validates email uniqueness,
+                hashes password, persists user, and sends a welcome email.
+                Returns the created user without sensitive fields.`,
+  route: ['POST', '/api/users/register'],
+  authentication: 'none',
+  rateLimit: '5/minute/ip',
+  sideEffects: [
+    'Inserts one row into users table',
+    'Sends welcome email via mailer service',
+  ],
+  errorCases: [
+    '409 - Email already registered',
+    '422 - Validation failed',
+  ],
 
-use Manifest\Feature\Feature;
-use Manifest\Feature\InputSchema;
-use Manifest\Feature\Result;
-use App\Schemas\UserSchema;
-use App\Services\Mailer;
+  input: {
+    email: t.string({
+      description: 'User email address. Must be unique across all users.',
+      required: true,
+      format: 'email',
+    }),
+    password: t.string({
+      description: 'Account password. Hashed with argon2 before storage.',
+      required: true,
+      minLength: 8,
+      maxLength: 128,
+    }),
+    displayName: t.string({
+      description: 'Public display name shown to other users.',
+      required: true,
+      maxLength: 100,
+    }),
+  },
 
-#[Feature(
-    name: 'user-registration',
-    description: 'Creates a new user account. Validates email uniqueness,
-                  hashes password, persists user, and sends a welcome email.
-                  Returns the created user without sensitive fields.',
-    route: ['POST', '/api/users/register'],
-    authentication: 'none',
-    rateLimit: '5/minute/ip',
-    sideEffects: [
-        'Inserts one row into users table',
-        'Sends welcome email via Mailer service',
-    ],
-    errorCases: [
-        '409 - Email already registered',
-        '422 - Validation failed',
-    ],
-)]
-class UserRegistration extends Feature
-{
-    public function __construct(
-        private readonly UserSchema $users,
-        private readonly Mailer $mailer,
-    ) {}
+  async handle({ input, ok, fail }) {
+    // Step 1: Check uniqueness
+    const existing = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, input.email))
+      .limit(1)
 
-    public function input(): InputSchema
-    {
-        return InputSchema::create()
-            ->string('email',
-                description: 'User email address. Must be unique across all users.',
-                required: true,
-                format: 'email',
-            )
-            ->string('password',
-                description: 'Account password. Hashed with bcrypt before storage.',
-                required: true,
-                minLength: 8,
-                maxLength: 128,
-            )
-            ->string('display_name',
-                description: 'Public display name shown to other users.',
-                required: true,
-                maxLength: 100,
-            );
+    if (existing.length > 0) {
+      return fail('Email already registered', 409)
     }
 
-    public function handle(Input $input): Result
-    {
-        if ($this->users->findOneBy(['email' => $input->email])) {
-            return $this->fail(
-                message: 'Email already registered',
-                status: 409,
-            );
-        }
+    // Step 2: Create user
+    const [user] = await db.insert(users).values({
+      email: input.email,
+      password: await Bun.password.hash(input.password),
+      displayName: input.displayName,
+    }).returning({
+      id: users.id,
+      email: users.email,
+      displayName: users.displayName,
+    })
 
-        $user = $this->users->create([
-            'email' => $input->email,
-            'password' => password_hash($input->password, PASSWORD_BCRYPT),
-            'display_name' => $input->display_name,
-        ]);
+    // Step 3: Send welcome email (explicit, not a hidden listener)
+    await mailer.send({
+      template: 'welcome',
+      to: user.email,
+      context: { displayName: user.displayName },
+    })
 
-        $this->mailer->send(
-            template: 'welcome',
-            to: $user['email'],
-            context: ['display_name' => $user['display_name']],
-        );
-
-        return $this->ok(
-            message: 'User registered',
-            data: $user,
-            status: 201,
-        );
-    }
-}
+    return ok('User registered', { data: user, status: 201 })
+  },
+})
 ```
 
-What an agent gets from a single file:
+What an agent gets from this single file:
 - What the feature does (description)
 - What URL triggers it and how (route, method, auth, rate limit)
 - Exactly what inputs it accepts, with types, constraints, and why each field exists
 - Every side effect, declared before the agent reads the logic
 - Every error case and its HTTP status
 - The full execution flow - linear, no hidden branches
+- All dependencies are explicit `import` statements at the top - the agent knows exactly what this feature touches
 
-The `#[Feature]` attribute is a contract with the agent. An agent can read just the attribute block and know what this feature does without reading `handle()`.
+### No Classes, No Inheritance, No Magic
 
-## Schemas
+The `defineFeature()` function takes a plain typed object and returns a typed feature definition. There's no base class, no abstract methods, no decorator evaluation. The object literal IS the feature. An agent can read it as data.
 
-Schemas replace Doctrine entities. They define data shape, generate migrations, and act as the query interface.
+### Three Feature Types
 
-```php
-<?php
-
-namespace App\Schemas;
-
-use Manifest\Schema\Schema;
-use Manifest\Schema\Field;
-use Manifest\Schema\Index;
-
-#[Schema(
-    name: 'users',
-    table: 'users',
-    description: 'Application users. One row per registered account.
-                  Email is the unique identifier for authentication.
-                  Soft-deleted: rows are never physically removed.',
-)]
-class UserSchema extends Schema
-{
-    public function fields(): array
-    {
-        return [
-            Field::uuid('id')
-                ->primary()
-                ->description('Unique user identifier. Generated on creation.'),
-
-            Field::string('email', length: 255)
-                ->unique()
-                ->description('Login email. Must be unique. Used for authentication
-                              and all transactional email.'),
-
-            Field::string('password', length: 255)
-                ->description('Bcrypt-hashed password. Never exposed in API responses.')
-                ->hidden(),
-
-            Field::string('display_name', length: 100)
-                ->description('Public name shown in UI and to other users.'),
-
-            Field::enum('role', ['user', 'admin'])
-                ->default('user')
-                ->description('Authorization role. "admin" grants access to all
-                              admin-prefixed features.'),
-
-            Field::timestamp('email_verified_at')
-                ->nullable()
-                ->description('Null means unverified. Set when user clicks
-                              verification link. Required for posting content.'),
-
-            Field::timestamps(),
-            Field::softDeletes(),
-        ];
-    }
-
-    public function indexes(): array
-    {
-        return [
-            Index::on('email')->unique(),
-            Index::on('role')->description('Used by admin user listing feature.'),
-        ];
-    }
-
-    public function relationships(): array
-    {
-        return [
-            $this->hasMany('posts', PostSchema::class,
-                description: 'All posts authored by this user. Cascade soft-delete.',
-            ),
-        ];
-    }
-}
+**Request (default)** - HTTP endpoint:
+```typescript
+export default defineFeature({
+  name: 'list-posts',
+  route: ['GET', '/api/posts'],
+  type: 'request',
+  // ...
+  async handle({ input, ok }) { /* ... */ },
+})
 ```
 
-Key design choices:
-- `->description()` on everything. Every field, index, relationship explains itself.
-- `->hidden()` marks fields that never appear in API responses. Framework enforces this.
-- Schemas are also the query interface. `$this->users->findOneBy(...)`, `$this->users->create(...)`.
-- Migrations are generated from schemas, not hand-written. Change the schema, run a command, get a migration.
+**Stream (SSE)** - Server-Sent Events:
+```typescript
+export default defineFeature({
+  name: 'post-feed',
+  description: 'Streams new posts to connected clients in real-time.',
+  route: ['GET', '/api/posts/feed'],
+  type: 'stream',
+  authentication: 'required',
+  // ...
+  async stream({ input, emit, on }) {
+    on('post.created', (post) => {
+      emit('new-post', post)
+    })
+  },
+})
+```
+
+**Event** - Triggered by internal events, not HTTP:
+```typescript
+export default defineFeature({
+  name: 'notify-order-shipped',
+  description: 'Sends webhook to merchant when order status changes to shipped.',
+  type: 'event',
+  trigger: 'order.shipped',
+  sideEffects: ['POST to merchant webhook URL'],
+  // ...
+  async handle({ input, ok }) {
+    await webhook.send({
+      url: input.merchantWebhookUrl,
+      event: 'order.shipped',
+      payload: input.order,
+    })
+    return ok('Webhook delivered')
+  },
+})
+```
+
+## Schemas (Drizzle ORM)
+
+Schemas define the database structure using Drizzle ORM's TypeScript-native syntax. Every field has a description.
+
+```typescript
+// schemas/users.ts
+import { pgTable, uuid, varchar, timestamp, pgEnum } from 'drizzle-orm/pg-core'
+import { relations } from 'drizzle-orm'
+import { posts } from './posts'
+
+/**
+ * Application users. One row per registered account.
+ * Email is the unique identifier for authentication.
+ * Soft-deleted: rows are never physically removed.
+ */
+export const userRole = pgEnum('user_role', ['user', 'admin'])
+
+export const users = pgTable('users', {
+  /** Unique user identifier. Generated on creation. */
+  id: uuid('id').primaryKey().defaultRandom(),
+
+  /** Login email. Must be unique. Used for authentication and all transactional email. */
+  email: varchar('email', { length: 255 }).unique().notNull(),
+
+  /** Argon2-hashed password. Never exposed in API responses. */
+  password: varchar('password', { length: 255 }).notNull(),
+
+  /** Public name shown in UI and to other users. */
+  displayName: varchar('display_name', { length: 100 }).notNull(),
+
+  /** Authorization role. 'admin' grants access to all admin-prefixed features. */
+  role: userRole('role').default('user').notNull(),
+
+  /** Null means unverified. Set when user clicks verification link. */
+  emailVerifiedAt: timestamp('email_verified_at'),
+
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  deletedAt: timestamp('deleted_at'),
+})
+
+/** All posts authored by this user. Cascade soft-delete. */
+export const usersRelations = relations(users, ({ many }) => ({
+  posts: many(posts),
+}))
+
+/** Fields that should never appear in API responses. */
+export const usersHiddenFields = ['password'] as const
+```
+
+Key points:
+- **JSDoc comments on every field.** An agent reads the schema and knows why every column exists.
+- **`usersHiddenFields`** - explicit list of fields to strip from API responses. No magic `hidden()` method - just a typed constant.
+- **Relations are explicit.** Defined in the same file, not auto-discovered.
+- **Drizzle handles migrations.** Run `bunx drizzle-kit generate` to create migrations from schema changes.
 
 ## API Layer
-
-### Routing
-
-Defined in feature attributes. No separate route files. The framework scans `features/` on boot and registers them.
 
 ### Response Envelope
 
@@ -272,70 +318,44 @@ Every response follows a standard envelope:
 
 ```json
 {
-    "status": 201,
-    "message": "User registered",
-    "data": {
-        "id": "a1b2c3",
-        "email": "user@example.com",
-        "display_name": "Jane"
-    },
-    "meta": {
-        "feature": "user-registration",
-        "duration_ms": 42,
-        "request_id": "req_xyz789"
-    }
+  "status": 201,
+  "message": "User registered",
+  "data": {
+    "id": "a1b2c3",
+    "email": "user@example.com",
+    "displayName": "Jane"
+  },
+  "meta": {
+    "feature": "user-registration",
+    "duration_ms": 42,
+    "request_id": "req_xyz789"
+  }
 }
 ```
 
 Every response includes `meta.feature` and `meta.request_id`. When something breaks, the agent knows which feature produced it and can trace the request. Errors follow the same envelope - no surprise HTML pages.
 
-### Feature Types
+### Bun.serve() as the Foundation
 
-Three types of features: **request** (default), **stream** (SSE), and **event** (triggered internally, not by HTTP).
+The HTTP server uses Bun's built-in `Bun.serve()`:
 
-**SSE Stream:**
-```php
-#[Feature(
-    name: 'post-feed',
-    description: 'Streams new posts to connected clients in real-time.',
-    route: ['GET', '/api/posts/feed'],
-    type: 'stream',
-    authentication: 'required',
-)]
-class PostFeed extends Feature
-{
-    public function stream(Input $input, Stream $stream): void
-    {
-        $stream->on('post.created', function (array $post) use ($stream) {
-            $stream->emit('new-post', data: $post);
-        });
-    }
-}
+```typescript
+// index.ts
+import { createManifestServer } from 'manifest'
+
+const server = await createManifestServer({
+  projectDir: import.meta.dir,
+  port: 8080,
+})
+
+console.log(`Manifest server running on http://localhost:${server.port}`)
 ```
 
-**Event-triggered (webhooks etc):**
-```php
-#[Feature(
-    name: 'notify-order-shipped',
-    description: 'Sends webhook to merchant when order status changes to shipped.',
-    trigger: 'event',
-    event: 'order.shipped',
-    sideEffects: ['POST to merchant webhook URL'],
-)]
-class NotifyOrderShipped extends Feature
-{
-    public function handle(Input $input): Result
-    {
-        $this->webhook->send(
-            url: $input->merchant_webhook_url,
-            event: 'order.shipped',
-            payload: $input->order,
-        );
+Under the hood, `createManifestServer` scans `features/`, builds a route table, and calls `Bun.serve()` with a request handler that matches routes, validates input, executes features, and returns JSON envelopes.
 
-        return $this->ok('Webhook delivered');
-    }
-}
-```
+### Hot Reload
+
+Running with `bun --hot index.ts` enables hot reloading. When the agent modifies a feature file, Bun reloads the module and the next request uses the new code. No restart, no cache clear. This is the key enabler for agent self-healing in production.
 
 ## MANIFEST.md
 
@@ -345,26 +365,26 @@ Every Manifest project has a `MANIFEST.md` at the root. It's the system prompt f
 # Manifest: my-app
 
 ## System
-- Runtime: PHP 8.3, Symfony 7.x, Manifest 1.x
+- Runtime: Bun 1.x, TypeScript 5.x, Manifest 1.x
 - Database: PostgreSQL 16
 - Cache: Redis 7
-- Queue: Redis-backed
 
 ## Architecture
 This is a Manifest application. All behavior lives in feature files.
 - features/ - One file per application behavior (31 features)
-- schemas/ - Data definitions (8 schemas)
+- schemas/ - Drizzle ORM table definitions (8 schemas)
 - services/ - Shared services (5 services)
 - policies/ - Authorization rules (4 policies)
 - commands/ - CLI commands (6 commands)
 
 ## Conventions
-- NEVER use auto-wiring. All services are registered in config/services.php.
-- NEVER create event listeners. Side effects go in the feature's handle() method.
+- NEVER use decorator-based patterns. Features are defined with defineFeature().
+- NEVER create event listeners or middleware. Side effects go in the feature's handle() function.
 - NEVER scatter one behavior across multiple files. One feature = one file.
-- Every field, parameter, and return value MUST have a description.
-- Features MUST declare all side effects in the #[Feature] attribute.
-- Schemas MUST describe every field and relationship.
+- Every input field MUST have a description.
+- Features MUST declare all side effects in the feature definition.
+- Schema fields MUST have JSDoc descriptions.
+- All dependencies MUST be explicit imports. No global state, no service locators.
 
 ## Feature Index
 | Name | Route | Type | Description |
@@ -372,216 +392,251 @@ This is a Manifest application. All behavior lives in feature files.
 | user-registration | POST /api/users/register | request | Creates new account |
 | user-login | POST /api/users/login | request | Authenticates user |
 | post-feed | GET /api/posts/feed | stream | Real-time post stream |
+| ... | ... | ... | ... |
 
 ## Schema Index
 | Name | Table | Fields | Description |
 |------|-------|--------|-------------|
 | users | users | 8 | Application user accounts |
 | posts | posts | 6 | User-authored content |
+| ... | ... | ... | ... |
 
 ## Service Index
 | Name | Description | Used by |
 |------|-------------|---------|
-| Mailer | Sends transactional email via SMTP | user-registration, password-reset |
+| mailer | Sends transactional email via SMTP | user-registration, password-reset |
+| ... | ... | ... |
 
 ## Command Index
 | Name | Created By | Description |
 |------|-----------|-------------|
-| app:seed-demo-tenant | agent | Creates demo tenant with sample data |
+| seed-demo-tenant | agent | Creates demo tenant with sample data |
+| prune-sessions | agent | Removes expired sessions older than 30 days |
 
 ## Known Issues
 - None currently.
 
 ## Recent Changes
 - 2026-02-14: Added post-feed SSE stream feature
-- 2026-02-13: Added soft-delete to UserSchema
+- 2026-02-13: Added soft-delete to users schema
 ```
 
-The Feature/Schema/Service/Command indexes are auto-generated. Known Issues and Recent Changes are maintained by agents.
+The Feature/Schema/Service/Command indexes are auto-generated by `bun manifest index`. Known Issues and Recent Changes are maintained by agents.
 
-## Config & Services
+## Config
 
-Config is flat PHP files returning arrays. No YAML, no .env magic, no nested config cascading.
+Config is typed TypeScript files. No YAML, no .env magic. Full IDE support.
 
-```php
-<?php
-// config/manifest.php
+```typescript
+// config/manifest.ts
+export default {
+  appName: 'my-app',
+  appUrl: 'https://my-app.com',
+  debug: false,
 
-return [
-    'app_name' => 'my-app',
-    'app_url' => 'https://my-app.com',
-    'debug' => false,
-    'include_meta_in_responses' => true,
-    'include_duration_in_meta' => true,
-    'rate_limit_driver' => 'redis',
-    'rate_limit_prefix' => 'manifest:',
-    'sse_heartbeat_seconds' => 15,
-    'sse_max_connection_seconds' => 300,
-];
+  // API response settings
+  includeMetaInResponses: true,
+  includeDurationInMeta: true,
+
+  // Rate limiting
+  rateLimitDriver: 'redis' as const,  // 'redis' or 'memory'
+  rateLimitPrefix: 'manifest:',
+
+  // Real-time
+  sseHeartbeatSeconds: 15,
+  sseMaxConnectionSeconds: 300,
+} satisfies ManifestConfig
 ```
 
-Environment-specific values use `getenv()` directly in the config file - visible, explicit, greppable:
+Environment-specific values use `Bun.env` directly - visible, explicit, greppable:
 
-```php
-'database_host' => getenv('DB_HOST') ?: 'localhost',
+```typescript
+// config/database.ts
+export default {
+  host: Bun.env.DB_HOST ?? 'localhost',
+  port: Number(Bun.env.DB_PORT ?? 5432),
+  database: Bun.env.DB_NAME ?? 'manifest',
+  user: Bun.env.DB_USER ?? 'manifest',
+  password: Bun.env.DB_PASSWORD ?? '',
+} satisfies DatabaseConfig
 ```
 
-Services are registered explicitly in `config/services.php`. No auto-discovery, no auto-wiring. Every service has a description.
+### Services
 
-```php
-<?php
-// config/services.php
+Services are plain exported objects or functions. No DI container - TypeScript's module system IS the dependency injection:
 
-return [
-    Mailer::class => [
-        'description' => 'Sends transactional email. Uses SMTP in production,
-                          logs to file in development.',
-        'args' => [
-            'host' => getenv('SMTP_HOST'),
-            'port' => (int) getenv('SMTP_PORT') ?: 587,
-            'from' => 'hello@my-app.com',
-        ],
-    ],
-];
-```
+```typescript
+// services/mailer.ts
+import config from '../config/manifest'
 
-Dependency trace is always three hops: feature constructor -> services.php -> actual class.
-
-## Testing
-
-Tests mirror features 1:1. Every feature has exactly one test file.
-
-```php
-<?php
-
-namespace Tests\Features;
-
-use Manifest\Testing\FeatureTest;
-
-#[TestFor(
-    feature: 'user-registration',
-    description: 'Verifies account creation, email uniqueness enforcement,
-                  input validation, and welcome email dispatch.',
-)]
-class UserRegistrationTest extends FeatureTest
-{
-    public function test_creates_user_with_valid_input(): void
-    {
-        $result = $this->call('user-registration', [
-            'email' => 'jane@example.com',
-            'password' => 'secure-password-123',
-            'display_name' => 'Jane',
-        ]);
-
-        $result->assertStatus(201);
-        $result->assertMessage('User registered');
-        $result->assertDataHas('email', 'jane@example.com');
-        $result->assertDataMissing('password');
-
-        $this->assertDatabaseHas('users', ['email' => 'jane@example.com']);
-        $this->assertMailSent('welcome', to: 'jane@example.com');
+/**
+ * Sends transactional email. Uses SMTP in production,
+ * logs to console in development.
+ */
+export const mailer = {
+  async send(options: {
+    template: string
+    to: string
+    context: Record<string, unknown>
+  }): Promise<void> {
+    if (config.debug) {
+      console.log('[mailer]', options)
+      return
     }
-
-    public function test_rejects_duplicate_email(): void
-    {
-        $this->seedUser(email: 'taken@example.com');
-
-        $result = $this->call('user-registration', [
-            'email' => 'taken@example.com',
-            'password' => 'secure-password-123',
-            'display_name' => 'Jane',
-        ]);
-
-        $result->assertStatus(409);
-        $result->assertMessage('Email already registered');
-        $this->assertMailNotSent('welcome');
-    }
-
-    public function test_validates_required_fields(): void
-    {
-        $result = $this->call('user-registration', []);
-
-        $result->assertStatus(422);
-        $result->assertValidationErrors([
-            'email' => 'required',
-            'password' => 'required',
-            'display_name' => 'required',
-        ]);
-    }
+    // SMTP implementation
+  },
 }
 ```
 
+Features import services directly:
+```typescript
+import { mailer } from '../services/mailer'
+```
+
+An agent traces dependencies by following imports. No service container, no string-based lookups, no auto-wiring. Just `import`.
+
+## Testing
+
+Tests use Bun's built-in test runner. Tests mirror features 1:1.
+
+```typescript
+// tests/UserRegistration.test.ts
+import { describe, test, expect } from 'bun:test'
+import { createTestClient } from 'manifest/testing'
+
+describe('user-registration', () => {
+  const client = createTestClient({ featuresDir: './features' })
+
+  test('creates user with valid input', async () => {
+    const result = await client.call('user-registration', {
+      email: 'jane@example.com',
+      password: 'secure-password-123',
+      displayName: 'Jane',
+    })
+
+    expect(result.status).toBe(201)
+    expect(result.message).toBe('User registered')
+    expect(result.data.email).toBe('jane@example.com')
+    expect(result.data).not.toHaveProperty('password')
+
+    await expect(client.database).toHaveRow('users', {
+      email: 'jane@example.com',
+    })
+
+    expect(client.mailer.sent).toContainEqual(
+      expect.objectContaining({ template: 'welcome', to: 'jane@example.com' })
+    )
+  })
+
+  test('rejects duplicate email', async () => {
+    await client.seed('users', { email: 'taken@example.com' })
+
+    const result = await client.call('user-registration', {
+      email: 'taken@example.com',
+      password: 'secure-password-123',
+      displayName: 'Jane',
+    })
+
+    expect(result.status).toBe(409)
+    expect(result.message).toBe('Email already registered')
+    expect(client.mailer.sent).toHaveLength(0)
+  })
+
+  test('validates required fields', async () => {
+    const result = await client.call('user-registration', {})
+
+    expect(result.status).toBe(422)
+    expect(result.errors).toHaveProperty('email', 'required')
+    expect(result.errors).toHaveProperty('password', 'required')
+    expect(result.errors).toHaveProperty('displayName', 'required')
+  })
+})
+```
+
 Key design choices:
-- `$this->call('feature-name', [...])` - Tests call features by name, not HTTP route. URL changes don't break tests.
-- `#[TestFor]` links tests to features. Framework can verify every feature has tests.
-- No mocking unless absolutely necessary. Real assertions against real state.
+- **`client.call('feature-name', {...})`** - Tests call features by name, not HTTP route.
+- **Bun's built-in test runner** - No Jest, no Vitest. `bun test` just works.
+- **Test helpers** - `client.database`, `client.mailer.sent` provide inspection without mocking.
 
 ## Live Code Runtime
 
-No compilation in production. No cached routes, no compiled DI container. Features are scanned, services resolved, and routes registered on every request.
+Bun's `--hot` flag is the key to everything. It watches the filesystem and hot-reloads modules when they change. Unlike Node.js `--watch` (which restarts the process), `--hot` reloads in-place - keeping WebSocket connections alive and avoiding cold start.
 
-```php
-<?php
-// public/index.php
+```bash
+# Development
+bun --hot index.ts
 
-require __DIR__ . '/../vendor/autoload.php';
-
-use Manifest\Kernel;
-
-$kernel = new Kernel(
-    projectDir: dirname(__DIR__),
-    cacheEnabled: false,
-);
-
-$kernel->handleRequest();
+# Production (with hot reload for agent self-healing)
+bun --hot index.ts
 ```
 
-For a typical app with 30-50 features, the overhead is ~5-15ms per request. That's the price of live code. If needed, opt-in caching is available with `php manifest cache:clear && php manifest cache:warm` after changes.
+The agent edits a feature file → Bun detects the change → the module is reloaded → the next request uses the new code. No restart, no deploy, no cache clear.
+
+### What about `bun build`?
+
+We don't use it. There's no build step. The `.ts` files in the project ARE what runs. This is critical for agent self-healing: the agent modifies a `.ts` file and it takes effect immediately. If there were a build step, the agent would need to know about the build pipeline, which adds complexity and failure modes.
 
 ## CLI Tooling
 
 ### Built-in Commands
 
 ```bash
-php manifest make:feature UserRegistration --route="POST /api/users/register" --type=request --auth=none
-php manifest make:schema User --table=users
-php manifest make:test UserRegistration
-php manifest migrate:generate
-php manifest migrate
-php manifest index          # Rebuild MANIFEST.md from codebase
-php manifest check          # Validate conventions
-php manifest agent:changelog  # Show agent changes since last release
-php manifest serve          # Boot PHP server + agent process
+bun manifest serve              # Start the server (with --hot by default)
+bun manifest index              # Rebuild MANIFEST.md from codebase
+bun manifest check              # Validate conventions
+bun manifest make:feature       # Scaffold a new feature
+bun manifest make:schema        # Scaffold a new schema
+bun manifest make:test          # Scaffold a test for a feature
+bun manifest agent:changelog    # Show agent changes since last release
 ```
 
-`php manifest check` enforces conventions:
+The `manifest` CLI is a Bun script (`bin/manifest.ts`), not a separate binary.
+
+### `bun manifest check`
+
+Enforces conventions:
 ```
-$ php manifest check
+$ bun manifest check
 
- Feature 'create-post' is missing side effects declaration
- Schema 'PostSchema' field 'slug' has no description
- Feature 'delete-user' has no test file
- Service 'ImageProcessor' is registered but has no description
- MANIFEST.md is in sync
- All routes are unique
- No auto-wired services detected
+✗ Feature 'create-post' is missing side effects declaration
+✗ Schema 'posts' field 'slug' has no JSDoc description
+✗ Feature 'delete-user' has no test file
+✗ Service 'imageProcessor' has no JSDoc description
+✓ MANIFEST.md is in sync
+✓ All routes are unique
+✓ No decorator patterns detected
 
-4 issues found. Run 'php manifest check --fix' for suggestions.
+4 issues found.
 ```
 
 ### Agent-Authored Commands
 
-Agents can create custom CLI commands in `commands/`. Commands track who created them and why:
+Agents can create CLI commands in `commands/`:
 
-```php
-#[Command(
-    name: 'app:seed-demo-tenant',
-    description: 'Creates a demo tenant with sample users and posts.',
-    usage: 'php manifest app:seed-demo-tenant --name="Acme Corp"',
-    createdBy: 'agent',
-    reason: 'Agent noticed manual tenant seeding via raw SQL on 2026-02-10 and 2026-02-12.',
-)]
-class SeedDemoTenant extends Command { ... }
+```typescript
+// commands/seedDemoTenant.ts
+import { defineCommand } from 'manifest'
+import { db } from '../config/database'
+import { users } from '../schemas/users'
+import { posts } from '../schemas/posts'
+
+export default defineCommand({
+  name: 'seed-demo-tenant',
+  description: `Creates a demo tenant with sample users and posts.
+                This app is multi-tenant. Every time we onboard a new
+                demo client, we need a pre-populated tenant.`,
+  createdBy: 'agent',
+  reason: 'Agent noticed manual tenant seeding via raw SQL on 2026-02-10 and 2026-02-12.',
+
+  args: {
+    name: { type: 'string', description: 'Tenant company name', required: true },
+  },
+
+  async run({ args, log }) {
+    // ... seed logic
+    log.success(`Demo tenant '${args.name}' created`)
+  },
+})
 ```
 
 ## Deployment & Git Workflow
@@ -589,18 +644,18 @@ class SeedDemoTenant extends Command { ... }
 ### Two Branches
 
 ```
-main        <- Human works here. Normal development.
-production  <- Deployed code. Agent works here.
+main        ← Human works here. Normal development.
+production  ← Deployed code. Agent works here.
 ```
 
 ### Deployment Flow
 
-1. Human merges main -> production
+1. Human merges main → production
 2. CI builds new Docker image from production branch
 3. Orchestrator sends SIGTERM to old container
 4. Agent gets graceful shutdown (30s): commits and pushes any uncommitted work, writes memory file
 5. Old container stops, new container starts
-6. New agent boots: git pull, `php manifest index`, reads MANIFEST.md, reads memory file, logs what changed
+6. New agent boots: git pull, `bun manifest index`, reads MANIFEST.md, reads memory file, logs what changed
 
 ### Agent Commits
 
@@ -610,10 +665,10 @@ Always prefixed with `[agent]`, always structured:
 [agent] fix: Null check in UserRegistration
 
 Error Tracker Issue: MYAPP-1234
-Root cause: $input->display_name could be null when OAuth provider omits the name field.
+Root cause: input.displayName could be undefined when OAuth provider omits the name field.
 Side effects of this fix: None.
 Features modified: user-registration
-Risk: Low - adds null coalesce, no behavior change for valid inputs.
+Risk: Low - adds nullish coalescing, no behavior change for valid inputs.
 ```
 
 ### Git as Persistence
@@ -627,23 +682,22 @@ The agent never force-resolves conflicts. If production and main have diverged a
 ### Docker Image
 
 ```dockerfile
-FROM php:8.3-fpm
+FROM oven/bun:1
 
 COPY . /app
 WORKDIR /app
 
-RUN composer install --no-dev
-RUN apt-get update && apt-get install -y git
+RUN bun install --production
 
 ENV MANIFEST_GIT_REMOTE=origin
 ENV MANIFEST_GIT_BRANCH=production
 ENV MANIFEST_AGENT_SHUTDOWN_GRACE_SECONDS=30
 
 EXPOSE 8080
-CMD ["php", "manifest", "serve"]
+CMD ["bun", "--hot", "index.ts"]
 ```
 
-`php manifest serve` boots both the PHP server and the agent process. On SIGTERM it coordinates graceful handoff.
+The `--hot` flag means the agent can modify code and Bun picks it up instantly. No restart needed.
 
 ## Security: Agent Credentials
 
@@ -681,7 +735,7 @@ The agent should have the minimum permissions it needs:
 |-----------|-------------|-----|
 | Git push | production branch only | Agent should never touch main |
 | Git force-push | deny | Never lose history |
-| Database | application user, not root | Agent fixes code, not schema (migrations are human-authored) |
+| Database | application user, not superuser | Agent fixes code, not schema (migrations are human-authored) |
 | Filesystem | /app directory only | No access outside the project |
 | Network | outbound to git remote + error tracker API only | No arbitrary network access |
 | SSH to host | deny | Agent lives inside the container, not on the host |
@@ -696,20 +750,19 @@ The agent should have the minimum permissions it needs:
 
 ### Config
 
-```php
-<?php
-// config/manifest.php
+```typescript
+// config/manifest.ts
+export default {
+  // ...
 
-return [
-    // ...
+  // Agent git credentials
+  agentGitSshKey: Bun.env.MANIFEST_GIT_SSH_KEY,
+  agentGitUserName: 'manifest-agent',
+  agentGitUserEmail: 'agent@myapp.manifest',
 
-    // Agent git credentials
-    'agent_git_ssh_key' => getenv('MANIFEST_GIT_SSH_KEY'),
-    'agent_git_user_name' => 'manifest-agent',
-    'agent_git_user_email' => 'agent@myapp.manifest',
-
-    // Agent permissions (enforced by framework)
-    'agent_allowed_branches' => ['production'],
-    'agent_can_force_push' => false,
-    'agent_can_run_migrations' => false,
-];
+  // Agent permissions (enforced by framework)
+  agentAllowedBranches: ['production'],
+  agentCanForcePush: false,
+  agentCanRunMigrations: false,
+} satisfies ManifestConfig
+```
