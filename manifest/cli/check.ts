@@ -28,37 +28,42 @@ export async function check(_args: string[]): Promise<number> {
   const routes = new Map<string, string>()
 
   for (const [name, feature] of features) {
+    const featureFile = `features/${pascalCase(name)}.ts`
+
     if (!feature.description || feature.description.trim().length === 0) {
-      issues.push(`Feature '${name}' has no description.`)
+      issues.push(`Feature '${name}' has no description. → Open ${featureFile} and add a 2-3 sentence description to the defineFeature() call.`)
     }
 
     if (!feature.sideEffects) {
-      issues.push(`Feature '${name}' is missing sideEffects declaration (can be empty array).`)
+      issues.push(`Feature '${name}' is missing sideEffects declaration. → Add sideEffects: [] to defineFeature() in ${featureFile}.`)
     }
 
     if (feature.type === 'request' && feature.route.length === 0) {
-      issues.push(`Feature '${name}' is type 'request' but has no route.`)
+      issues.push(`Feature '${name}' is type 'request' but has no route. → Add route: ['METHOD', '/api/path'] to defineFeature() in ${featureFile}.`)
     }
 
     for (const [fieldName, fieldDef] of Object.entries(feature.input)) {
       if (!fieldDef.description || fieldDef.description.trim().length === 0) {
-        issues.push(`Feature '${name}' input field '${fieldName}' has no description.`)
+        issues.push(`Feature '${name}' input field '${fieldName}' has no description. → Add a description to the '${fieldName}' input field in ${featureFile}.`)
       }
     }
 
+    const testPascal = pascalCase(name)
     const testPaths = [
-      path.join(projectDir, 'tests', `${pascalCase(name)}.test.ts`),
+      path.join(projectDir, 'tests', `${testPascal}.test.ts`),
       path.join(projectDir, 'tests', `${name}.test.ts`),
     ]
     const hasTest = testPaths.some((p) => existsSync(p))
     if (!hasTest) {
-      issues.push(`Feature '${name}' has no test file.`)
+      issues.push(`Feature '${name}' has no test file. → Create tests/${testPascal}.test.ts mirroring ${featureFile}.`)
     }
 
     if (feature.route.length > 0) {
       const routeKey = `${feature.route[0]} ${feature.route[1]}`
       if (routes.has(routeKey)) {
-        issues.push(`Duplicate route '${routeKey}' in features '${routes.get(routeKey)}' and '${name}'.`)
+        const otherName = routes.get(routeKey)!
+        const otherFile = `features/${pascalCase(otherName)}.ts`
+        issues.push(`Duplicate route '${routeKey}' in features '${otherName}' and '${name}'. → Resolve the route conflict between ${otherFile} and ${featureFile} — change one route.`)
       }
       routes.set(routeKey, name)
     }
@@ -67,7 +72,7 @@ export async function check(_args: string[]): Promise<number> {
   if (existsSync(path.join(projectDir, 'MANIFEST.md'))) {
     passes.push('MANIFEST.md exists.')
   } else {
-    issues.push('MANIFEST.md does not exist. Run `bun manifest index` to generate it.')
+    issues.push('MANIFEST.md does not exist. → Run: bun manifest index')
   }
 
   const hasDuplicateRoutes = issues.some((i) => i.startsWith('Duplicate route'))
@@ -85,7 +90,7 @@ export async function check(_args: string[]): Promise<number> {
   console.log('')
 
   if (issues.length > 0) {
-    console.log(`  ${issues.length} issue(s) found.\n`)
+    console.log(`  Fix these ${issues.length} issue(s), then run \`bun manifest check\` again to verify.\n`)
     return 1
   }
 
