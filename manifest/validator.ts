@@ -43,7 +43,7 @@ function validateInteger(field: IntegerFieldDef, value: unknown): string | null 
   return null
 }
 
-function validateNumber(field: IntegerFieldDef, value: unknown): string | null {
+function validateNumber(field: { min?: number; max?: number }, value: unknown): string | null {
   if (typeof value !== 'number') return 'invalid_type'
   if (field.min !== undefined && value < field.min) return 'min'
   if (field.max !== undefined && value > field.max) return 'max'

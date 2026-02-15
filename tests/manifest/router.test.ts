@@ -27,7 +27,7 @@ const features = {
   'order-webhook': defineFeature({
     name: 'order-webhook',
     description: 'Internal event.',
-    type: 'event',
+    type: 'event' as const,
     trigger: 'order.shipped',
     route: [],
     input: {},

@@ -24,7 +24,7 @@ describe('defineFeature', () => {
     expect(feature.route).toEqual(['GET', '/api/hello'])
     expect(feature.type).toBe('request')
     expect(feature.authentication).toBe('none')
-    expect(feature.input.name.type).toBe('string')
+    expect(feature.input.name!.type).toBe('string')
     expect(typeof feature.handle).toBe('function')
   })
 

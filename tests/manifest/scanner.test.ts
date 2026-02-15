@@ -7,8 +7,8 @@ describe('scanFeatures', () => {
     const registry = await scanFeatures(path.resolve(__dirname, '../../features'))
     expect(Object.keys(registry).length).toBeGreaterThan(0)
     expect(registry['hello-world']).toBeDefined()
-    expect(registry['hello-world'].name).toBe('hello-world')
-    expect(registry['hello-world'].route).toEqual(['GET', '/api/hello'])
+    expect(registry['hello-world']!.name).toBe('hello-world')
+    expect(registry['hello-world']!.route).toEqual(['GET', '/api/hello'])
   })
 
   test('returns empty registry for empty directory', async () => {
@@ -24,6 +24,6 @@ describe('scanFeatures', () => {
     const registry = await scanFeatures(path.resolve(__dirname, '../../features'))
     const feature = registry['hello-world']
     expect(feature).toBeDefined()
-    expect(feature.description).toContain('greeting')
+    expect(feature!.description).toContain('greeting')
   })
 })

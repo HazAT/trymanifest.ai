@@ -1,3 +1,5 @@
+export {}
+
 /**
  * Manifest CLI entry point.
  *

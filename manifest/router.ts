@@ -28,7 +28,7 @@ export function createRouter(registry: Record<string, FeatureDef>): Router {
     const route = feature.route as unknown as unknown[]
     if (!Array.isArray(route) || route.length < 2) continue
 
-    const [method, pattern] = feature.route
+    const [method, pattern] = feature.route as [HttpMethod, string]
     const segments = splitPath(pattern)
     const paramNames: string[] = []
 
@@ -43,9 +43,9 @@ export function createRouter(registry: Record<string, FeatureDef>): Router {
     if (entry.segments.length !== pathSegments.length) return null
     const params: Record<string, string> = {}
     for (let i = 0; i < entry.segments.length; i++) {
-      const seg = entry.segments[i]
+      const seg = entry.segments[i]!
       if (seg.startsWith(':')) {
-        params[seg.slice(1)] = pathSegments[i]
+        params[seg.slice(1)] = pathSegments[i]!
       } else if (seg !== pathSegments[i]) {
         return null
       }

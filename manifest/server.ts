@@ -4,12 +4,14 @@ import { createRouter } from './router'
 import { validateInput } from './validator'
 import { toEnvelope, createResultHelpers } from './envelope'
 
-interface ServerOptions {
+export interface ManifestServerOptions {
   projectDir: string
   port?: number
 }
 
-export async function createManifestServer(options: ServerOptions) {
+export type ManifestServer = Awaited<ReturnType<typeof createManifestServer>>
+
+export async function createManifestServer(options: ManifestServerOptions) {
   const featuresDir = path.join(options.projectDir, 'features')
   const registry = await scanFeatures(featuresDir)
   const router = createRouter(registry)

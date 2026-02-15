@@ -33,7 +33,7 @@ export async function makeFeature(args: string[]): Promise<void> {
   let routeLine = `route: ['GET', '/api/${kebabName}'],`
   if (route) {
     const [method, ...pathParts] = route.split(' ')
-    routeLine = `route: ['${method.toUpperCase()}', '${pathParts.join(' ')}'],`
+    routeLine = `route: ['${method!.toUpperCase()}', '${pathParts.join(' ')}'],`
   }
 
   const code = `// features/${className}.ts

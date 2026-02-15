@@ -29,8 +29,9 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 export interface FeatureOptions<TInput = Record<string, unknown>> {
   name: string
   description: string
-  route: [HttpMethod, string]
-  type?: 'request' | 'action'
+  route: [HttpMethod, string] | []
+  type?: 'request' | 'action' | 'event'
+  trigger?: string
   authentication?: 'none' | 'required' | 'optional'
   sideEffects?: string[]
   errorCases?: string[]
@@ -44,8 +45,9 @@ export interface FeatureOptions<TInput = Record<string, unknown>> {
 export interface FeatureDef<TInput = Record<string, unknown>> {
   name: string
   description: string
-  route: [HttpMethod, string]
-  type: 'request' | 'action'
+  route: [HttpMethod, string] | []
+  type: 'request' | 'action' | 'event'
+  trigger?: string
   authentication: 'none' | 'required' | 'optional'
   sideEffects: string[]
   errorCases: string[]
@@ -71,6 +73,7 @@ export function defineFeature<TInput = Record<string, unknown>>(
     description: opts.description,
     route: opts.route,
     type: opts.type ?? 'request',
+    trigger: opts.trigger,
     authentication: opts.authentication ?? 'required',
     sideEffects: opts.sideEffects ?? [],
     errorCases: opts.errorCases ?? [],
