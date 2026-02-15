@@ -22,6 +22,8 @@ Manifest is a TypeScript/Bun framework where every piece of code is written to b
 
 **Commits carry knowledge.** Every commit message should be descriptive enough that an agent reading `git log` understands what changed and why without looking at the diff. Use a clear subject line and a body that explains the reasoning, what files were affected, and any migration steps. For larger changes, point to a plan file. The commit history is how the local agent learns what happened while it wasn't watching — treat it as a knowledge transfer, not a formality. Load `.claude/skills/manifest-commit/SKILL.md` before committing.
 
+**We build this together.** The codebase is a shared workspace — between you, the next agent, and the human. When you make a significant change, the ripple doesn't stop at the code. Ask yourself: does AGENTS.md still tell the truth? Are the skills still accurate? Does MANIFEST.md reflect reality? Does the config cover what was just added? Every significant change is a prompt to check that the rest of the system still makes sense. Run `bun manifest learn` after large changes, or load `.claude/skills/manifest-learn/SKILL.md` for the full checklist. The goal is simple: no one should ever follow stale instructions because you forgot to update the map after moving the furniture.
+
 ## Your Codebase, Your Choices
 
 Manifest has opinions about how features, schemas, and services are structured — that's the framework. It does **not** dictate how you build your application. You'll install npm packages. You'll make architectural decisions that aren't covered here. You'll do things your way.
@@ -161,6 +163,7 @@ bun --hot index.ts              # Start with hot reload
 bun test                        # Run all tests
 bun run manifest index          # Regenerate MANIFEST.md
 bun run manifest check          # Validate conventions
+bun run manifest learn          # Check for staleness after changes
 bun run manifest make:feature   # Scaffold a new feature
 ```
 

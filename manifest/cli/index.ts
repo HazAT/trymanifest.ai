@@ -24,6 +24,7 @@ Usage:
   bun manifest serve [--port=8080]     Start the development server
   bun manifest index                    Rebuild MANIFEST.md
   bun manifest check                    Validate conventions
+  bun manifest learn                    Check for staleness after changes
   bun manifest make:feature <Name>      Scaffold a new feature
 
 `)
@@ -44,6 +45,12 @@ switch (command) {
   case 'check': {
     const { check } = await import('./check')
     const exitCode = await check(args.slice(1))
+    process.exit(exitCode)
+    break
+  }
+  case 'learn': {
+    const { learn } = await import('./learn')
+    const exitCode = await learn(args.slice(1))
     process.exit(exitCode)
     break
   }
