@@ -74,7 +74,8 @@ export async function indexManifest(_args: string[]): Promise<void> {
   }
 
   await Bun.write(manifestPath, md)
-  console.log(`\n  ✓ MANIFEST.md generated with ${features.length} features indexed.\n`)
+  console.log(`\n  ✓ MANIFEST.md generated with ${features.length} features indexed.`)
+  console.log(`  Review MANIFEST.md for accuracy, then commit if it looks correct.\n`)
 }
 
 function countFiles(dir: string, ext: string): number {

@@ -65,7 +65,8 @@ export async function learn(_args: string[]): Promise<number> {
   }
 
   if (findings.length === 0) {
-    console.log('  \x1b[32m✓\x1b[0m Everything looks consistent.\n')
+    console.log('  \x1b[32m✓\x1b[0m Everything looks consistent.')
+    console.log('  No action needed. The codebase is consistent.\n')
     return 0
   }
 

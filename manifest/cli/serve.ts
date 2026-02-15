@@ -24,6 +24,8 @@ export async function serve(args: string[]): Promise<void> {
   console.log(`  Manifest server running on http://localhost:${server.port}`)
   console.log(`  Production is our dev environment.`)
   console.log(``)
+  console.log(`  Test endpoints with: curl http://localhost:${server.port}/api/hello`)
+  console.log(``)
   console.log(`  Tip: Run with 'bun --hot' for live reload:`)
   console.log(`    bun --hot manifest/cli/index.ts serve`)
   console.log(``)
