@@ -18,7 +18,7 @@ export { validateInput } from './validator'
 export { createRouter } from './router'
 export type { Router, RouteMatch } from './router'
 
-export { scanFeatures } from './scanner'
+export { scanFeatures, scanAllFeatures } from './scanner'
 export type { FeatureRegistry } from './scanner'
 
 export { toEnvelope, createResultHelpers } from './envelope'

@@ -1,5 +1,5 @@
 import type { FeatureDef } from './feature'
-import { readdirSync } from 'fs'
+import { readdirSync, existsSync, statSync } from 'fs'
 import path from 'path'
 
 export type FeatureRegistry = Record<string, FeatureDef>
@@ -27,6 +27,33 @@ export async function scanFeatures(featuresDir: string): Promise<FeatureRegistry
     } catch (err) {
       console.error(`[manifest] Failed to load feature from ${file}:`, err)
     }
+  }
+
+  return registry
+}
+
+export async function scanAllFeatures(projectDir: string): Promise<FeatureRegistry> {
+  const registry = await scanFeatures(path.join(projectDir, 'features'))
+
+  const extensionsDir = path.join(projectDir, 'extensions')
+  if (!existsSync(extensionsDir)) return registry
+
+  let entries: string[]
+  try {
+    entries = readdirSync(extensionsDir)
+  } catch {
+    return registry
+  }
+
+  for (const entry of entries) {
+    const entryPath = path.join(extensionsDir, entry)
+    if (!statSync(entryPath).isDirectory()) continue
+
+    const extFeaturesDir = path.join(entryPath, 'features')
+    if (!existsSync(extFeaturesDir)) continue
+
+    const extRegistry = await scanFeatures(extFeaturesDir)
+    Object.assign(registry, extRegistry)
   }
 
   return registry
