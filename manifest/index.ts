@@ -28,4 +28,4 @@ export { createManifestServer } from './server'
 export type { ManifestServer, ManifestServerOptions } from './server'
 
 export { createTestClient } from './testing'
-export type { TestClient, TestResult } from './testing'
+export type { TestClient, TestResult, StreamEvent } from './testing'

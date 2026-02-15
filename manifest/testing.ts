@@ -6,7 +6,7 @@
 import { scanFeatures } from './scanner'
 import { validateInput } from './validator'
 import { createResultHelpers } from './envelope'
-import type { FeatureResult } from './feature'
+import type { FeatureResult, StreamFeatureDef } from './feature'
 import type { FeatureRegistry } from './scanner'
 
 export interface TestResult {
@@ -17,8 +17,14 @@ export interface TestResult {
   errors: Record<string, string>
 }
 
+export interface StreamEvent {
+  event?: string
+  data: unknown
+}
+
 export interface TestClient {
   call(featureName: string, input: Record<string, unknown>): Promise<TestResult>
+  stream(featureName: string, input: Record<string, unknown>): Promise<StreamEvent[]>
   getRegistry(): Promise<FeatureRegistry>
 }
 
@@ -64,6 +70,48 @@ export function createTestClient(options: {
         data: result.data,
         errors: result.errors,
       }
+    },
+
+    async stream(featureName: string, input: Record<string, unknown>): Promise<StreamEvent[]> {
+      const registry = await getRegistry()
+      const feature = registry[featureName]
+
+      if (!feature) {
+        throw new Error(`Feature "${featureName}" not found in ${options.featuresDir}`)
+      }
+
+      if (feature.type !== 'stream') {
+        throw new Error(`Feature "${featureName}" is not a stream feature (type: "${feature.type || 'request'}")`)
+      }
+
+      const validationErrors = validateInput(feature.input, input)
+      if (Object.keys(validationErrors).length > 0) {
+        throw new Error(`Validation failed: ${JSON.stringify(validationErrors)}`)
+      }
+
+      const events: StreamEvent[] = []
+      let closed = false
+
+      const emit = (...args: unknown[]) => {
+        if (closed) return
+        if (args.length === 2) {
+          events.push({ event: args[0] as string, data: args[1] })
+        } else {
+          events.push({ data: args[0] })
+        }
+      }
+
+      const close = () => { closed = true }
+
+      const fail = (message: string) => {
+        events.push({ event: 'error', data: { message } })
+        closed = true
+      }
+
+      const streamFeature = feature as StreamFeatureDef
+      await streamFeature.stream({ input, emit, close, fail })
+
+      return events
     },
 
     getRegistry() {
