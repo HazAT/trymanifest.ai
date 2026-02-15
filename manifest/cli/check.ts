@@ -28,7 +28,7 @@ export async function check(_args: string[]): Promise<number> {
   const routes = new Map<string, string>()
 
   for (const [name, feature] of features) {
-    const featureFile = `features/${pascalCase(name)}.ts`
+    const featureFile = (feature as any)._sourcePath || `features/${pascalCase(name)}.ts`
 
     if (!feature.description || feature.description.trim().length === 0) {
       issues.push(`Feature '${name}' has no description. → Open ${featureFile} and add a 2-3 sentence description to the defineFeature() call.`)
