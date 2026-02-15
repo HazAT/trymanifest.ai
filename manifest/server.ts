@@ -4,7 +4,7 @@ import { scanAllFeatures } from './scanner'
 import { createRouter } from './router'
 import { validateInput } from './validator'
 import { toEnvelope, createResultHelpers } from './envelope'
-import { createStaticHandler } from './frontend'
+import { createStaticHandler, watchFrontend } from './frontend'
 import frontendConfig from '../config/frontend'
 import manifestConfig from '../config/manifest'
 
@@ -135,19 +135,30 @@ export async function createManifestServer(options: ManifestServerOptions) {
     },
   })
 
+  const notifyReload = () => {
+    for (const client of reloadClients) {
+      try {
+        client.enqueue('event: reload\ndata: reload\n\n')
+      } catch {
+        reloadClients.delete(client)
+      }
+    }
+  }
+
+  // In dev mode, watch frontend/ and trigger live reload automatically.
+  // This makes dev mode single-process: just `bun --hot index.ts`.
+  if (manifestConfig.debug && frontendConfig.devReload) {
+    const frontendDir = path.resolve(options.projectDir, 'frontend')
+    if (fs.existsSync(frontendDir)) {
+      watchFrontend(options.projectDir, notifyReload)
+    }
+  }
+
   return {
     port: server.port,
     stop() {
       server.stop()
     },
-    notifyReload() {
-      for (const client of reloadClients) {
-        try {
-          client.enqueue('event: reload\ndata: reload\n\n')
-        } catch {
-          reloadClients.delete(client)
-        }
-      }
-    },
+    notifyReload,
   }
 }

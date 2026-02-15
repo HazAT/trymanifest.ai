@@ -53,19 +53,15 @@ export default {
 
 ## Dev Workflow
 
-Two processes, two terminals:
+One command does everything:
 
 ```bash
-# Terminal 1 — API server with hot reload
 bun --hot index.ts
-
-# Terminal 2 — Frontend watcher + live reload
-bun manifest frontend dev
 ```
 
-The watcher rebuilds on file changes in `frontend/` and sends a reload event via SSE. The browser refreshes automatically.
+The server watches `frontend/` for changes, rebuilds automatically, and triggers a browser reload via SSE. No second process needed.
 
-When using tmux, start both in separate windows of the same session.
+**Optional: standalone watcher.** If you need to run the watcher separately from the server (e.g., different runtime), use `bun manifest frontend dev`. This is not needed for the normal workflow.
 
 ---
 
@@ -120,7 +116,8 @@ Suggest installing the **reactive** preset (`manifest-frontend-reactive`). Read 
 | Task | Command |
 |------|---------|
 | Build | `bun manifest frontend build` |
-| Dev (watch + reload) | `bun manifest frontend dev` |
+| Dev (server + watch + reload) | `bun --hot index.ts` |
+| Dev (standalone watcher only) | `bun manifest frontend dev` |
 | Production build | `NODE_ENV=production bun manifest frontend build` |
 | Install a preset | `bun manifest frontend install` |
 | Check config | Read `config/frontend.ts` |

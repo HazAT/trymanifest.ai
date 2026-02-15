@@ -74,37 +74,22 @@ You should see output listing built files in `dist/`.
 ### 7. Start development
 
 ```bash
-bun manifest frontend dev
+bun --hot index.ts
 ```
 
 ---
 
 ## How to Run (Development)
 
-Two processes run side by side:
+One command does everything:
 
-**Terminal 1 — API server:**
 ```bash
 bun --hot index.ts
 ```
 
-**Terminal 2 — Frontend watcher + live reload:**
-```bash
-bun manifest frontend dev
-```
+The server watches `frontend/` for changes, rebuilds automatically, and triggers a browser reload via SSE. No second process needed.
 
-The API server serves both the API routes and the built frontend files from `dist/`. The frontend watcher rebuilds on file changes and triggers a browser reload via SSE.
-
-You can also add scripts to `package.json`:
-
-```json
-{
-  "scripts": {
-    "dev:api": "bun --hot index.ts",
-    "dev:frontend": "bun manifest frontend dev"
-  }
-}
-```
+**Optional: standalone watcher.** If you run the server separately (e.g., a different runtime), you can use `bun manifest frontend dev` to run only the file watcher. This is not needed for the normal workflow.
 
 ---
 

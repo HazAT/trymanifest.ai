@@ -51,8 +51,9 @@ export async function frontendBuild(_args: string[]): Promise<void> {
 export async function frontendDev(_args: string[]): Promise<void> {
   const projectDir = process.cwd()
 
-  console.log('Starting frontend dev watcher...')
-  console.log('Note: This only watches frontend files. Run your API server separately with: bun --hot index.ts\n')
+  console.log('Starting standalone frontend dev watcher...')
+  console.log('Note: In most cases you don\'t need this — `bun --hot index.ts` watches frontend/ and triggers live reload automatically.')
+  console.log('This command is for when you run the watcher separately from the server.\n')
 
   await watchFrontend(projectDir, () => {
     console.log('[frontend] reload triggered')
