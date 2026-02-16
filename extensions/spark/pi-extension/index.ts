@@ -7,6 +7,7 @@ type AgentInfo = {
   id: string
   pid: number
   status: 'idle' | 'working'
+  role?: 'sidecar' | 'human'
   startedAt: string
   lastActivity: string
 }
@@ -76,6 +77,7 @@ export default function spark(pi: ExtensionAPI) {
       id: agentId,
       pid: process.pid,
       status,
+      role: isSidecar ? 'sidecar' as const : 'human' as const,
       startedAt: agentStartedAt,
       lastActivity: new Date().toISOString(),
     }
@@ -512,6 +514,20 @@ You understand Manifest conventions: features are in features/, one file per beh
       if (cleaned.length > 0) {
         report.push(`Cleaned stale agents: ${cleaned.join(', ')}`)
       }
+      // Sidecar announces itself so human Pi instances can recognize it
+      agentId = crypto.randomUUID()
+      agentFilePath = path.join(agentsDir, `${agentId}.json`)
+      const sidecarData = {
+        id: agentId,
+        pid: process.pid,
+        status: 'idle' as const,
+        role: 'sidecar' as const,
+        startedAt: new Date().toISOString(),
+        lastActivity: new Date().toISOString(),
+      }
+      const tmpPath = agentFilePath + '.tmp'
+      await fsp.writeFile(tmpPath, JSON.stringify(sidecarData, null, 2))
+      await fsp.rename(tmpPath, agentFilePath)
     } else {
       agentId = crypto.randomUUID()
       agentFilePath = path.join(agentsDir, `${agentId}.json`)
@@ -616,7 +632,19 @@ You understand Manifest conventions: features are in features/, one file per beh
             () => {
               if (!knownAgentFiles.has(filename)) {
                 knownAgentFiles.add(filename)
-                showAmbientStatus('🤖 Another agent joined')
+                // Read the file to check if it's a sidecar or human
+                fsp.readFile(filePath, 'utf-8').then(raw => {
+                  try {
+                    const agent = JSON.parse(raw) as AgentInfo
+                    if (agent.role === 'sidecar') {
+                      showAmbientStatus('⚡ Spark is watching your back')
+                    } else {
+                      showAmbientStatus('🤖 Another agent joined')
+                    }
+                  } catch {
+                    showAmbientStatus('🤖 Another agent joined')
+                  }
+                }).catch(() => showAmbientStatus('🤖 Another agent joined'))
               }
             },
             () => {
@@ -636,12 +664,12 @@ You understand Manifest conventions: features are in features/, one file per beh
 
   // Cleanup
   pi.on('session_shutdown', async (_event, ctx) => {
-    // Agent presence cleanup (human mode only)
-    if (!isSidecar && agentId) {
-      try { await writeSparkEvent('agent-stop', ctx?.cwd || '.') } catch {}
-      if (agentFilePath) {
-        try { await fsp.unlink(agentFilePath) } catch {}
+    // Agent presence cleanup
+    if (agentId && agentFilePath) {
+      if (!isSidecar) {
+        try { await writeSparkEvent('agent-stop', ctx?.cwd || '.') } catch {}
       }
+      try { await fsp.unlink(agentFilePath) } catch {}
     }
 
     if (agentsWatcher) {
