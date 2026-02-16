@@ -23,18 +23,7 @@
     body { background: #000; color: #b0b0b0; }
     ::selection { background: #00ff41; color: #000; }
 
-    /* Scanline overlay */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 9999;
-      background: repeating-linear-gradient(
-        0deg, transparent, transparent 2px,
-        rgba(0, 0, 0, 0.08) 2px, rgba(0, 0, 0, 0.08) 4px
-      );
-    }
+
 
     /* Blinking cursor */
     @keyframes blink {
@@ -63,9 +52,23 @@
       transform: translateY(0);
     }
 
-    /* Glow effects */
+    /* Glow effects with scanline overlay */
+    .glow, .glow-amber {
+      position: relative;
+      display: inline-block;
+    }
     .glow { text-shadow: 0 0 10px rgba(0, 255, 65, 0.3), 0 0 40px rgba(0, 255, 65, 0.1); }
     .glow-amber { text-shadow: 0 0 10px rgba(255, 176, 0, 0.3), 0 0 40px rgba(255, 176, 0, 0.1); }
+    .glow::after, .glow-amber::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0, 0, 0, 0.08) 2px, rgba(0, 0, 0, 0.08) 4px
+      );
+    }
 
     /* Code highlight bar */
     .code-line {
