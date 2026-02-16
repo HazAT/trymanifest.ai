@@ -3,7 +3,7 @@
  * Flat, typed, no nesting. Every value is visible and greppable.
  */
 export default {
-  appName: 'manifest-app',
+  appName: 'trymanifest.ai',
   appUrl: Bun.env.APP_URL ?? 'http://localhost:8080',
   debug: Bun.env.NODE_ENV !== 'production',
 
