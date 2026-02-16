@@ -130,6 +130,14 @@ export async function watchFrontend(projectDir: string, onRebuild?: () => void) 
   }
 }
 
+function isFile(filePath: string): boolean {
+  try {
+    return fs.statSync(filePath).isFile()
+  } catch {
+    return false
+  }
+}
+
 export function createStaticHandler(distDir: string, options: { spaFallback: boolean }) {
   const resolvedDistDir = path.resolve(distDir)
 
@@ -145,9 +153,8 @@ export function createStaticHandler(distDir: string, options: { spaFallback: boo
     // Path traversal guard: ensure resolved path stays within distDir
     if (!filePath.startsWith(resolvedDistDir + '/') && filePath !== resolvedDistDir) return null
 
-    const file = Bun.file(filePath)
-
-    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+    if (isFile(filePath)) {
+      const file = Bun.file(filePath)
       const headers: Record<string, string> = { 'Cache-Control': 'no-cache' }
       const mimeType = file.type
       if (mimeType && mimeType.startsWith('text/') && !mimeType.includes('charset')) {
@@ -158,13 +165,13 @@ export function createStaticHandler(distDir: string, options: { spaFallback: boo
 
     // Directory → index.html resolution
     const indexFilePath = path.join(filePath, 'index.html')
-    if (fs.existsSync(indexFilePath) && fs.statSync(indexFilePath).isFile()) {
+    if (isFile(indexFilePath)) {
       return new Response(Bun.file(indexFilePath), { headers: { 'Cache-Control': 'no-cache' } })
     }
 
     if (options.spaFallback) {
       const indexPath = path.join(distDir, 'index.html')
-      if (fs.existsSync(indexPath)) {
+      if (isFile(indexPath)) {
         return new Response(Bun.file(indexPath), { headers: { 'Cache-Control': 'no-cache' } })
       }
     }

@@ -8,32 +8,7 @@ import { createStaticHandler, watchFrontend } from './frontend'
 import frontendConfig from '../config/frontend'
 import manifestConfig from '../config/manifest'
 
-async function emitSparkError(opts: {
-  requestId: string
-  featureName: string
-  route: string
-  error: unknown
-  input: Record<string, unknown>
-}) {
-  try {
-    const sparkConfig = (await import('../config/spark')).default
-    if (sparkConfig.enabled && sparkConfig.watch.serverErrors) {
-      const { spark } = await import('../extensions/spark/services/spark')
-      spark.emit({
-        type: 'server-error',
-        traceId: opts.requestId,
-        feature: opts.featureName,
-        route: opts.route,
-        status: 500,
-        error: {
-          message: opts.error instanceof Error ? opts.error.message : String(opts.error),
-          stack: opts.error instanceof Error ? opts.error.stack : undefined,
-        },
-        request: { input: opts.input },
-      })
-    }
-  } catch {} // Spark emission must never break the server
-}
+const textEncoder = new TextEncoder()
 
 export interface ManifestServerOptions {
   projectDir: string
@@ -45,6 +20,40 @@ export type ManifestServer = Awaited<ReturnType<typeof createManifestServer>>
 export async function createManifestServer(options: ManifestServerOptions) {
   const registry = await scanAllFeatures(options.projectDir)
   const router = createRouter(registry)
+
+  // Resolve Spark once at startup — never in the error path
+  let sparkEmitter: ((event: any) => void) | null = null
+  try {
+    const sparkConfig = (await import('../config/spark')).default
+    if (sparkConfig.enabled && sparkConfig.watch.serverErrors) {
+      const { spark } = await import('../extensions/spark/services/spark')
+      sparkEmitter = (event) => spark.emit(event)
+    }
+  } catch {} // Spark setup must never prevent server from starting
+
+  const emitSparkError = (opts: {
+    requestId: string
+    featureName: string
+    route: string
+    error: unknown
+    input: Record<string, unknown>
+  }) => {
+    if (!sparkEmitter) return
+    try {
+      sparkEmitter({
+        type: 'server-error',
+        traceId: opts.requestId,
+        feature: opts.featureName,
+        route: opts.route,
+        status: 500,
+        error: {
+          message: opts.error instanceof Error ? opts.error.message : String(opts.error),
+          stack: opts.error instanceof Error ? opts.error.stack : undefined,
+        },
+        request: { input: opts.input },
+      })
+    } catch {} // Spark emission must never break the server
+  }
 
   // Static file serving (only if dist/ exists)
   const distDir = path.resolve(options.projectDir, frontendConfig.outputDir)
@@ -87,14 +96,14 @@ export async function createManifestServer(options: ManifestServerOptions) {
         })
       }
 
-      // Try to match route
+      // Try to match route (single pass handles match, 405, and 404)
       const match = router.match(method, pathname)
 
-      if (!match) {
-        if (router.isMethodNotAllowed(method, pathname)) {
-          return Response.json({ status: 405, message: 'Method not allowed' }, { status: 405 })
-        }
+      if (match.kind === 'method_not_allowed') {
+        return Response.json({ status: 405, message: 'Method not allowed' }, { status: 405 })
+      }
 
+      if (match.kind === 'not_found') {
         // Fallback to static files
         if (staticHandler) {
           const staticResponse = staticHandler(pathname)
@@ -105,7 +114,7 @@ export async function createManifestServer(options: ManifestServerOptions) {
       }
 
       const { feature, params } = match
-      const requestId = crypto.randomUUID()
+      const requestId = Bun.randomUUIDv7()
       const start = performance.now()
 
       const input: Record<string, unknown> = {}
@@ -160,7 +169,7 @@ export async function createManifestServer(options: ManifestServerOptions) {
               const safeEnqueue = (chunk: string) => {
                 if (closed) return
                 try {
-                  controller.enqueue(new TextEncoder().encode(chunk))
+                  controller.enqueue(textEncoder.encode(chunk))
                 } catch {
                   closed = true
                 }
@@ -197,7 +206,7 @@ export async function createManifestServer(options: ManifestServerOptions) {
               } catch (err) {
                 const message = err instanceof Error ? err.message : 'Internal server error'
                 fail(message)
-                await emitSparkError({ requestId, featureName: feature.name, route: `${method} ${pathname}`, error: err, input })
+                emitSparkError({ requestId, featureName: feature.name, route: `${method} ${pathname}`, error: err, input })
               }
             },
           })
@@ -220,7 +229,7 @@ export async function createManifestServer(options: ManifestServerOptions) {
         return Response.json(envelope, { status: result.status })
       } catch (err) {
         const durationMs = Math.round((performance.now() - start) * 100) / 100
-        await emitSparkError({ requestId, featureName: feature.name, route: `${method} ${pathname}`, error: err, input })
+        emitSparkError({ requestId, featureName: feature.name, route: `${method} ${pathname}`, error: err, input })
         return Response.json(
           {
             status: 500,
