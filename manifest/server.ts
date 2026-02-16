@@ -5,6 +5,7 @@ import { createRouter } from './router'
 import { validateInput } from './validator'
 import { toEnvelope, createResultHelpers } from './envelope'
 import { createStaticHandler, watchFrontend } from './frontend'
+import { checkRateLimit, startCleanup } from '../services/rateLimiter'
 import frontendConfig from '../config/frontend'
 import manifestConfig from '../config/manifest'
 
@@ -66,11 +67,14 @@ export async function createManifestServer(options: ManifestServerOptions) {
 
   const requestedPort = options.port ?? 3000
 
+  // Start periodic cleanup of stale rate limit entries
+  startCleanup()
+
   let server: ReturnType<typeof Bun.serve>
   try {
     server = Bun.serve({
     port: requestedPort,
-    fetch: async (req) => {
+    fetch: async (req, server) => {
       const url = new URL(req.url)
       const method = req.method
       const pathname = url.pathname
@@ -116,6 +120,47 @@ export async function createManifestServer(options: ManifestServerOptions) {
       const { feature, params } = match
       const requestId = Bun.randomUUIDv7()
       const start = performance.now()
+
+      // Rate limit check (before input parsing)
+      if (feature.rateLimit) {
+        const ip = server.requestIP(req)?.address ?? 'unknown'
+        const key = `${feature.name}:${ip}`
+        const result = checkRateLimit(key, feature.rateLimit)
+        if (!result.allowed) {
+          const durationMs = Math.round((performance.now() - start) * 100) / 100
+          // Emit Spark event for rate limiting
+          if (sparkEmitter) {
+            try {
+              sparkEmitter({
+                type: 'rate-limit',
+                traceId: requestId,
+                feature: feature.name,
+                route: `${method} ${pathname}`,
+                status: 429,
+                ip,
+                limit: { max: feature.rateLimit.max, windowSeconds: feature.rateLimit.windowSeconds },
+                remaining: 0,
+                retryAfter: result.retryAfter,
+              })
+            } catch {} // Spark emission must never break the server
+          }
+          return Response.json(
+            {
+              status: 429,
+              message: 'Rate limit exceeded',
+              meta: { feature: feature.name, request_id: requestId, duration_ms: durationMs },
+            },
+            {
+              status: 429,
+              headers: {
+                'Retry-After': String(result.retryAfter),
+                'X-RateLimit-Limit': String(feature.rateLimit.max),
+                'X-RateLimit-Remaining': '0',
+              },
+            },
+          )
+        }
+      }
 
       const input: Record<string, unknown> = {}
 
