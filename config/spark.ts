@@ -48,6 +48,8 @@ export default {
     enabled: false,
     // URL path prefix for the dashboard and WebSocket
     path: '/_spark',
+    // Port for the Spark web sidecar server (separate from the main app server)
+    port: Number(Bun.env.SPARK_WEB_PORT) || 8081,
     // Auth token — required when web UI is enabled. Set via env var or directly.
     // Empty token prevents the web UI from starting even if enabled (safety measure).
     token: Bun.env.SPARK_WEB_TOKEN || '',
