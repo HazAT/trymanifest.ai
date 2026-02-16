@@ -1,19 +1,24 @@
 ---
 name: manifest-merge-conflicts
-description: Resolve merge conflicts from upstream or other repos. Preserves application identity while accepting framework and tooling improvements. Use when you see merge conflict markers, failed merges, or the user says "resolve conflicts", "fix merge", or "merge conflict".
+description: Resolve merge conflicts from upstream or other repos. Preserves application identity while accepting framework and tooling improvements. Use when you see merge conflict markers, failed cherry-picks, or the user says "resolve conflicts", "fix merge", or "merge conflict".
 ---
 
 # Manifest Merge Conflict Resolution
 
 Resolve merge conflicts intelligently. The cardinal rule: **never change what the app is supposed to be.** Framework improvements, prompt refinements, and documentation polish from upstream are welcome. Application-specific features, business logic, and identity are sacred.
 
-**When to use:** You see conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`), a merge or rebase has failed, or the user asks for help resolving conflicts.
+**When to use:** You see conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`), a cherry-pick has failed, or the user asks for help resolving conflicts.
 
 ---
 
 ## Philosophy
 
-Merge conflicts in Manifest are not just code conflicts — they're *intent* conflicts. Two lines of development diverged, and now you need to understand what each side was trying to do before you can reconcile them.
+Manifest uses a two-branch model:
+
+- **`manifest`** branch — a local, read-only mirror of the upstream framework repo
+- **`main`** branch — YOUR application, where all development happens
+
+Updates flow from `manifest` to `main` via **cherry-pick**. Conflicts happen when cherry-picking upstream commits onto your application branch. The two sides are always clear: your app (`main`) vs. the incoming upstream commit.
 
 The upstream repo evolves the framework, CLI, docs, skills, and conventions. Your project evolves the application — features, schemas, services, config, and vision. When these collide, the app wins. Always.
 
@@ -47,11 +52,14 @@ Before touching anything, understand what happened:
 # What state are we in?
 git status
 
+# Are we in a cherry-pick?
+test -f .git/CHERRY_PICK_HEAD && echo "Cherry-pick in progress" || echo "Not in a cherry-pick"
+
 # How many files have conflicts?
 git diff --name-only --diff-filter=U
 
-# What was the merge/rebase command that caused this?
-git log --merge --oneline 2>/dev/null || echo "Not in a merge state"
+# What commit is being cherry-picked?
+cat .git/CHERRY_PICK_HEAD 2>/dev/null && git log --oneline -1 $(cat .git/CHERRY_PICK_HEAD)
 ```
 
 ### 2. Read MANIFEST.md
@@ -70,21 +78,17 @@ Pay attention to:
 
 ### 3. Understand the Divergence
 
-Look at git history to see where and why things diverged:
+Look at what the cherry-picked commit does and how it relates to your `main` branch:
 
 ```bash
-# Find the common ancestor
-git merge-base HEAD MERGE_HEAD 2>/dev/null || git merge-base HEAD upstream/main
+# See the cherry-picked commit's full message and diff
+git log -1 -p $(cat .git/CHERRY_PICK_HEAD)
 
-# See what YOUR side changed since the fork point
-MERGE_BASE=$(git merge-base HEAD MERGE_HEAD 2>/dev/null || git merge-base HEAD upstream/main)
-git log --oneline $MERGE_BASE..HEAD
-
-# See what THE OTHER SIDE changed since the fork point
-git log --oneline $MERGE_BASE..MERGE_HEAD 2>/dev/null || git log --oneline $MERGE_BASE..upstream/main
+# See recent history on main for context
+git log --oneline -10 HEAD
 ```
 
-Read the commit messages on both sides. They tell you the *intent* behind each change. In Manifest, commit messages are knowledge transfer — use them.
+Read the commit message — it tells you the *intent* behind the change. In Manifest, commit messages are knowledge transfer — use them.
 
 ### 4. Categorize Each Conflicted File
 
@@ -95,8 +99,12 @@ For every conflicted file, decide which category it falls into:
 git diff --name-only --diff-filter=U
 ```
 
+During a cherry-pick, `--ours` and `--theirs` are intuitive:
+- **`--ours`** = your `main` branch (your application)
+- **`--theirs`** = the cherry-picked commit from `manifest`
+
 **Category A: Framework files (`manifest/`)**
-Take upstream's version unless you've made deliberate local modifications. If you have local changes, read both versions and merge the intent — keep your customizations, adopt upstream's improvements.
+Take the upstream version unless you've made deliberate local modifications. If you have local changes, read both versions and merge the intent — keep your customizations, adopt upstream's improvements.
 
 ```bash
 # If you haven't modified this file locally, just take upstream
@@ -157,11 +165,11 @@ git diff <file>
 
 The markers look like:
 ```
-<<<<<<< HEAD (yours)
+<<<<<<< HEAD (yours — main branch, your app)
 Your version of this section
 =======
 Their version of this section
->>>>>>> upstream/main (theirs)
+>>>>>>> <commit-hash> (theirs — cherry-picked from manifest)
 ```
 
 ### 6. Handle AGENTS.md Specifically
@@ -203,34 +211,34 @@ bunx tsc --noEmit
 bun run manifest check
 ```
 
-All three must pass before completing the merge.
+All three must pass before completing the cherry-pick.
 
-### 8. Complete the Merge
+### 8. Complete the Cherry-Pick
 
 ```bash
 # Stage all resolved files
 git add -A
 
-# If in a merge state
-git commit
-# The default merge commit message is fine, but add a body explaining
-# what you accepted, adapted, and rejected from the incoming side.
+# Continue the cherry-pick
+git cherry-pick --continue
 ```
 
-Write the merge commit body following the manifest-commit conventions:
+The cherry-pick will use the original upstream commit message. If you want to annotate it with what you adapted, amend:
+
+```bash
+git commit --amend
+```
+
+Add a note in the body explaining what you accepted, adapted, and rejected:
 
 ```
-merge: integrate upstream changes (abc1234..def5678)
-
 Accepted:
 - manifest/server.ts: improved error handling for streams
 - manifest/cli/check.ts: new convention checks
-- .claude/skills/manifest-commit: refined prompt wording
 
 Protected (kept ours):
 - features/*: all application features preserved as-is
 - VISION.md: our app identity unchanged
-- config/manifest.ts: our port and auth settings
 
 Adapted:
 - AGENTS.md: accepted framework doc improvements, kept our
@@ -250,8 +258,8 @@ All tests pass. tsc clean. manifest check clean.
 5. **Config is yours.** Your `config/` reflects your deployment, your secrets, your choices. Keep it.
 6. **MANIFEST.md is never merged.** It's regenerated from your project. Always.
 7. **When you don't know, ask the user.** If a conflict is ambiguous — both sides made meaningful changes and you can't tell which matters more — present both versions and ask.
-8. **Test after resolving.** No merge is complete until `bun test`, `tsc`, and `manifest check` all pass.
-9. **Document what you did.** The merge commit should list what was accepted, protected, and adapted so the next update knows the decisions you made.
+8. **Test after resolving.** No cherry-pick is complete until `bun test`, `tsc`, and `manifest check` all pass.
+9. **Document what you did.** The commit should list what was accepted, protected, and adapted so the next update knows the decisions you made.
 
 ---
 
