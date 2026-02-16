@@ -233,16 +233,26 @@ bun test
 
 If tests pass, say how many passed. If any fail, investigate and fix.
 
-Then briefly start the server to verify it responds:
+Then start the server to verify it responds. **Use tmux** — don't background with `&`. The server and frontend watcher produce continuous output that blocks backgrounded bash commands.
 
 ```bash
-# Start server in background, test it, stop it
-bun index.ts &
-SERVER_PID=$!
-sleep 1
+# Start server in tmux so it doesn't block
+SOCKET_DIR=${TMPDIR:-/tmp}/pi-tmux-sockets
+mkdir -p "$SOCKET_DIR"
+SOCKET="$SOCKET_DIR/pi.sock"
+tmux -S "$SOCKET" new -d -s spark-verify -n shell
+tmux -S "$SOCKET" send-keys -t spark-verify:0.0 -- 'bun index.ts' Enter
+sleep 2
+
+# Test the API
 curl -s http://localhost:8080/api/hello?name=World
-kill $SERVER_PID 2>/dev/null
+
+# Kill the server
+tmux -S "$SOCKET" send-keys -t spark-verify:0.0 C-c
+tmux -S "$SOCKET" kill-session -t spark-verify
 ```
+
+**Do NOT use `bun index.ts &` with `kill $PID`.** The frontend watcher keeps the process alive and floods stdout, causing bash commands to hang indefinitely.
 
 Show the user the JSON response. Then:
 
@@ -251,15 +261,20 @@ Show the user the JSON response. Then:
 **If a frontend was installed in Step 3**, also verify it:
 
 ```bash
-# Build the frontend
+# Build the frontend first
 bun manifest frontend build
 
-# Start server again and check the frontend is served
-bun index.ts &
-SERVER_PID=$!
-sleep 1
+# Start server in tmux
+tmux -S "$SOCKET" new -d -s spark-verify -n shell
+tmux -S "$SOCKET" send-keys -t spark-verify:0.0 -- 'bun index.ts' Enter
+sleep 2
+
+# Check the frontend is served
 curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/
-kill $SERVER_PID 2>/dev/null
+
+# Clean up
+tmux -S "$SOCKET" send-keys -t spark-verify:0.0 C-c
+tmux -S "$SOCKET" kill-session -t spark-verify
 ```
 
 If the frontend build succeeds and the server returns 200 for `/`, tell the user:
@@ -304,6 +319,25 @@ Give them a moment. Then:
 | `spark` | Reactive error watching sidekick |
 
 If an extension exists that handles part or all of what the user wants, install it with `bun manifest extension install [name]`, read its `EXTENSION.md`, and follow its instructions instead of building from scratch. Don't reinvent what's already packaged.
+
+### Migrating an Existing Site
+
+If the user is converting an existing site (Astro blog, Hugo site, Jekyll blog, any existing web project), **carry the design over**. Don't hand them a generic template that looks nothing like what they had.
+
+Before building:
+
+1. **Study the source site's design.** Read its CSS/stylesheets, look at the HTML structure, identify the design language: colors, fonts, spacing, layout, typography choices, dark mode behavior.
+2. **Extract the key design tokens.** Note specific hex colors, font families, font sizes, spacing values, border radii, and any distinctive visual elements (e.g., a specific link underline style, card shadows, header layout).
+3. **Apply them to the Manifest templates.** When you customize `build-blog.ts` (or whatever template you're using), match the source site's look and feel. Use the same fonts, the same color palette, the same spacing rhythm. The user is migrating — they want their site on a new engine, not a new identity.
+
+**This means:**
+- If their Astro blog uses Inter font at specific weights → use Inter at those weights
+- If they have a specific color for links → use that exact color
+- If their layout is narrow (640px) or wide (768px) → match it
+- If they have a distinctive header/footer layout → recreate it
+- If they use specific dark mode colors → match those too
+
+The goal: when the user opens their new Manifest site next to their old site, the design should feel like the same site on a better engine — not a downgrade to a generic template.
 
 Go back to what the user said they're building in the beginning. Decide which path to take:
 
