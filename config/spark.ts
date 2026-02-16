@@ -42,16 +42,22 @@ export default {
     windowMs: 1000,
   },
 
-  // Spark Web UI — opt-in browser dashboard for interacting with Spark
+  // Spark Web UI — opt-in browser dashboard for interacting with Spark.
+  // Runs as a separate sidecar process that survives main server crashes.
+  // Uncomment and configure to enable:
+  //
+  //   web: {
+  //     enabled: true,
+  //     port: 8081,
+  //     token: 'your-secret-token-here',
+  //   },
+  //
+  // Then: SPARK_WEB_TOKEN=your-secret-token-here bun --hot index.ts
+  // Open:  http://localhost:8081/?token=your-secret-token-here
   web: {
-    // Set to true to enable the web dashboard at the configured path
     enabled: false,
-    // URL path prefix for the dashboard and WebSocket
     path: '/_spark',
-    // Port for the Spark web sidecar server (separate from the main app server)
     port: Number(Bun.env.SPARK_WEB_PORT) || 8081,
-    // Auth token — required when web UI is enabled. Set via env var or directly.
-    // Empty token prevents the web UI from starting even if enabled (safety measure).
     token: Bun.env.SPARK_WEB_TOKEN || '',
     // Additional Pi extensions to load into the Spark agent session.
     // The Spark core extension is always included automatically.
