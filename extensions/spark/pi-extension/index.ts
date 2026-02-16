@@ -46,6 +46,44 @@ export default function spark(pi: ExtensionAPI) {
   let paused = false
   let bufferedEvents: SparkEvent[] = []
 
+  // Role detection — sidecar mode skips all agent presence behavior
+  const isSidecar = process.env.SPARK_ROLE === 'sidecar'
+
+  // Agent presence state (human mode only)
+  let agentId: string | undefined
+  let agentFilePath: string | undefined
+  let eventsPath: string | undefined
+
+  async function writeAgentFile(status: 'idle' | 'working', startedAt?: string) {
+    if (!agentFilePath || !agentId) return
+    const data = {
+      id: agentId,
+      pid: process.pid,
+      status,
+      startedAt: startedAt || new Date().toISOString(),
+      lastActivity: new Date().toISOString(),
+    }
+    const tmpPath = agentFilePath + '.tmp'
+    await fsp.writeFile(tmpPath, JSON.stringify(data, null, 2))
+    await fsp.rename(tmpPath, agentFilePath)
+  }
+
+  async function writeSparkEvent(type: string, cwd: string) {
+    if (!eventsPath || !agentId) return
+    const filename = `${Date.now()}-${type}-${agentId.slice(0, 8)}.json`
+    const event = {
+      type,
+      agentId,
+      pid: process.pid,
+      timestamp: new Date().toISOString(),
+      traceId: crypto.randomUUID(),
+    }
+    const tmpPath = path.join(eventsPath, `.${filename}.tmp`)
+    const finalPath = path.join(eventsPath, filename)
+    await fsp.writeFile(tmpPath, JSON.stringify(event, null, 2))
+    await fsp.rename(tmpPath, finalPath)
+  }
+
   function getEnvProfile(cfg: SparkConfig) {
     return cfg.environments[cfg.environment] || cfg.environments.development || { tools: 'full', behavior: 'fix' }
   }
@@ -179,12 +217,16 @@ export default function spark(pi: ExtensionAPI) {
 
     if (events.length === 0) return
 
+    // Human Pi filters out agent-* events (those are for the sidecar)
+    const filtered = isSidecar ? events : events.filter(e => !e.type.startsWith('agent-'))
+    if (filtered.length === 0) return
+
     if (paused) {
-      bufferedEvents.push(...events)
+      bufferedEvents.push(...filtered)
       return
     }
 
-    injectEvents(events)
+    injectEvents(filtered)
   }
 
   function injectEvents(events: SparkEvent[]) {
@@ -274,6 +316,21 @@ You understand Manifest conventions: features are in features/, one file per beh
     }
   })
 
+  // Agent presence: track mutating tool calls (human mode only)
+  pi.on('tool_call', async (event) => {
+    if (isSidecar || !agentId) return
+    const mutating = ['write', 'edit', 'bash']
+    if (mutating.includes(event.toolName)) {
+      try { await writeAgentFile('working') } catch {}
+    }
+  })
+
+  // Agent presence: return to idle after agent turn ends (human mode only)
+  pi.on('agent_end', async () => {
+    if (isSidecar || !agentId) return
+    try { await writeAgentFile('idle') } catch {}
+  })
+
   // Startup sequence
   pi.on('session_start', async (_event, ctx) => {
     config = await readConfig(ctx.cwd)
@@ -284,6 +341,17 @@ You understand Manifest conventions: features are in features/, one file per beh
 
     // Ensure events directory exists
     await fsp.mkdir(eventsDir, { recursive: true })
+
+    // Agent presence (human mode only)
+    if (!isSidecar) {
+      agentId = crypto.randomUUID()
+      const agentsDir = path.resolve(ctx.cwd, '.spark', 'agents')
+      await fsp.mkdir(agentsDir, { recursive: true })
+      agentFilePath = path.join(agentsDir, `${agentId}.json`)
+      eventsPath = eventsDir
+      await writeAgentFile('idle', new Date().toISOString())
+      await writeSparkEvent('agent-start', ctx.cwd)
+    }
 
     // --- Doctor check ---
     const report: string[] = ['⚡ **Spark starting up**']
@@ -363,7 +431,15 @@ You understand Manifest conventions: features are in features/, one file per beh
   })
 
   // Cleanup
-  pi.on('session_shutdown', async () => {
+  pi.on('session_shutdown', async (_event, ctx) => {
+    // Agent presence cleanup (human mode only)
+    if (!isSidecar && agentId) {
+      try { await writeSparkEvent('agent-stop', ctx?.cwd || '.') } catch {}
+      if (agentFilePath) {
+        try { await fsp.unlink(agentFilePath) } catch {}
+      }
+    }
+
     if (watcher) {
       watcher.close()
       watcher = undefined
