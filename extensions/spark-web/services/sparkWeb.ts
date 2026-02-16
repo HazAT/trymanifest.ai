@@ -560,14 +560,19 @@ export async function startSparkSidecar(config: SparkSidecarConfig): Promise<voi
 // Direct execution support
 if (import.meta.main) {
   const sparkConfig = (await import('../../../config/spark')).default
+  // Check Spark master switch first
+  if (!sparkConfig.enabled) {
+    console.error('❌ Spark is disabled (enabled: false in config/spark.ts). Cannot start sidecar.')
+    process.exit(1)
+  }
   // A non-empty token implicitly enables the web UI (useful for Docker/env-only config)
   const webEnabled = sparkConfig.web?.enabled || !!sparkConfig.web?.token
   if (!webEnabled) {
-    console.error('⚡ Spark web UI is not enabled. Set SPARK_WEB_TOKEN or enable in config/spark.ts')
+    console.error('❌ Spark web UI is not enabled. Set web.enabled: true and SPARK_WEB_TOKEN in config/spark.ts')
     process.exit(1)
   }
   if (!sparkConfig.web.token) {
-    console.error('⚡ No SPARK_WEB_TOKEN set. Set it in environment or config/spark.ts')
+    console.error('❌ No SPARK_WEB_TOKEN set. Set it in environment or config/spark.ts')
     process.exit(1)
   }
   await startSparkSidecar({
