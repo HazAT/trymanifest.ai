@@ -75,10 +75,10 @@ The sidecar runs independently from your main server. Start your app in one term
 Open your browser to:
 
 ```
-http://localhost:8081/?token=your-secret-token
+http://localhost:8081/
 ```
 
-The token is passed as a query parameter. If the token is wrong or missing, you get a 401 response.
+You'll see a terminal-styled login prompt. Enter your token and hit Enter. On success, a session cookie is set and you're redirected to the dashboard — no need to put the token in the URL.
 
 Once loaded, the dashboard shows:
 - **Conversation history** — all messages between you and Spark
@@ -136,7 +136,10 @@ The session is in-memory. It persists as long as the sidecar process is running.
 
 ## Security
 
-- **Token authentication** — Every HTTP request and WebSocket connection requires the correct token. There's no session cookie or login persistence.
+- **Cookie-based authentication** — After entering the correct token at the login prompt, the server sets an `HttpOnly`, `SameSite=Strict` session cookie (`spark_session`). The `Secure` flag is added automatically when not on localhost. The token never appears in URLs, browser history, or referrer headers.
+- **Rate limiting on login** — The `POST /auth` endpoint is rate-limited to 5 attempts per 60 seconds per IP. Exceeding this returns a 429 with a `Retry-After` header.
+- **In-memory sessions** — Session UUIDs are stored in a `Set<string>` in the sidecar process. Restarting the sidecar clears all sessions (users must re-login). There is no session expiry — sessions last until the sidecar restarts.
+- **Logout** — `POST /logout` removes the session and clears the cookie.
 - **Don't expose to the public internet.** This dashboard gives direct access to a coding agent with full tools in development mode. Bind to localhost or put it behind a VPN/proxy.
 - **Use environment variables for the token** in any shared or deployed environment. Don't commit tokens to git.
 - **The agent inherits your API keys.** It uses whatever LLM API key is configured in the environment (e.g., `ANTHROPIC_API_KEY`). Treat the dashboard as having the same access as your terminal.
@@ -169,9 +172,26 @@ lsof -ti:8081 | xargs kill
 SPARK_WEB_TOKEN=your-token bun extensions/spark-web/services/sparkWeb.ts
 ```
 
+### Can't log in (wrong token)
+
+1. Verify the token you're entering matches `config/spark.ts` exactly (check for trailing whitespace).
+2. Check the `SPARK_WEB_TOKEN` environment variable the sidecar was started with:
+   ```bash
+   # Restart with the correct token
+   SPARK_WEB_TOKEN=your-token bun extensions/spark-web/services/sparkWeb.ts
+   ```
+
+### Rate limited on login (429)
+
+You've exceeded 5 login attempts in 60 seconds. Wait for the `Retry-After` duration shown in the response, then try again. Restarting the sidecar also resets the rate limiter.
+
+### Session expired / redirected to login
+
+The sidecar was restarted, which clears all in-memory sessions. Just log in again with your token.
+
 ### Dashboard not loading (404 or blank page)
 
-1. Check you're using the correct URL: `http://localhost:8081/?token=your-token` (port 8081, not the main app port).
+1. Check you're using the correct URL: `http://localhost:8081/` (port 8081, not the main app port).
 2. Verify the HTML file exists:
    ```bash
    ls extensions/spark-web/frontend/index.html
@@ -181,7 +201,7 @@ SPARK_WEB_TOKEN=your-token bun extensions/spark-web/services/sparkWeb.ts
 ### WebSocket not connecting
 
 1. Open browser developer tools → Console tab. Look for WebSocket errors.
-2. Verify the token in your URL matches `config/spark.ts` exactly (check for trailing whitespace).
+2. Verify you're logged in (you should see the dashboard, not the login page). Try logging out and back in.
 3. Check that the sidecar is running:
    ```bash
    lsof -i:8081

@@ -290,10 +290,10 @@ Read `extensions/spark/EXTENSION.md` for the full guide.
 Instead of a second terminal with `bunx pi`, you can run Spark as a sidecar process with a browser-based UI:
 
 1. Enable in `config/spark.ts`: set `web.enabled: true` and `SPARK_WEB_TOKEN`
-2. Start the sidecar: `SPARK_WEB_TOKEN=xxx bun extensions/spark-web/services/sparkWeb.ts`
-3. Open `http://localhost:8081/?token=your-token`
+2. Start the sidecar: `SPARK_WEB_TOKEN=your-token bun extensions/spark-web/services/sparkWeb.ts`
+3. Open `http://localhost:8081/` — you'll see a login prompt where you enter your token
 
-The sidecar runs as a separate process on its own port — same Spark extension, same error watching, same behavior. **It survives main server crashes**, so you can still talk to Spark and investigate what happened even if your app goes down. You can load additional Pi extensions into the Spark agent via the `web.extensions` config array in `config/spark.ts` — supports local paths, npm packages, and git repos. See `extensions/spark-web/EXTENSION.md` for full docs.
+The sidecar runs as a separate process on its own port — same Spark extension, same error watching, same behavior. **It survives main server crashes**, so you can still talk to Spark and investigate what happened even if your app goes down. Authentication uses HttpOnly cookies — enter your token once at the login prompt and you're in for the session. You can load additional Pi extensions into the Spark agent via the `web.extensions` config array in `config/spark.ts` — supports local paths, npm packages, and git repos. See `extensions/spark-web/EXTENSION.md` for full docs.
 
 ## The Framework
 
