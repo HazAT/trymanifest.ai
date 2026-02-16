@@ -45,7 +45,7 @@ export default {
   // Spark Web UI — opt-in browser dashboard for interacting with Spark.
   // Runs as a separate sidecar process that survives main server crashes.
   // Start it explicitly: SPARK_WEB_TOKEN=xxx bun extensions/spark-web/services/sparkWeb.ts
-  // Open:  http://localhost:8081/?token=your-token
+  // Open:  http://localhost:8081/
   web: {
     enabled: false,
     port: Number(Bun.env.SPARK_WEB_PORT) || 8081,

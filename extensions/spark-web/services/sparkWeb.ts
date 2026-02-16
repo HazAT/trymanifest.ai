@@ -48,14 +48,25 @@ const AUTH_RATE_WINDOW = 60_000 // 60 seconds in ms
 function checkAuthRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
   const now = Date.now()
   const timestamps = (authAttempts.get(ip) || []).filter(t => now - t < AUTH_RATE_WINDOW)
-  authAttempts.set(ip, timestamps)
+  if (timestamps.length === 0) {
+    authAttempts.delete(ip)
+  } else {
+    authAttempts.set(ip, timestamps)
+  }
   if (timestamps.length >= AUTH_RATE_LIMIT) {
     const oldest = timestamps[0]
     const retryAfter = Math.ceil((oldest + AUTH_RATE_WINDOW - now) / 1000)
     return { allowed: false, retryAfter }
   }
-  timestamps.push(now)
   return { allowed: true }
+}
+
+/** Record a failed auth attempt for rate limiting. */
+function recordAuthFailure(ip: string) {
+  const now = Date.now()
+  const timestamps = authAttempts.get(ip) || []
+  timestamps.push(now)
+  authAttempts.set(ip, timestamps)
 }
 
 /** Login page HTML. */
@@ -337,6 +348,7 @@ export async function startSparkSidecar(config: SparkSidecarConfig): Promise<voi
             const formData = await req.formData()
             const submittedToken = formData.get('token')
             if (typeof submittedToken !== 'string' || !safeTokenCompare(submittedToken, token)) {
+              recordAuthFailure(ip)
               return new Response(loginPageHtml('Invalid token.'), {
                 status: 401,
                 headers: { 'Content-Type': 'text/html; charset=utf-8' },
