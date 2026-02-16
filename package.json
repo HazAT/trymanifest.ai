@@ -9,7 +9,9 @@
     "test": "bun test",
     "manifest": "bun manifest/cli/index.ts"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@mariozechner/pi-coding-agent": "0.52.10"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   }

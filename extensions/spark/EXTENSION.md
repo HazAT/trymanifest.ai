@@ -38,18 +38,19 @@ This does three things:
 - Adds the Spark Pi extension path to `.pi/settings.json`
 - Adds process hooks to `index.ts` for uncaught errors
 
-### 2. Set up Pi
+### 2. Start Pi
 
-**If you already have Pi installed and running in this project** — you're done. Restart Pi and Spark will auto-load via the extension registered in `.pi/settings.json`.
+Pi ships as a project dependency of Manifest (`@mariozechner/pi-coding-agent`). No global install needed.
 
-**If you don't have Pi yet:**
+```bash
+bunx pi
+```
 
-1. Install Pi globally:
-   ```bash
-   npm install -g @mariozechner/pi-coding-agent
-   ```
-2. You'll need an API key for your preferred LLM provider (Anthropic, OpenAI, etc.) — Pi uses your own subscription.
-3. Run `pi` in the project directory. Spark will auto-load via `.pi/settings.json`.
+Spark auto-loads via the extension path registered in `.pi/settings.json`.
+
+You'll need an API key for your preferred LLM provider (Anthropic, OpenAI, etc.) — Pi uses your own subscription. Run `pi` and it will guide you through API key setup on first launch.
+
+**Already have Pi installed globally?** That works too — just run `pi` in the project directory. The local `.pi/settings.json` tells it to load Spark regardless of how Pi was installed.
 
 ### 3. Verify it works
 
@@ -255,8 +256,8 @@ This means the Pi extension isn't running or has crashed.
 
 ### Don't have Pi?
 
-Install it globally:
+Pi ships as a project dependency — run `bunx pi` from the project directory. If you prefer a global install:
 ```bash
 npm install -g @mariozechner/pi-coding-agent
 ```
-You'll need an API key for your preferred LLM provider (Anthropic, OpenAI, etc.). Run `pi` in the project directory — Spark will auto-load if `.pi/settings.json` is configured.
+You'll need an API key for your preferred LLM provider (Anthropic, OpenAI, etc.). Run `pi` or `bunx pi` in the project directory — Spark will auto-load if `.pi/settings.json` is configured.

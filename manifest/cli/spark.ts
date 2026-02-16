@@ -97,12 +97,19 @@ export async function sparkInit(_args: string[]): Promise<void> {
     steps.push('✓ .spark/ already in .gitignore')
   }
 
-  // 4. Check Pi installation
-  let piInstalled = false
+  // 4. Check Pi installation — prefer local project dependency, fall back to global
+  let piLocal = false
+  let piGlobal = false
   try {
-    const proc = Bun.spawnSync(['which', 'pi'])
-    piInstalled = proc.exitCode === 0
+    await fs.access('node_modules/@mariozechner/pi-coding-agent/package.json')
+    piLocal = true
   } catch {}
+  if (!piLocal) {
+    try {
+      const proc = Bun.spawnSync(['which', 'pi'])
+      piGlobal = proc.exitCode === 0
+    } catch {}
+  }
 
   // Output
   console.log('\n⚡ Spark initialized\n')
@@ -111,17 +118,24 @@ export async function sparkInit(_args: string[]): Promise<void> {
   }
 
   console.log()
-  if (piInstalled) {
-    console.log('  Pi is installed. Run `pi` in this directory — Spark will auto-load.')
+  if (piLocal) {
+    console.log('  Pi is installed as a project dependency.')
+    console.log('  Run `bunx pi` in this directory — Spark will auto-load.')
+  } else if (piGlobal) {
+    console.log('  Pi is installed globally. Run `pi` in this directory — Spark will auto-load.')
   } else {
-    console.log('  Pi not found. Install it: npm install -g @mariozechner/pi-coding-agent')
+    console.log('  Pi not found. Install it:')
+    console.log('    bun add @mariozechner/pi-coding-agent    (project dependency — recommended)')
+    console.log('    npm install -g @mariozechner/pi-coding-agent  (global install)')
     console.log('  You\'ll need an API key for your LLM provider (Anthropic, OpenAI, etc.).')
   }
+
+  const piCmd = piLocal ? 'bunx pi' : 'pi'
 
   console.log(`
   Next steps:
     1. Start your app:       bun --hot index.ts
-    2. Start Pi:             pi
+    2. Start Spark:          ${piCmd}
     3. Spark will auto-load and watch for events
 
   Verify it works: trigger a 500 error, then check .spark/events/
