@@ -213,6 +213,8 @@ Install the corresponding extension. Read its `EXTENSION.md` and follow every st
 
 The extension's `EXTENSION.md` has the complete steps: creating directories, copying templates, installing dependencies, creating config, and building. Follow it — don't improvise.
 
+**After choosing the frontend, check for content/specialized extensions that match the use case.** For example, if the user wants a blog and you chose the static frontend, also install `manifest-content-blog` — it provides markdown-based blog infrastructure on top of the static preset. Run `ls extensions/` to see what's available and match against what the user described.
+
 After the extension is installed and built, tell the user:
 
 > Frontend is set up. Your pages live in `frontend/`, builds go to `dist/`, and the server serves them automatically after API routes. I'll verify everything works in the next step.
@@ -290,6 +292,19 @@ Give them a moment. Then:
 
 ### Step 6: What They Want to Build
 
+**Before deciding how to build, check if an extension already covers the use case.** Run `ls extensions/` and scan for anything relevant. Known extensions and their purposes:
+
+| Extension | What it does |
+|-----------|-------------|
+| `manifest-frontend-static` | HTML + Tailwind + vanilla TS (content sites, blogs, landing pages) |
+| `manifest-frontend-reactive` | SolidJS + Tailwind (interactive apps, dashboards) |
+| `manifest-content-blog` | Markdown blog with static HTML output (blogs, dev blogs) |
+| `manifest-drizzle-postgres` | Drizzle ORM + Postgres (database access) |
+| `manifest-sse-example` | SSE streaming example |
+| `spark` | Reactive error watching sidekick |
+
+If an extension exists that handles part or all of what the user wants, install it with `bun manifest extension install [name]`, read its `EXTENSION.md`, and follow its instructions instead of building from scratch. Don't reinvent what's already packaged.
+
 Go back to what the user said they're building in the beginning. Decide which path to take:
 
 **Path A: Simple enough to one-shot.** If what they described is a straightforward API — a few CRUD endpoints, a simple webhook, a basic service — and you're confident you can build it correctly in one go, just do it. Scaffold the features, write the implementations, write the tests, run them, update the manifest. Show them what you built and explain the patterns as you go. This is the best way to teach — they see a real, working implementation following all the conventions.
@@ -340,3 +355,4 @@ If the project needs real architecture work:
 - **Stay in character.** You're Spark. You're focused, opinionated, slightly intense. You care about this.
 - **If they ask about other frameworks**, don't trash-talk. Just explain why Manifest is different. The comparison should make itself.
 - **If they want to skip to coding**, let them — but remind them to read `CLAUDE.md` first. Context matters.
+- **Check extensions first.** Before building anything substantial, check if an extension already handles it. `extensions/` in the repo has the installed ones. The migration from "build everything" to "check what exists, then build what's missing" is how the ecosystem grows.

@@ -7,6 +7,7 @@ interface FrontendConfig {
   sourceMaps: boolean
   spaFallback: boolean
   devReload: boolean
+  copyHtml: boolean
 }
 
 export interface BuildResult {
@@ -43,10 +44,12 @@ export async function buildFrontend(projectDir: string): Promise<BuildResult> {
   })
 
   // Copy HTML files from frontend/ to outDir
-  const frontendDir = path.resolve(projectDir, 'frontend')
-  for (const entry of fs.readdirSync(frontendDir)) {
-    if (entry.endsWith('.html')) {
-      fs.copyFileSync(path.join(frontendDir, entry), path.join(outDir, entry))
+  if (config.copyHtml !== false) {
+    const frontendDir = path.resolve(projectDir, 'frontend')
+    for (const entry of fs.readdirSync(frontendDir)) {
+      if (entry.endsWith('.html')) {
+        fs.copyFileSync(path.join(frontendDir, entry), path.join(outDir, entry))
+      }
     }
   }
 
@@ -73,7 +76,8 @@ export async function watchFrontend(projectDir: string, onRebuild?: () => void) 
   const frontendDir = path.resolve(projectDir, 'frontend')
   let timeout: ReturnType<typeof setTimeout> | null = null
 
-  fs.watch(frontendDir, { recursive: true }, () => {
+  fs.watch(frontendDir, { recursive: true }, (_event, filename) => {
+    if (filename && (filename.startsWith('public/') || filename.includes('/public/'))) return
     if (timeout) clearTimeout(timeout)
     timeout = setTimeout(async () => {
       const start = performance.now()
@@ -92,6 +96,9 @@ export function createStaticHandler(distDir: string, options: { spaFallback: boo
     // Never serve hidden files
     if (pathname.split('/').some((s) => s.startsWith('.'))) return null
 
+    // Never serve API routes — let the API handler deal with them
+    if (pathname.startsWith('/api/')) return null
+
     const filePath = path.resolve(resolvedDistDir, pathname.slice(1))
 
     // Path traversal guard: ensure resolved path stays within distDir
@@ -101,6 +108,12 @@ export function createStaticHandler(distDir: string, options: { spaFallback: boo
 
     if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
       return new Response(file, { headers: { 'Cache-Control': 'no-cache' } })
+    }
+
+    // Directory → index.html resolution
+    const indexFilePath = path.join(filePath, 'index.html')
+    if (fs.existsSync(indexFilePath) && fs.statSync(indexFilePath).isFile()) {
+      return new Response(Bun.file(indexFilePath), { headers: { 'Cache-Control': 'no-cache' } })
     }
 
     if (options.spaFallback) {

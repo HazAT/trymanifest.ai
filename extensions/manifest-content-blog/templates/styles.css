@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/*
+ * Typography plugin styles are applied by Tailwind CLI, not Bun's bundler.
+ * Run: bunx @tailwindcss/cli -i frontend/styles.css -o dist/index.css
+ *
+ * The `prose` class from @tailwindcss/typography handles all article formatting:
+ * headings, paragraphs, lists, code blocks, blockquotes, links, etc.
+ */
