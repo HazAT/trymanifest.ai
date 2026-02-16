@@ -82,6 +82,7 @@ export default defineFeature({
                 that has never seen this codebase.`,
   route: ['POST', '/api/path'],
   authentication: 'required',         // 'required' | 'none' | 'optional'
+  rateLimit: { max: 100, windowSeconds: 60 },  // optional — omit to disable
   sideEffects: [
     'Inserts one row into users table',
     'Sends email via mailer service',
@@ -149,6 +150,21 @@ The stream auto-closes when `stream()` returns. Use `close()` for early terminat
 - **errorCases** — List error cases with HTTP status codes.
 - **handle()** — Linear execution. All logic in one function.
 - **imports** — All dependencies are explicit `import` statements. Follow the imports to understand what a feature touches.
+
+### Rate Limiting
+
+Features can declare an optional `rateLimit` to throttle requests per IP using a sliding window:
+
+```typescript
+rateLimit: { max: 100, windowSeconds: 60 },
+```
+
+- **`max`** — Maximum requests allowed within the window.
+- **`windowSeconds`** — Sliding window duration in seconds.
+
+The server enforces this automatically — no code needed in `handle()`. When exceeded, the client gets a `429 Too Many Requests` response with `Retry-After` and `X-RateLimit-*` headers in the standard Manifest envelope format. Spark receives a `rate-limit` event for observability. Omit `rateLimit` to disable (the default).
+
+The rate limiter is in-memory (`services/rateLimiter.ts`) — counters reset on server restart. Keys are `${featureName}:${clientIP}`, so each feature has independent limits per IP.
 
 ### Feature types:
 - `type: 'request'` (default) — HTTP endpoint with `route: ['METHOD', '/path']`
@@ -276,8 +292,8 @@ The framework lives in `manifest/`. It's ~3,100 lines total. Read it:
 |------|-------|-------------|
 | `types.ts` | 141 | Input type builders: `t.string()`, `t.integer()`, etc. |
 | `validator.ts` | 103 | Validates input against schema. Formats, lengths, ranges. |
-| `feature.ts` | 168 | `defineFeature()` and all feature types (request, stream, event). |
-| `server.ts` | 280 | `Bun.serve()` wrapper. Route matching → validation → execution → envelope. SSE streaming. |
+| `feature.ts` | 175 | `defineFeature()` and all feature types (request, stream, event). |
+| `server.ts` | 325 | `Bun.serve()` wrapper. Route matching → rate limiting → validation → execution → envelope. SSE streaming. |
 | `router.ts` | 72 | HTTP route matching with path parameters. |
 | `envelope.ts` | 65 | Response formatting. `ok()`, `fail()`, `toEnvelope()`. |
 | `scanner.ts` | 78 | Scans features directory and extensions, dynamically imports `.ts` files. |
@@ -380,7 +396,7 @@ Spark is what makes Manifest applications self-aware. It's not a separate tool y
 
 ### How It Works
 
-Your Manifest server captures errors (500 responses, unhandled exceptions) and writes them as JSON event files to `.spark/events/`. A Pi extension watches that directory and injects events into the agent's conversation. The connection is a plain directory of files — no sockets, no message queues, no dependencies.
+Your Manifest server captures errors (500 responses, unhandled exceptions) and rate-limit violations and writes them as JSON event files to `.spark/events/`. A Pi extension watches that directory and injects events into the agent's conversation. The connection is a plain directory of files — no sockets, no message queues, no dependencies.
 
 ### Environment Modes
 
