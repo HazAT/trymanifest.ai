@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    ports:
+      - "${PORT:-8080}:${PORT:-8080}"
+      - "${SPARK_WEB_PORT:-8081}:${SPARK_WEB_PORT:-8081}"
+    environment:
+      - PORT=${PORT:-8080}
+      - NODE_ENV=${NODE_ENV:-production}
+      - SPARK_WEB_TOKEN=${SPARK_WEB_TOKEN:-}
+      - SPARK_WEB_PORT=${SPARK_WEB_PORT:-8081}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    restart: unless-stopped

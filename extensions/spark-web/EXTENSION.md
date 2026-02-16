@@ -23,14 +23,14 @@ A browser dashboard for the Spark AI sidekick. Instead of running Spark in a ter
 
 ## How It Works
 
-When enabled, the main Manifest server automatically spawns the sidecar process on startup. The sidecar:
+The sidecar is a standalone process you start separately from your main server:
 
 1. **Starts its own `Bun.serve()`** on a separate port (default 8081), independent of the main app server.
 2. **Creates a Pi AgentSession** using the Pi SDK, with the Spark extension loaded. This is the same agent that would run in your terminal — it watches `.spark/events/` for errors and reacts according to your environment config.
 3. **Serves a web dashboard** at `http://localhost:8081/` — a single HTML page with a conversation UI.
 4. **Bridges WebSocket connections** between the browser and the agent session. Messages you type go to the agent; responses, tool calls, and Spark events stream back in real time.
 
-The sidecar runs as a separate process. If your main server crashes, the sidecar keeps running — you can still access the dashboard and ask Spark to investigate the crash. If the sidecar is already running on that port (e.g., from a previous server start), starting it again exits silently (idempotent).
+Because it runs as its own process, it **survives main server crashes** — you can still access the dashboard and ask Spark to investigate what happened. If the sidecar is already running on that port, starting it again exits silently (idempotent).
 
 ---
 
@@ -58,23 +58,15 @@ export SPARK_WEB_TOKEN="a-strong-random-token"
 
 **Both `web.enabled: true` AND a non-empty token are required.** If either is missing, the sidecar won't start.
 
-### 3. Start the server
+### 3. Start the sidecar
 
-```bash
-bun --hot index.ts
-```
-
-The main server auto-spawns the sidecar. You'll see `⚡ Spark sidecar running on http://localhost:8081` in the output.
-
-### Manual start (optional)
-
-You can also start the sidecar manually, without the main server:
+In a separate terminal:
 
 ```bash
 SPARK_WEB_TOKEN=your-secret-token bun extensions/spark-web/services/sparkWeb.ts
 ```
 
-This is useful for investigating crashes when the main server won't start.
+The sidecar runs independently from your main server. Start your app in one terminal and the sidecar in another — this way the sidecar survives server crashes and hot reloads.
 
 ---
 
@@ -83,10 +75,10 @@ This is useful for investigating crashes when the main server won't start.
 Open your browser to:
 
 ```
-http://localhost:8081/?token=your-secret-token
+http://localhost:8081/
 ```
 
-The token is passed as a query parameter. If the token is wrong or missing, you get a 401 response.
+You'll see a terminal-styled login prompt. Enter your token and hit Enter. On success, a session cookie is set and you're redirected to the dashboard — no need to put the token in the URL.
 
 Once loaded, the dashboard shows:
 - **Conversation history** — all messages between you and Spark
@@ -136,15 +128,18 @@ The `sparkWeb` service (`extensions/spark-web/services/sparkWeb.ts`) runs as a *
 2. **HTTP server** — Starts its own `Bun.serve()` on the configured port (default 8081). Serves the dashboard HTML at `/` and handles WebSocket upgrades at `/ws`. Both require token auth.
 3. **WebSocket bridge** — Connected browsers receive all agent events (message starts/updates/ends, tool execution, agent lifecycle). Browsers send `prompt` messages to talk to the agent and `abort` messages to cancel streaming.
 
-The main server spawns the sidecar as a child process when `web.enabled: true`. If the sidecar port is already in use (e.g., from a previous run that survived a server restart), the new sidecar instance exits silently — the existing one keeps serving.
+The sidecar is started explicitly as a separate process. If the port is already in use (e.g., from a previous run), the new instance exits silently — the existing one keeps serving.
 
-The session is in-memory. It persists as long as the sidecar process is running. Restarting the main server does **not** restart the sidecar (it's already running). To restart the sidecar, kill it manually and restart the main server.
+The session is in-memory. It persists as long as the sidecar process is running. Restarting the main server has no effect on the sidecar.
 
 ---
 
 ## Security
 
-- **Token authentication** — Every HTTP request and WebSocket connection requires the correct token. There's no session cookie or login persistence.
+- **Cookie-based authentication** — After entering the correct token at the login prompt, the server sets an `HttpOnly`, `SameSite=Strict` session cookie (`spark_session`). The `Secure` flag is added automatically when not on localhost. The token never appears in URLs, browser history, or referrer headers.
+- **Rate limiting on login** — The `POST /auth` endpoint is rate-limited to 5 attempts per 60 seconds per IP. Exceeding this returns a 429 with a `Retry-After` header.
+- **In-memory sessions** — Session UUIDs are stored in a `Set<string>` in the sidecar process. Restarting the sidecar clears all sessions (users must re-login). There is no session expiry — sessions last until the sidecar restarts.
+- **Logout** — `POST /logout` removes the session and clears the cookie.
 - **Don't expose to the public internet.** This dashboard gives direct access to a coding agent with full tools in development mode. Bind to localhost or put it behind a VPN/proxy.
 - **Use environment variables for the token** in any shared or deployed environment. Don't commit tokens to git.
 - **The agent inherits your API keys.** It uses whatever LLM API key is configured in the environment (e.g., `ANTHROPIC_API_KEY`). Treat the dashboard as having the same access as your terminal.
@@ -160,27 +155,43 @@ The session is in-memory. It persists as long as the sidecar process is running.
    grep -A 8 'web:' config/spark.ts
    ```
    Verify `enabled: true` and a non-empty `token`.
-2. Check server logs for `⚡ Spark sidecar` messages at startup.
-3. Try starting the sidecar manually to see errors directly:
+2. Start the sidecar and check for errors:
    ```bash
    SPARK_WEB_TOKEN=your-token bun extensions/spark-web/services/sparkWeb.ts
    ```
 
 ### Port already in use (expected)
 
-If you see `⚡ Spark sidecar already running on port 8081`, that's normal — the sidecar from a previous server start is still running. This is by design (crash resilience). The existing sidecar keeps serving.
+If you see `⚡ Spark sidecar already running on port 8081`, that's normal — a sidecar from a previous run is still alive. This is by design (crash resilience). The existing sidecar keeps serving.
 
 To restart the sidecar fresh:
 ```bash
 # Find and kill the existing sidecar
 lsof -ti:8081 | xargs kill
-# Then restart the main server
-bun --hot index.ts
+# Then start it again
+SPARK_WEB_TOKEN=your-token bun extensions/spark-web/services/sparkWeb.ts
 ```
+
+### Can't log in (wrong token)
+
+1. Verify the token you're entering matches `config/spark.ts` exactly (check for trailing whitespace).
+2. Check the `SPARK_WEB_TOKEN` environment variable the sidecar was started with:
+   ```bash
+   # Restart with the correct token
+   SPARK_WEB_TOKEN=your-token bun extensions/spark-web/services/sparkWeb.ts
+   ```
+
+### Rate limited on login (429)
+
+You've exceeded 5 login attempts in 60 seconds. Wait for the `Retry-After` duration shown in the response, then try again. Restarting the sidecar also resets the rate limiter.
+
+### Session expired / redirected to login
+
+The sidecar was restarted, which clears all in-memory sessions. Just log in again with your token.
 
 ### Dashboard not loading (404 or blank page)
 
-1. Check you're using the correct URL: `http://localhost:8081/?token=your-token` (port 8081, not the main app port).
+1. Check you're using the correct URL: `http://localhost:8081/` (port 8081, not the main app port).
 2. Verify the HTML file exists:
    ```bash
    ls extensions/spark-web/frontend/index.html
@@ -190,7 +201,7 @@ bun --hot index.ts
 ### WebSocket not connecting
 
 1. Open browser developer tools → Console tab. Look for WebSocket errors.
-2. Verify the token in your URL matches `config/spark.ts` exactly (check for trailing whitespace).
+2. Verify you're logged in (you should see the dashboard, not the login page). Try logging out and back in.
 3. Check that the sidecar is running:
    ```bash
    lsof -i:8081

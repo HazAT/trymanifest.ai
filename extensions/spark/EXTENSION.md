@@ -68,7 +68,7 @@ Spark can also run as a **sidecar process** with a browser-based dashboard, inst
 
 **The sidecar survives main server crashes.** Because it runs as its own process, you can still access the dashboard and ask Spark to investigate what happened even if your app goes down.
 
-To enable: set `web.enabled: true` and `SPARK_WEB_TOKEN` in `config/spark.ts`, then restart the server. Open `http://localhost:8081/?token=your-token` to interact with Spark in the browser.
+To enable: set `web.enabled: true` and `SPARK_WEB_TOKEN` in `config/spark.ts`, then start the sidecar: `SPARK_WEB_TOKEN=xxx bun extensions/spark-web/services/sparkWeb.ts`. Open `http://localhost:8081/` and log in with your token.
 
 The standalone `bunx pi` mode and web UI mode are fully compatible — you can use either, or both simultaneously.
 

@@ -377,7 +377,7 @@ cd my-app
 rm -rf .git
 git init
 git add -A
-git commit -m "Initial commit from Manifest"
+git commit -m "Initial commit of my-app"
 bun install
 
 # Start developing
@@ -422,7 +422,7 @@ Manifest doesn't install from npm. You clone the repo and start building.
 git clone https://github.com/hazat/manifest.git my-project
 cd my-project
 rm -rf .git
-git init && git add -A && git commit -m "Initial commit from Manifest"
+git init && git add -A && git commit -m "Initial commit of my-project"
 bun install
 bun --hot index.ts
 ```
@@ -436,6 +436,32 @@ Manifest erases that boundary. The framework code lives in your project, committ
 **What about upstream improvements?**
 
 When the Manifest base repo adds a new capability, you don't `git merge`. Your agent reads the upstream diff, understands the intent, and implements the idea in the context of what your project has become. That's how agents work. They don't need `git merge`, they need context. The upstream repo serves as a reference and inspiration, not a dependency.
+
+---
+
+## Deployment
+
+The repo includes a `Dockerfile`, `docker-compose.yml`, and `docker-entrypoint.sh`. One command:
+
+```bash
+docker compose up --build
+```
+
+Your app runs on port 8080. That's it.
+
+### Environment variables
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `PORT` | `8080` | App server port |
+| `NODE_ENV` | `production` | Environment mode |
+| `SPARK_WEB_TOKEN` | *(empty)* | Auth token for Spark dashboard |
+| `SPARK_WEB_PORT` | `8081` | Spark dashboard port |
+| `ANTHROPIC_API_KEY` | *(empty)* | API key for Spark's AI agent |
+
+Without `SPARK_WEB_TOKEN`, the container runs just your app. With it, you also get the Spark web dashboard on port 8081 — an AI sidekick that watches your running app and investigates errors in real time.
+
+> **🔥 Want Spark in production?** Set both `SPARK_WEB_TOKEN` and `ANTHROPIC_API_KEY` in your environment. The entrypoint script starts the Spark sidecar automatically — no extra containers, no extra config.
 
 ---
 
@@ -576,7 +602,7 @@ Coming next:
 - ⬜ Rate limiting
 - ⬜ Event-triggered features
 - ⬜ Agent sidecar (error tracking integration, self-healing loop)
-- ⬜ Docker deployment
+- ✅ Docker deployment
 
 ---
 
