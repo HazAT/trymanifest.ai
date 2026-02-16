@@ -107,11 +107,11 @@ export async function runProcess(
   if (exitCode !== 0 && !killedBySignal) {
     try {
       const sparkConfig = (await import('../../config/spark')).default
-      if (sparkConfig.enabled) {
+      if (sparkConfig.enabled && sparkConfig.watch.processErrors) {
         const { spark } = await import('../../extensions/spark/services/spark')
         const tail = buffer.slice(-TAIL_LINES).join('\n')
         await spark.emit({
-          type: 'process-error' as any,
+          type: 'process-error',
           traceId: crypto.randomUUID(),
           command: command.join(' '),
           exitCode,
@@ -120,7 +120,7 @@ export async function runProcess(
           error: {
             message: `Process '${command.join(' ')}' exited with code ${exitCode}`,
           },
-        } as any)
+        })
       }
     } catch {} // Spark emission must never break the runner
   }
