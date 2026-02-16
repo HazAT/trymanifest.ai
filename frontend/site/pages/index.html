@@ -93,8 +93,8 @@
 <!-- include: nav-home.html -->
 
   <!-- ════════════════ OPENING ════════════════ -->
-  <section class="min-h-screen flex flex-col items-center justify-center px-6">
-    <div class="text-center">
+  <section class="min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden">
+    <div class="text-center w-full max-w-3xl">
       <h1 class="opening-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white leading-tight">
         Every idea starts with a <span class="spark-word">spark</span>
       </h1>
@@ -103,10 +103,12 @@
         Tell your agent:
       </p>
 
-      <div class="mt-8 inline-flex items-center gap-3 bg-neutral-950 border border-neutral-800 rounded px-5 py-3 text-sm group cursor-pointer" onclick="navigator.clipboard.writeText('read and follow https://trymanifest.ai/spark.md');this.querySelector('.copy-label').textContent='copied!';setTimeout(()=>this.querySelector('.copy-label').textContent='copy',1500)">
-        <span class="text-neutral-500">$</span>
-        <span class="text-white">read and follow</span> <span class="text-amber">https://trymanifest.ai/spark.md</span>
-        <span class="copy-label text-neutral-600 text-xs border border-neutral-700 rounded px-2 py-0.5 group-hover:text-terminal group-hover:border-terminal transition-colors">copy</span>
+      <div class="mt-8 flex items-center bg-neutral-950 border border-neutral-800 rounded text-sm group cursor-pointer" onclick="navigator.clipboard.writeText('read and follow https://trymanifest.ai/spark.md');this.querySelector('.copy-label').textContent='copied!';setTimeout(()=>this.querySelector('.copy-label').textContent='copy',1500)">
+        <div class="flex items-center gap-3 overflow-x-auto px-5 py-3 min-w-0">
+          <span class="text-neutral-500 shrink-0">$</span>
+          <span class="whitespace-nowrap shrink-0"><span class="text-white">read and follow</span> <span class="text-amber">https://trymanifest.ai/spark.md</span></span>
+        </div>
+        <span class="copy-label text-neutral-600 text-xs border border-neutral-700 rounded px-2 py-0.5 group-hover:text-terminal group-hover:border-terminal transition-colors shrink-0 mx-4">copy</span>
       </div>
 
       <div class="mt-16 text-xs text-neutral-600">
@@ -327,10 +329,12 @@
           <span class="text-terminal-dim">~</span><span class="text-neutral-600">/manifest $</span> <span class="text-neutral-500">try</span><span class="cursor"></span>
         </div>
 
-        <div class="inline-flex items-center gap-3 bg-neutral-950 border border-neutral-800 rounded px-5 py-3 text-sm group cursor-pointer" onclick="navigator.clipboard.writeText('read and follow https://trymanifest.ai/spark.md');this.querySelector('.copy-label').textContent='copied!';setTimeout(()=>this.querySelector('.copy-label').textContent='copy',1500)">
-          <span class="text-neutral-500">$</span>
-          <span class="text-white">read and follow</span> <span class="text-amber">https://trymanifest.ai/spark.md</span>
-          <span class="copy-label text-neutral-600 text-xs border border-neutral-700 rounded px-2 py-0.5 group-hover:text-terminal group-hover:border-terminal transition-colors">copy</span>
+        <div class="flex items-center bg-neutral-950 border border-neutral-800 rounded text-sm group cursor-pointer" onclick="navigator.clipboard.writeText('read and follow https://trymanifest.ai/spark.md');this.querySelector('.copy-label').textContent='copied!';setTimeout(()=>this.querySelector('.copy-label').textContent='copy',1500)">
+          <div class="flex items-center gap-3 overflow-x-auto px-5 py-3 min-w-0">
+            <span class="text-neutral-500 shrink-0">$</span>
+            <span class="whitespace-nowrap shrink-0"><span class="text-white">read and follow</span> <span class="text-amber">https://trymanifest.ai/spark.md</span></span>
+          </div>
+          <span class="copy-label text-neutral-600 text-xs border border-neutral-700 rounded px-2 py-0.5 group-hover:text-terminal group-hover:border-terminal transition-colors shrink-0 mx-4">copy</span>
         </div>
 
         <div class="mt-8">
