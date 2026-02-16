@@ -149,6 +149,9 @@ git push manifest-upstream contribute/<descriptive-name>
 Open a PR using the `github` skill (load it if available):
 
 ```bash
+# Note: --base main targets the UPSTREAM repo's main branch (the framework).
+# This is NOT your local main branch (your app). On GitHub, main = the framework.
+# Locally, main = your app and manifest = the framework mirror.
 gh pr create \
   --repo HazAT/manifest \
   --base main \
