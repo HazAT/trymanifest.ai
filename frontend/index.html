@@ -4,6 +4,7 @@
   <title>Manifest — Built by agents, for agents</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Instrument+Serif&display=swap" rel="stylesheet">
@@ -194,12 +195,12 @@
         Tell your agent:
       </p>
 
-      <div class="mt-8 flex items-center bg-neutral-950 border border-neutral-800 rounded text-sm group cursor-pointer" onclick="navigator.clipboard.writeText('read and follow https://trymanifest.ai/spark.md');this.querySelector('.copy-label').textContent='copied!';setTimeout(()=>this.querySelector('.copy-label').textContent='copy',1500)">
-        <div class="flex items-center gap-3 overflow-x-auto px-5 py-3 min-w-0">
+      <div class="mt-8 max-w-full overflow-hidden">
+        <div class="inline-flex items-center gap-3 max-w-full bg-neutral-950 border border-neutral-800 rounded px-5 py-3 text-sm group cursor-pointer" onclick="navigator.clipboard.writeText('read and follow https://trymanifest.ai/spark.md');this.querySelector('.copy-label').textContent='copied!';setTimeout(()=>this.querySelector('.copy-label').textContent='copy',1500)">
           <span class="text-neutral-500 shrink-0">$</span>
-          <span class="whitespace-nowrap shrink-0"><span class="text-white">read and follow</span> <span class="text-amber">https://trymanifest.ai/spark.md</span></span>
+          <span class="truncate"><span class="text-white">read and follow</span> <span class="text-amber">https://trymanifest.ai/spark.md</span></span>
+          <span class="copy-label text-neutral-600 text-xs border border-neutral-700 rounded px-2 py-0.5 group-hover:text-terminal group-hover:border-terminal transition-colors shrink-0">copy</span>
         </div>
-        <span class="copy-label text-neutral-600 text-xs border border-neutral-700 rounded px-2 py-0.5 group-hover:text-terminal group-hover:border-terminal transition-colors shrink-0 mx-4">copy</span>
       </div>
 
       <div class="mt-16 text-xs text-neutral-600">
@@ -420,12 +421,12 @@
           <span class="text-terminal-dim">~</span><span class="text-neutral-600">/manifest $</span> <span class="text-neutral-500">try</span><span class="cursor"></span>
         </div>
 
-        <div class="flex items-center bg-neutral-950 border border-neutral-800 rounded text-sm group cursor-pointer" onclick="navigator.clipboard.writeText('read and follow https://trymanifest.ai/spark.md');this.querySelector('.copy-label').textContent='copied!';setTimeout(()=>this.querySelector('.copy-label').textContent='copy',1500)">
-          <div class="flex items-center gap-3 overflow-x-auto px-5 py-3 min-w-0">
+        <div class="max-w-full overflow-hidden">
+          <div class="inline-flex items-center gap-3 max-w-full bg-neutral-950 border border-neutral-800 rounded px-5 py-3 text-sm group cursor-pointer" onclick="navigator.clipboard.writeText('read and follow https://trymanifest.ai/spark.md');this.querySelector('.copy-label').textContent='copied!';setTimeout(()=>this.querySelector('.copy-label').textContent='copy',1500)">
             <span class="text-neutral-500 shrink-0">$</span>
-            <span class="whitespace-nowrap shrink-0"><span class="text-white">read and follow</span> <span class="text-amber">https://trymanifest.ai/spark.md</span></span>
+            <span class="truncate"><span class="text-white">read and follow</span> <span class="text-amber">https://trymanifest.ai/spark.md</span></span>
+            <span class="copy-label text-neutral-600 text-xs border border-neutral-700 rounded px-2 py-0.5 group-hover:text-terminal group-hover:border-terminal transition-colors shrink-0">copy</span>
           </div>
-          <span class="copy-label text-neutral-600 text-xs border border-neutral-700 rounded px-2 py-0.5 group-hover:text-terminal group-hover:border-terminal transition-colors shrink-0 mx-4">copy</span>
         </div>
 
         <div class="mt-8">
@@ -444,7 +445,7 @@
 
   <footer class="py-12 px-6 text-center">
     <div class="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-      <span class="text-xs text-neutral-700">manifest v0.1 — the agent framework</span>
+      <span class="text-xs text-neutral-700">manifest v0.1 — the agent framework · built with <a href="https://github.com/mariozechner/pi-coding-agent" class="hover:text-terminal transition-colors cursor-pointer">pi</a> using manifest</span>
       <div class="flex items-center gap-6">
         <a href="/philosophy" class="text-xs text-neutral-700 hover:text-terminal transition-colors cursor-pointer">Philosophy</a>
         <a href="https://github.com/HazAT/manifest" class="text-xs text-neutral-700 hover:text-terminal transition-colors cursor-pointer">GitHub</a>
