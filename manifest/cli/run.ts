@@ -54,7 +54,6 @@ export async function runProcess(
   function pushToBuffer(text: string) {
     const lines = text.split('\n')
     for (const line of lines) {
-      if (line === '' && lines.length > 1) continue
       buffer.push(line)
       if (buffer.length > BUFFER_MAX_LINES) buffer.shift()
     }
@@ -63,12 +62,18 @@ export async function runProcess(
   // Track signal-forwarded kills
   let killedBySignal = false
 
-  const proc = Bun.spawn(command, {
-    stdout: 'pipe',
-    stderr: 'pipe',
-    cwd: options?.cwd,
-    env: options?.env ? { ...process.env, ...options.env } : undefined,
-  })
+  let proc: ReturnType<typeof Bun.spawn>
+  try {
+    proc = Bun.spawn(command, {
+      stdout: 'pipe',
+      stderr: 'pipe',
+      cwd: options?.cwd,
+      env: options?.env ? { ...process.env, ...options.env } : undefined,
+    })
+  } catch (err) {
+    fs.closeSync(logFd)
+    throw err
+  }
 
   // Forward signals to child
   const onSIGINT = () => { killedBySignal = true; proc.kill('SIGINT') }
@@ -148,7 +153,8 @@ Examples:
   }
 
   // Resolve sugar shortcuts
-  const command = SUGAR[args[0]] && args.length === 1 ? SUGAR[args[0]] : args
+  const sugar = args.length === 1 ? SUGAR[args[0]!] : undefined
+  const command = sugar ?? args
 
   const { exitCode } = await runProcess(command)
   process.exit(exitCode)
