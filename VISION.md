@@ -1,7 +1,9 @@
 # Vision
 
-trymanifest.ai is the public website for Manifest — the framework where every line of code exists to be read, not just run.
+trymanifest.ai is the landing page for Manifest — the framework for building
+AI-native applications. It's built with Manifest itself, dogfooding the
+framework to showcase what it can do.
 
-It serves developers who are tired of magic, hidden behavior, and framework lock-in. The site explains what Manifest is, how it works, and why it exists — with the same clarity and intentionality that the framework demands of its own code.
-
-Success looks like a developer landing on the site, understanding Manifest's philosophy in under a minute, and cloning the repo to start building.
+The goal is the best possible landing page: clear, compelling, and instantly
+communicative about what Manifest is, why it exists, and how to get started.
+It should make developers want to try Manifest within 30 seconds of landing.
