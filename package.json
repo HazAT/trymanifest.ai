@@ -7,7 +7,9 @@
     "dev": "bun --hot index.ts",
     "start": "bun index.ts",
     "test": "bun test",
-    "manifest": "bun manifest/cli/index.ts"
+    "manifest": "bun manifest/cli/index.ts",
+    "build:site": "bun frontend/site/build.ts",
+    "build": "bun frontend/site/build.ts && bun manifest/cli/index.ts frontend build"
   },
   "dependencies": {
     "@mariozechner/pi-coding-agent": "0.52.10",

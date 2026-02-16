@@ -1,0 +1,19 @@
+  <!-- Dev reload -->
+  <script>
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      const source = new EventSource('/__dev/reload');
+      source.addEventListener('reload', () => location.reload());
+    }
+  </script>
+
+  <!-- Scroll reveal observer -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>

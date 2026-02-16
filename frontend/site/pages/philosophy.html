@@ -2,101 +2,11 @@
 <html lang="en">
 <head>
   <title>Manifest — Philosophy</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Instrument+Serif&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-  <style type="text/tailwindcss">
-    @theme {
-      --color-terminal: #00ff41;
-      --color-terminal-dim: #00cc33;
-      --color-amber: #ffb000;
-      --color-amber-dim: #cc8d00;
-      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-    }
-  </style>
-  <style>
-    * { font-family: 'JetBrains Mono', ui-monospace, monospace; }
-    html { scroll-behavior: smooth; }
-    body { background: #000; color: #b0b0b0; }
-    ::selection { background: #00ff41; color: #000; }
-
-    /* Scanline overlay */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 9999;
-      background: repeating-linear-gradient(
-        0deg, transparent, transparent 2px,
-        rgba(0, 0, 0, 0.08) 2px, rgba(0, 0, 0, 0.08) 4px
-      );
-    }
-
-    /* Blinking cursor */
-    @keyframes blink {
-      0%, 50% { opacity: 1; }
-      51%, 100% { opacity: 0; }
-    }
-    .cursor::after {
-      content: '';
-      display: inline-block;
-      width: 0.65em;
-      height: 1em;
-      background: #00ff41;
-      vertical-align: -0.15em;
-      margin-left: 1px;
-      animation: blink 1s step-end infinite;
-    }
-
-    /* Fade up on scroll */
-    .reveal {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* Glow effects */
-    .glow { text-shadow: 0 0 10px rgba(0, 255, 65, 0.3), 0 0 40px rgba(0, 255, 65, 0.1); }
-    .glow-amber { text-shadow: 0 0 10px rgba(255, 176, 0, 0.3), 0 0 40px rgba(255, 176, 0, 0.1); }
-
-    /* Code highlight bar */
-    .code-line {
-      border-left: 2px solid #1a1a1a;
-      transition: border-color 0.3s ease;
-    }
-    .code-line:hover {
-      border-color: #00ff41;
-      background: rgba(0, 255, 65, 0.03);
-    }
-
-    /* Section dividers */
-    .divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, #1a1a1a 20%, #1a1a1a 80%, transparent);
-    }
-  </style>
+<!-- include: head.html -->
 </head>
 <body class="min-h-screen">
 
-  <nav class="fixed top-0 left-0 right-0 z-50 px-6 py-5" style="background: linear-gradient(to bottom, #000 0%, #000 40%, transparent 100%);">
-    <div class="max-w-3xl mx-auto flex items-center justify-between">
-      <a href="/" class="text-xs text-neutral-500 hover:text-terminal transition-colors cursor-pointer">
-        <span class="text-terminal-dim">←</span> Manifest
-      </a>
-      <div class="flex items-center gap-6">
-        <a href="/philosophy" class="text-xs text-neutral-600 hover:text-terminal transition-colors cursor-pointer">Philosophy</a>
-        <a href="#" class="text-xs text-neutral-600 hover:text-terminal transition-colors cursor-pointer">GitHub</a>
-      </div>
-    </div>
-  </nav>
+<!-- include: nav-sub.html -->
 
   <!-- ════════════════ TITLE ════════════════ -->
   <section class="pt-24 sm:pt-32 pb-16 px-6">
@@ -315,34 +225,8 @@
     </div>
   </section>
 
-  <footer class="py-12 px-6 text-center">
-    <div class="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-      <span class="text-xs text-neutral-700">manifest v0.1 — the agent framework</span>
-      <div class="flex items-center gap-6">
-        <a href="/philosophy" class="text-xs text-neutral-700 hover:text-terminal transition-colors cursor-pointer">Philosophy</a>
-        <a href="#" class="text-xs text-neutral-700 hover:text-terminal transition-colors cursor-pointer">GitHub</a>
-      </div>
-    </div>
-  </footer>
+<!-- include: footer.html -->
 
-  <!-- Dev reload -->
-  <script>
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-      const source = new EventSource('/__dev/reload');
-      source.addEventListener('reload', () => location.reload());
-    }
-  </script>
-
-  <!-- Scroll reveal observer -->
-  <script>
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, { threshold: 0.15 });
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-  </script>
+<!-- include: scripts.html -->
 </body>
 </html>
