@@ -1,4 +1,885 @@
 <!DOCTYPE html>
-<html><head><title>Spark Web UI</title></head>
-<body><h1>Spark Web UI</h1><p>Placeholder — full dashboard coming soon.</p></body>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚡ Spark</title>
+<style>
+  :root {
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --bg-tertiary: #0f3460;
+    --bg-input: #1e1e3a;
+    --bg-user-msg: #2a2a4a;
+    --bg-tool: #1a1a30;
+    --bg-error: #2d1a1a;
+    --text-primary: #e0e0e0;
+    --text-secondary: #8888a8;
+    --text-muted: #5a5a7a;
+    --accent: #f59e0b;
+    --accent-dim: #b45309;
+    --accent-glow: rgba(245, 158, 11, 0.15);
+    --border: #2a2a4a;
+    --red: #ef4444;
+    --green: #22c55e;
+    --blue: #3b82f6;
+    --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace;
+    --font-sans: system-ui, -apple-system, sans-serif;
+    --radius: 6px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-mono);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* Header */
+  #header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    min-height: 40px;
+  }
+
+  #header .logo {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+  }
+
+  .badge-env {
+    background: var(--bg-tertiary);
+    color: var(--blue);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+
+  .badge-mode {
+    background: var(--bg-tertiary);
+    color: var(--accent);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+
+  .spacer { flex: 1; }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-dot.connected { background: var(--green); }
+  .status-dot.disconnected { background: var(--red); }
+  .status-dot.connecting { background: var(--accent); animation: pulse 1.5s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .streaming-indicator {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--accent);
+    font-family: var(--font-sans);
+  }
+
+  .streaming-indicator.active { display: flex; }
+
+  .streaming-indicator .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1s infinite;
+  }
+
+  /* Messages area */
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #messages::-webkit-scrollbar { width: 6px; }
+  #messages::-webkit-scrollbar-track { background: transparent; }
+  #messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .msg { max-width: 100%; }
+
+  .msg-system {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 12px;
+    text-align: center;
+    padding: 4px 0;
+  }
+
+  .msg-user {
+    align-self: flex-end;
+    background: var(--bg-user-msg);
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    max-width: 80%;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .msg-assistant {
+    align-self: flex-start;
+    max-width: 90%;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .msg-assistant strong { color: #fff; }
+
+  .msg-assistant code:not(pre code) {
+    background: var(--bg-tertiary);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+
+  .msg-assistant pre {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px;
+    overflow-x: auto;
+    margin: 6px 0;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .msg-assistant pre code {
+    background: none;
+    padding: 0;
+  }
+
+  .msg-assistant a {
+    color: var(--accent);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .msg-thinking {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 12px;
+    border-left: 2px solid var(--border);
+    padding-left: 8px;
+    margin: 4px 0;
+    max-width: 90%;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .tool-call {
+    margin: 4px 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-tool);
+    max-width: 90%;
+  }
+
+  .tool-call summary {
+    padding: 6px 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tool-call summary:hover { color: var(--text-primary); }
+
+  .tool-call summary .tool-name {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .tool-call summary .tool-args {
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+
+  .tool-call .tool-result {
+    padding: 8px 10px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    max-height: 300px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--text-secondary);
+  }
+
+  .tool-call .tool-result.error { color: var(--red); }
+
+  .error-card {
+    background: var(--bg-error);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin: 4px 0;
+    max-width: 90%;
+  }
+
+  .error-card .error-title {
+    color: var(--red);
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .error-card pre {
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  /* Input bar */
+  #input-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  #input-bar textarea {
+    flex: 1;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 8px 10px;
+    resize: none;
+    outline: none;
+    min-height: 36px;
+    max-height: 144px;
+    line-height: 1.4;
+  }
+
+  #input-bar textarea:focus { border-color: var(--accent-dim); }
+  #input-bar textarea::placeholder { color: var(--text-muted); }
+
+  #input-bar button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  #send-btn {
+    background: var(--accent);
+    color: #000;
+  }
+
+  #send-btn:hover { background: #fbbf24; }
+  #send-btn:disabled { opacity: 0.3; cursor: default; }
+
+  #stop-btn {
+    display: none;
+    background: var(--red);
+    color: #fff;
+  }
+
+  #stop-btn:hover { background: #dc2626; }
+
+  /* Auth screen */
+  #auth-screen {
+    display: none;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  #auth-screen.visible { display: flex; }
+
+  #auth-screen h2 {
+    font-family: var(--font-sans);
+    color: var(--accent);
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  #auth-screen form {
+    display: flex;
+    gap: 8px;
+  }
+
+  #auth-screen input {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    width: 260px;
+  }
+
+  #auth-screen input:focus { border-color: var(--accent-dim); }
+
+  #auth-screen button {
+    padding: 8px 16px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  #auth-screen button:hover { background: #fbbf24; }
+
+  #auth-error {
+    color: var(--red);
+    font-size: 12px;
+    display: none;
+  }
+
+  #main-ui { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+  #main-ui.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div id="auth-screen">
+  <h2>⚡ Spark</h2>
+  <form id="auth-form">
+    <input type="password" id="token-input" placeholder="Enter access token" autocomplete="off">
+    <button type="submit">Connect</button>
+  </form>
+  <div id="auth-error">Authentication failed. Check your token.</div>
+</div>
+
+<div id="main-ui" class="hidden">
+  <div id="header">
+    <div class="logo">⚡ Spark</div>
+    <span id="env-badge" class="badge badge-env"></span>
+    <span id="mode-badge" class="badge badge-mode" style="display:none"></span>
+    <div class="streaming-indicator" id="streaming-ind">
+      <span class="dot"></span>
+      <span>working</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="status-dot disconnected" id="status-dot" title="Disconnected"></div>
+  </div>
+
+  <div id="messages"></div>
+
+  <div id="input-bar">
+    <textarea id="msg-input" rows="1" placeholder="Message Spark..." disabled></textarea>
+    <button id="send-btn" disabled>Send</button>
+    <button id="stop-btn">⏹ Stop</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  // --- State ---
+  let token = null;
+  let ws = null;
+  let reconnectDelay = 2000;
+  let reconnectTimer = null;
+  let isStreaming = false;
+  let isConnected = false;
+  let sessionReady = false;
+  let userScrolledUp = false;
+
+  // DOM refs
+  const authScreen = document.getElementById('auth-screen');
+  const authForm = document.getElementById('auth-form');
+  const tokenInput = document.getElementById('token-input');
+  const authError = document.getElementById('auth-error');
+  const mainUI = document.getElementById('main-ui');
+  const messagesEl = document.getElementById('messages');
+  const msgInput = document.getElementById('msg-input');
+  const sendBtn = document.getElementById('send-btn');
+  const stopBtn = document.getElementById('stop-btn');
+  const statusDot = document.getElementById('status-dot');
+  const envBadge = document.getElementById('env-badge');
+  const modeBadge = document.getElementById('mode-badge');
+  const streamingInd = document.getElementById('streaming-ind');
+
+  // Current streaming state
+  let currentAssistantEl = null;
+  let currentThinkingEl = null;
+  let currentToolCalls = {};  // toolCallId -> { el, resultEl, name }
+  let streamingToolCall = null; // { id, name, argsBuffer }
+
+  // --- Auth ---
+  const params = new URLSearchParams(window.location.search);
+  const urlToken = params.get('token');
+  if (urlToken) {
+    token = urlToken;
+    history.replaceState(null, '', window.location.pathname);
+    showMain();
+    connect();
+  } else {
+    authScreen.classList.add('visible');
+  }
+
+  authForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const val = tokenInput.value.trim();
+    if (!val) return;
+    token = val;
+    authError.style.display = 'none';
+    showMain();
+    connect();
+  });
+
+  function showMain() {
+    authScreen.classList.remove('visible');
+    mainUI.classList.remove('hidden');
+  }
+
+  function showAuth(error) {
+    mainUI.classList.add('hidden');
+    authScreen.classList.add('visible');
+    if (error) authError.style.display = 'block';
+    token = null;
+  }
+
+  // --- WebSocket ---
+  function connect() {
+    if (ws) { try { ws.close(); } catch {} }
+    setConnectionStatus('connecting');
+
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = proto + '//' + location.host + '/_spark/ws?token=' + encodeURIComponent(token);
+    ws = new WebSocket(wsUrl);
+
+    ws.onopen = function() {
+      isConnected = true;
+      reconnectDelay = 2000;
+      setConnectionStatus('connected');
+      updateInputState();
+    };
+
+    ws.onmessage = function(e) {
+      let data;
+      try { data = JSON.parse(e.data); } catch { return; }
+      handleEvent(data);
+    };
+
+    ws.onclose = function(e) {
+      isConnected = false;
+      sessionReady = false;
+      setConnectionStatus('disconnected');
+      updateInputState();
+
+      // Auth failure
+      if (e.code === 1008 || e.code === 4001 || e.code === 1006) {
+        // Could be auth or server down - try reconnect first
+      }
+
+      if (token) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(function() {
+          reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+          connect();
+        }, reconnectDelay);
+      }
+    };
+
+    ws.onerror = function() {};
+  }
+
+  function setConnectionStatus(status) {
+    statusDot.className = 'status-dot ' + status;
+    statusDot.title = status.charAt(0).toUpperCase() + status.slice(1);
+  }
+
+  // --- Event handling ---
+  function handleEvent(data) {
+    switch (data.type) {
+      case 'state':
+        sessionReady = data.data.sessionReady;
+        if (data.data.environment) {
+          envBadge.textContent = data.data.environment === 'development' ? 'dev' : 'prod';
+        }
+        if (data.data.isStreaming) setStreaming(true);
+        if (data.data.sessionError) {
+          appendSystem('Session error: ' + data.data.sessionError);
+        }
+        updateInputState();
+        break;
+
+      case 'messages':
+        messagesEl.innerHTML = '';
+        renderHistory(data.messages || []);
+        break;
+
+      case 'message_start':
+        if (data.message && data.message.role === 'assistant') {
+          currentAssistantEl = null;
+          currentThinkingEl = null;
+          streamingToolCall = null;
+        }
+        break;
+
+      case 'message_update':
+        handleMessageUpdate(data.event);
+        break;
+
+      case 'message_end':
+        currentAssistantEl = null;
+        currentThinkingEl = null;
+        streamingToolCall = null;
+        break;
+
+      case 'tool_start':
+        handleToolStart(data);
+        break;
+
+      case 'tool_update':
+        handleToolUpdate(data);
+        break;
+
+      case 'tool_end':
+        handleToolEnd(data);
+        break;
+
+      case 'agent_start':
+        setStreaming(true);
+        break;
+
+      case 'agent_end':
+        setStreaming(false);
+        break;
+
+      case 'error':
+        appendError('Error', data.message);
+        break;
+    }
+  }
+
+  function handleMessageUpdate(event) {
+    if (!event) return;
+
+    if (event.type === 'text_delta') {
+      if (!currentAssistantEl) {
+        currentAssistantEl = document.createElement('div');
+        currentAssistantEl.className = 'msg msg-assistant';
+        currentAssistantEl._rawText = '';
+        messagesEl.appendChild(currentAssistantEl);
+      }
+      currentAssistantEl._rawText += event.delta;
+      currentAssistantEl.innerHTML = renderMarkdown(currentAssistantEl._rawText);
+      autoScroll();
+    } else if (event.type === 'thinking_delta') {
+      if (!currentThinkingEl) {
+        currentThinkingEl = document.createElement('div');
+        currentThinkingEl.className = 'msg msg-thinking';
+        currentThinkingEl._rawText = '';
+        messagesEl.appendChild(currentThinkingEl);
+      }
+      currentThinkingEl._rawText += event.delta;
+      currentThinkingEl.textContent = currentThinkingEl._rawText;
+      autoScroll();
+    } else if (event.type === 'toolcall_start') {
+      streamingToolCall = { id: event.toolCallId || '', name: event.toolName || '', argsBuffer: '' };
+    } else if (event.type === 'toolcall_delta') {
+      if (streamingToolCall) {
+        streamingToolCall.argsBuffer += (event.delta || '');
+      }
+    } else if (event.type === 'toolcall_end') {
+      if (streamingToolCall) {
+        createToolCallEl(streamingToolCall.id || event.toolCallId, streamingToolCall.name || event.toolName, streamingToolCall.argsBuffer);
+        streamingToolCall = null;
+      }
+    }
+  }
+
+  function handleToolStart(data) {
+    const id = data.toolCallId;
+    if (!currentToolCalls[id]) {
+      createToolCallEl(id, data.toolName, typeof data.args === 'string' ? data.args : JSON.stringify(data.args, null, 2));
+    }
+  }
+
+  function createToolCallEl(id, name, argsStr) {
+    const details = document.createElement('details');
+    details.className = 'tool-call';
+
+    let argsPreview = '';
+    try {
+      const parsed = JSON.parse(argsStr);
+      // Show first string value as preview
+      for (const k in parsed) {
+        const v = parsed[k];
+        if (typeof v === 'string') {
+          argsPreview = v.length > 80 ? v.slice(0, 80) + '…' : v;
+          break;
+        }
+      }
+    } catch { argsPreview = argsStr ? (argsStr.length > 80 ? argsStr.slice(0, 80) + '…' : argsStr) : ''; }
+
+    const summary = document.createElement('summary');
+    summary.innerHTML = '<span class="tool-name">' + escapeHtml(name || '?') + '</span> <span class="tool-args">' + escapeHtml(argsPreview) + '</span>';
+
+    const resultDiv = document.createElement('div');
+    resultDiv.className = 'tool-result';
+    resultDiv.textContent = 'Running...';
+
+    details.appendChild(summary);
+    details.appendChild(resultDiv);
+    messagesEl.appendChild(details);
+
+    if (id) {
+      currentToolCalls[id] = { el: details, resultEl: resultDiv, name: name };
+    }
+    autoScroll();
+  }
+
+  function handleToolUpdate(data) {
+    const tc = currentToolCalls[data.toolCallId];
+    if (tc && data.partialResult != null) {
+      tc.resultEl.textContent = String(data.partialResult);
+      autoScroll();
+    }
+  }
+
+  function handleToolEnd(data) {
+    const tc = currentToolCalls[data.toolCallId];
+    if (tc) {
+      let text = '';
+      if (data.result != null) {
+        if (typeof data.result === 'string') text = data.result;
+        else if (Array.isArray(data.result)) {
+          text = data.result.map(function(b) { return b.text || ''; }).join('\n');
+        } else {
+          text = JSON.stringify(data.result, null, 2);
+        }
+      }
+      // Truncate long results
+      if (text.length > 5000) text = text.slice(0, 5000) + '\n… (truncated)';
+      tc.resultEl.textContent = text || '(no output)';
+      if (data.isError) tc.resultEl.classList.add('error');
+      delete currentToolCalls[data.toolCallId];
+      autoScroll();
+    }
+  }
+
+  // --- Render history ---
+  function renderHistory(messages) {
+    const toolResults = {};
+    // First pass: index tool results by toolCallId
+    messages.forEach(function(m) {
+      if (m.role === 'toolResult' && m.toolCallId) {
+        toolResults[m.toolCallId] = m;
+      }
+    });
+
+    messages.forEach(function(m) {
+      if (m.role === 'user') {
+        const text = typeof m.content === 'string' ? m.content : (Array.isArray(m.content) ? m.content.map(function(b) { return b.text || ''; }).join('') : '');
+        if (text.trim()) appendUser(text);
+      } else if (m.role === 'assistant' && Array.isArray(m.content)) {
+        m.content.forEach(function(block) {
+          if (block.type === 'text' && block.text) {
+            const el = document.createElement('div');
+            el.className = 'msg msg-assistant';
+            el.innerHTML = renderMarkdown(block.text);
+            messagesEl.appendChild(el);
+          } else if (block.type === 'thinking' && block.thinking) {
+            const el = document.createElement('div');
+            el.className = 'msg msg-thinking';
+            el.textContent = block.thinking;
+            messagesEl.appendChild(el);
+          } else if (block.type === 'toolCall') {
+            const argsStr = typeof block.arguments === 'string' ? block.arguments : JSON.stringify(block.arguments, null, 2);
+            createToolCallEl(block.id, block.name, argsStr);
+            // Attach result if we have one
+            const tr = toolResults[block.id];
+            if (tr) {
+              const tc = currentToolCalls[block.id];
+              if (tc) {
+                let text = '';
+                if (Array.isArray(tr.content)) {
+                  text = tr.content.map(function(b) { return b.text || ''; }).join('\n');
+                }
+                if (text.length > 5000) text = text.slice(0, 5000) + '\n… (truncated)';
+                tc.resultEl.textContent = text || '(no output)';
+                if (tr.isError) tc.resultEl.classList.add('error');
+                delete currentToolCalls[block.id];
+              }
+            }
+          }
+        });
+      }
+      // toolResult messages handled inline with toolCalls above
+    });
+
+    autoScroll();
+  }
+
+  // --- UI helpers ---
+  function appendUser(text) {
+    const el = document.createElement('div');
+    el.className = 'msg msg-user';
+    el.textContent = text;
+    messagesEl.appendChild(el);
+    autoScroll();
+  }
+
+  function appendSystem(text) {
+    const el = document.createElement('div');
+    el.className = 'msg msg-system';
+    el.textContent = text;
+    messagesEl.appendChild(el);
+    autoScroll();
+  }
+
+  function appendError(title, message) {
+    const el = document.createElement('div');
+    el.className = 'error-card';
+    el.innerHTML = '<div class="error-title">' + escapeHtml(title) + '</div><pre>' + escapeHtml(message || '') + '</pre>';
+    messagesEl.appendChild(el);
+    autoScroll();
+  }
+
+  function setStreaming(val) {
+    isStreaming = val;
+    streamingInd.classList.toggle('active', val);
+    stopBtn.style.display = val ? 'inline-block' : 'none';
+    updateInputState();
+  }
+
+  function updateInputState() {
+    const enabled = isConnected && sessionReady;
+    msgInput.disabled = !enabled;
+    sendBtn.disabled = !enabled;
+    msgInput.placeholder = !isConnected ? 'Disconnected...' : !sessionReady ? 'Session loading...' : 'Message Spark...';
+  }
+
+  // Auto-scroll logic
+  messagesEl.addEventListener('scroll', function() {
+    const threshold = 50;
+    userScrolledUp = (messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight) > threshold;
+  });
+
+  function autoScroll() {
+    if (!userScrolledUp) {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+  }
+
+  // --- Input handling ---
+  msgInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 144) + 'px';
+  });
+
+  msgInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  sendBtn.addEventListener('click', sendMessage);
+
+  stopBtn.addEventListener('click', function() {
+    if (ws && ws.readyState === 1) {
+      ws.send(JSON.stringify({ type: 'abort' }));
+    }
+  });
+
+  function sendMessage() {
+    const text = msgInput.value.trim();
+    if (!text || !ws || ws.readyState !== 1) return;
+    ws.send(JSON.stringify({ type: 'prompt', message: text }));
+    appendUser(text);
+    msgInput.value = '';
+    msgInput.style.height = 'auto';
+  }
+
+  // --- Markdown ---
+  function renderMarkdown(text) {
+    // Code blocks first
+    let html = escapeHtml(text);
+
+    // ```blocks```
+    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(_, lang, code) {
+      return '<pre><code>' + code + '</code></pre>';
+    });
+
+    // Inline code
+    html = html.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+
+    // Bold
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+    // Links
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+    return html;
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+})();
+</script>
+</body>
 </html>
