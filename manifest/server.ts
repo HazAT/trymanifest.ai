@@ -11,9 +11,20 @@ import manifestConfig from '../config/manifest'
 
 const textEncoder = new TextEncoder()
 
+export interface CustomRoute {
+  prefix: string
+  handle: (req: Request, server: any) => Promise<Response | null | undefined>
+}
+
 export interface ManifestServerOptions {
   projectDir: string
   port?: number
+  customRoutes?: CustomRoute[]
+  websocket?: {
+    open?: (ws: any) => void
+    message?: (ws: any, message: string | Buffer) => void
+    close?: (ws: any) => void
+  }
 }
 
 export type ManifestServer = Awaited<ReturnType<typeof createManifestServer>>
@@ -72,9 +83,15 @@ export async function createManifestServer(options: ManifestServerOptions) {
 
   let server: ReturnType<typeof Bun.serve>
   try {
-    server = Bun.serve({
+    const serveOptions: any = {
     port: requestedPort,
-    fetch: async (req, server) => {
+    fetch: undefined as any, // assigned below
+    }
+    if (options.websocket) {
+      serveOptions.websocket = options.websocket
+    }
+
+    serveOptions.fetch = async (req: Request, server: any) => {
       const url = new URL(req.url)
       const method = req.method
       const pathname = url.pathname
@@ -98,6 +115,16 @@ export async function createManifestServer(options: ManifestServerOptions) {
         return new Response(stream, {
           headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' },
         })
+      }
+
+      // Custom routes (extensions like spark-web)
+      if (options.customRoutes) {
+        for (const route of options.customRoutes) {
+          if (pathname.startsWith(route.prefix)) {
+            const response = await route.handle(req, server)
+            if (response) return response
+          }
+        }
       }
 
       // Try to match route (single pass handles match, 405, and 404)
@@ -284,8 +311,9 @@ export async function createManifestServer(options: ManifestServerOptions) {
           { status: 500 },
         )
       }
-    },
-  })
+    }
+
+    server = Bun.serve(serveOptions)
   } catch (err: any) {
     if (err?.code === 'EADDRINUSE' || err?.message?.includes('address already in use') || err?.errno === -48) {
       console.error(`\n⚠ Port ${requestedPort} is already in use.`)
