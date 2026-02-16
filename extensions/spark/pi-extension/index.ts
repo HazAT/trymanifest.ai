@@ -267,16 +267,21 @@ export default function spark(pi: ExtensionAPI) {
       // Parse the file to extract static values and resolve env vars ourselves.
       const raw = await fsp.readFile(configPath, 'utf-8')
 
+      // Extract the top-level block (before nested objects like `web:`)
+      // and nested blocks separately to avoid false positives.
+      const topLevel = raw.split(/^\s+(?:watch|environments|pause|debounce|web)\s*:/m)[0] || raw
+      const watchBlock = raw.match(/watch\s*:\s*\{([^}]*)\}/s)?.[1] || ''
+
       // Defaults — matches config/spark.ts structure
       const env = process.env.SPARK_ENV || process.env.NODE_ENV || 'development'
       return {
-        enabled: !raw.includes('enabled: false'),
+        enabled: !topLevel.includes('enabled: false'),
         environment: env,
         eventsDir: '.spark/events',
         watch: {
-          unhandledErrors: !raw.includes('unhandledErrors: false'),
-          serverErrors: !raw.includes('serverErrors: false'),
-          processErrors: !raw.includes('processErrors: false'),
+          unhandledErrors: !watchBlock.includes('unhandledErrors: false'),
+          serverErrors: !watchBlock.includes('serverErrors: false'),
+          processErrors: !watchBlock.includes('processErrors: false'),
         },
         environments: {
           development: { tools: 'full', behavior: 'fix' },
@@ -486,7 +491,20 @@ You understand Manifest conventions: features are in features/, one file per beh
   pi.on('session_start', async (_event, ctx) => {
     sessionCtx = ctx
     config = await readConfig(ctx.cwd)
-    if (!config || !config.enabled) return
+    if (!config || !config.enabled) {
+      if (isSidecar) {
+        const reason = !config
+          ? 'config/spark.ts not found'
+          : 'Spark is disabled (enabled: false in config/spark.ts)'
+        pi.sendMessage({
+          customType: 'spark-error',
+          content: `❌ **Spark sidecar cannot start** — ${reason}.\n\nThe sidecar requires Spark to be enabled. Check your config/spark.ts and try again.`,
+          display: true,
+        })
+        ctx.shutdown()
+      }
+      return
+    }
 
     const profile = getEnvProfile(config)
     const eventsDir = path.resolve(ctx.cwd, config.eventsDir)
