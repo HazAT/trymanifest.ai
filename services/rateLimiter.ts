@@ -39,7 +39,7 @@ export function checkRateLimit(key: string, config: RateLimitConfig): RateLimitR
 
   if (timestamps.length >= config.max) {
     store.set(key, timestamps)
-    const oldestInWindow = timestamps[0]
+    const oldestInWindow = timestamps[0]!
     const retryAfter = Math.ceil((oldestInWindow + windowMs - now) / 1000)
     return { allowed: false, remaining: 0, retryAfter }
   }
@@ -56,13 +56,9 @@ export function checkRateLimit(key: string, config: RateLimitConfig): RateLimitR
 export function startCleanup(): void {
   if (cleanupTimer) return
   cleanupTimer = setInterval(() => {
-    const now = Date.now()
     for (const [key, timestamps] of store) {
-      const filtered = timestamps.filter((t) => t > now - 120_000)
-      if (filtered.length === 0) {
+      if (timestamps.length === 0) {
         store.delete(key)
-      } else {
-        store.set(key, filtered)
       }
     }
   }, 60_000)
