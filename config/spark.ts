@@ -44,19 +44,10 @@ export default {
 
   // Spark Web UI — opt-in browser dashboard for interacting with Spark.
   // Runs as a separate sidecar process that survives main server crashes.
-  // Uncomment and configure to enable:
-  //
-  //   web: {
-  //     enabled: true,
-  //     port: 8081,
-  //     token: 'your-secret-token-here',
-  //   },
-  //
-  // Then: SPARK_WEB_TOKEN=your-secret-token-here bun --hot index.ts
-  // Open:  http://localhost:8081/?token=your-secret-token-here
+  // Start it explicitly: SPARK_WEB_TOKEN=xxx bun extensions/spark-web/services/sparkWeb.ts
+  // Open:  http://localhost:8081/?token=your-token
   web: {
     enabled: false,
-    path: '/_spark',
     port: Number(Bun.env.SPARK_WEB_PORT) || 8081,
     token: Bun.env.SPARK_WEB_TOKEN || '',
     // Additional Pi extensions to load into the Spark agent session.

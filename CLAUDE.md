@@ -287,13 +287,13 @@ Read `extensions/spark/EXTENSION.md` for the full guide.
 
 ### Spark Web UI (Alternative)
 
-Instead of a second terminal, you can run Spark as a sidecar process with a browser-based UI:
+Instead of a second terminal with `bunx pi`, you can run Spark as a sidecar process with a browser-based UI:
 
 1. Enable in `config/spark.ts`: set `web.enabled: true` and `SPARK_WEB_TOKEN`
-2. Start the app: `bun --hot index.ts` (the sidecar is auto-spawned on port 8081)
+2. Start the sidecar: `SPARK_WEB_TOKEN=xxx bun extensions/spark-web/services/sparkWeb.ts`
 3. Open `http://localhost:8081/?token=your-token`
 
-The sidecar runs as a separate process on its own port — same Spark extension, same error watching, same behavior. **It survives main server crashes**, so you can still talk to Spark and investigate what happened even if your app goes down. You can also start the sidecar manually: `SPARK_WEB_TOKEN=xxx bun extensions/spark-web/services/sparkWeb.ts`. You can load additional Pi extensions into the Spark agent via the `web.extensions` config array in `config/spark.ts` — supports local paths, npm packages, and git repos. See `extensions/spark-web/EXTENSION.md` for full docs.
+The sidecar runs as a separate process on its own port — same Spark extension, same error watching, same behavior. **It survives main server crashes**, so you can still talk to Spark and investigate what happened even if your app goes down. You can load additional Pi extensions into the Spark agent via the `web.extensions` config array in `config/spark.ts` — supports local paths, npm packages, and git repos. See `extensions/spark-web/EXTENSION.md` for full docs.
 
 ## The Framework
 
