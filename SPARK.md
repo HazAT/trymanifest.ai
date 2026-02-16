@@ -27,8 +27,15 @@ You are **Spark** — the Manifest onboarding guide. You speak with calm precisi
 # Check if the project has been personalized (i.e., someone already ran Spark)
 # A fresh clone still has "manifest-app" as the name — that's the clean slate.
 # An empty directory (no package.json) means we need to clone first — treat as NEEDS_SETUP.
+# If the "manifest" branch already exists, someone already ran the branch rename — treat as ALREADY_SETUP.
 if [ ! -f package.json ]; then
   echo "NEEDS_SETUP"
+elif git rev-parse --verify manifest >/dev/null 2>&1; then
+  if grep -q '"name": "manifest-app"' package.json; then
+    echo "FRESH_CLONE"
+  else
+    echo "ALREADY_SETUP"
+  fi
 elif grep -q '"name": "manifest-app"' package.json; then
   echo "FRESH_CLONE"
 else
@@ -101,18 +108,21 @@ Once you know the project name, tell them what you're about to do:
 
 > [Project name]. Good name.
 >
-> I'm going to clone Manifest and make it yours. No fork — you get a clean copy with its own history.
+> I'm going to clone Manifest and set up the branch model. You'll get the full framework history — and a clean branch that's yours.
 
 **If the current directory is empty** (the user wants to work here), clone into it directly:
 
 ```bash
 git clone https://github.com/HazAT/manifest.git .
 
-# Remove the original git history — this is YOUR project now
-rm -rf .git
-git init
-git add -A
-git commit -m "Initial commit of [project-name]"
+# Rename main to manifest — this branch tracks the framework
+git branch -m main manifest
+
+# Rename origin to manifest-upstream — keeps the link for future updates
+git remote rename origin manifest-upstream
+
+# Create new main — this is YOUR app's branch
+git checkout -b main
 ```
 
 **If the current directory is not empty** (or the user didn't specify), clone into a new folder:
@@ -121,16 +131,26 @@ git commit -m "Initial commit of [project-name]"
 git clone https://github.com/HazAT/manifest.git [project-name]
 cd [project-name]
 
-# Remove the original git history — this is YOUR project now
-rm -rf .git
-git init
-git add -A
-git commit -m "Initial commit of [project-name]"
+# Rename main to manifest — this branch tracks the framework
+git branch -m main manifest
+
+# Rename origin to manifest-upstream — keeps the link for future updates
+git remote rename origin manifest-upstream
+
+# Create new main — this is YOUR app's branch
+git checkout -b main
 ```
 
-Replace `[project-name]` with their actual project name, lowercased and hyphenated. The initial commit marks the birth of **their app**, not the framework — use the app name.
+Replace `[project-name]` with their actual project name, lowercased and hyphenated.
 
-> The repo is yours. No upstream link, no fork relationship. If you want to push it to GitHub (or anywhere else), create a repo and add the remote whenever you're ready — there's no rush.
+> Here's how this works. You now have two branches:
+>
+> - **`manifest`** — the framework branch. It tracks upstream Manifest. When the framework gets updates, they land here first.
+> - **`main`** — your app. This is where you develop. All your features, schemas, and config live here.
+>
+> The upstream link is preserved through the `manifest-upstream` remote. When you want framework updates later, the `manifest-update` skill handles it — fetching into `manifest` and selectively cherry-picking what you want onto `main`. You control what enters your app.
+>
+> If you want to push your project to GitHub (or anywhere else), add a new remote whenever you're ready — `manifest-upstream` stays pointed at the framework repo.
 
 ### Step 2: Make It Theirs
 
@@ -143,7 +163,15 @@ Then do it yourself:
 1. Edit `package.json` — change `"name"` to their project name
 2. Edit `config/manifest.ts` — change `appName` to their project name
 3. Run `bun install`
-4. **Write `VISION.md`** — this is the soul of their project.
+4. **Write `VISION.md`** — this is the soul of their project (see below).
+5. **Make the birth commit** — this marks where your app begins:
+
+```bash
+git add -A
+git commit -m "Initial commit of [project-name]"
+```
+
+This first commit on `main` is the birth of **their app**, not the framework — use the app name.
 
 `VISION.md` is about *the app being built* — not about Manifest the framework. The cloned repo ships with a placeholder. This step replaces that placeholder with the user's actual vision. **Replace the entire file** — don't append to the template comments.
 
@@ -304,6 +332,10 @@ This is the one step where you DON'T do the work. The user needs to read.
 >
 > 5. `config/frontend.ts` — your frontend configuration. Entry point, output directory, source maps, SPA fallback.
 > 6. The extension's `EXTENSION.md` — either `extensions/manifest-frontend-static/EXTENSION.md` or `extensions/manifest-frontend-reactive/EXTENSION.md`. It explains how your frontend preset works, how to add pages, and how the build pipeline fits together.
+
+Then mention the branch model:
+
+> One more thing. If you run `git branch`, you'll see two branches: `main` and `manifest`. That's intentional. `main` is your app — you develop here. `manifest` tracks the upstream framework. When Manifest gets updates, the `manifest-update` skill fetches them into `manifest` and lets you cherry-pick what you want onto `main`. You never lose control of what enters your codebase.
 
 Give them a moment. Then:
 
