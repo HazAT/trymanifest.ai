@@ -1,4 +1,5 @@
 import type { InputSchemaDef } from './types'
+import type { RateLimitConfig } from '../services/rateLimiter'
 
 /**
  * Standard response envelope returned by feature handlers.
@@ -35,6 +36,7 @@ export interface FeatureOptions<TInput = Record<string, unknown>> {
   authentication?: 'none' | 'required' | 'optional'
   sideEffects?: string[]
   errorCases?: string[]
+  rateLimit?: RateLimitConfig
   input: InputSchemaDef
   handle: (ctx: HandleContext<TInput>) => Promise<FeatureResult>
 }
@@ -51,6 +53,7 @@ export interface FeatureDef<TInput = Record<string, unknown>> {
   authentication: 'none' | 'required' | 'optional'
   sideEffects: string[]
   errorCases: string[]
+  rateLimit?: RateLimitConfig
   input: InputSchemaDef
   handle: (ctx: HandleContext<TInput>) => Promise<FeatureResult>
 }
@@ -89,6 +92,7 @@ export interface StreamFeatureOptions<TInput = Record<string, unknown>> {
   authentication?: 'none' | 'required' | 'optional'
   sideEffects?: string[]
   errorCases?: string[]
+  rateLimit?: RateLimitConfig
   input: InputSchemaDef
   stream: (ctx: StreamContext<TInput>) => Promise<void>
 }
@@ -104,6 +108,7 @@ export interface StreamFeatureDef<TInput = Record<string, unknown>> {
   authentication: 'none' | 'required' | 'optional'
   sideEffects: string[]
   errorCases: string[]
+  rateLimit?: RateLimitConfig
   input: InputSchemaDef
   stream: (ctx: StreamContext<TInput>) => Promise<void>
 }
@@ -147,6 +152,7 @@ export function defineFeature<TInput = Record<string, unknown>>(
       authentication: streamOpts.authentication ?? 'required',
       sideEffects: streamOpts.sideEffects ?? [],
       errorCases: streamOpts.errorCases ?? [],
+      rateLimit: streamOpts.rateLimit,
       input: streamOpts.input,
       stream: streamOpts.stream,
     }
@@ -162,6 +168,7 @@ export function defineFeature<TInput = Record<string, unknown>>(
     authentication: reqOpts.authentication ?? 'required',
     sideEffects: reqOpts.sideEffects ?? [],
     errorCases: reqOpts.errorCases ?? [],
+    rateLimit: reqOpts.rateLimit,
     input: reqOpts.input,
     handle: reqOpts.handle,
   }
