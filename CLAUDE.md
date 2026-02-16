@@ -8,13 +8,13 @@ You are working on a Manifest project. Read this file completely before writing 
 
 ## What This Is
 
-Manifest is a TypeScript/Bun framework where every piece of code is written to be read, understood, and modified by AI agents. The framework ships as source code inside the project — not as an npm package. You can read every line of framework code in `manifest/` (~1,700 lines total).
+Manifest is a TypeScript/Bun framework where every piece of code is written to be read, understood, and modified by AI agents. The framework ships as source code inside the project — not as an npm package. You can read every line of framework code in `manifest/` (~3,100 lines total).
 
 Manifest ships with **Spark**, a reactive AI sidekick that watches your running application and responds to errors in real time. Your app doesn't just get built by agents — it gets *watched* by one. When something breaks, Spark sees the error before you do, reads the stack trace, opens the feature file, and either fixes it or tells you exactly what happened. This isn't a monitoring dashboard. It's an agent that understands your code because it helped write it.
 
 ## Principles
 
-**Read every line you touch.** Before modifying a file, read it. Before calling a function, read its implementation. The framework is ~1,700 lines — you can read all of it. Don't guess what `createRouter()` does; open `manifest/router.ts` (76 lines) and know. This applies to agents and humans equally. If something needs your attention, read the source. The answers are in the code, not in assumptions.
+**Read every line you touch.** Before modifying a file, read it. Before calling a function, read its implementation. The framework is ~3,100 lines — you can read all of it. Don't guess what `createRouter()` does; open `manifest/router.ts` (76 lines) and know. This applies to agents and humans equally. If something needs your attention, read the source. The answers are in the code, not in assumptions.
 
 **Trust the defaults.** The framework has made deliberate choices: `defineFeature()` for behavior, `t.string()` for inputs, JSON envelopes for responses, `Bun.serve()` for HTTP. Lean into these patterns. Don't reach for Express middleware when `handle()` already solves it. Don't add a validation library when `manifest/validator.ts` already handles it. If a proven structure exists, use it.
 
@@ -270,20 +270,21 @@ Read `extensions/spark/EXTENSION.md` for the full guide.
 
 ## The Framework
 
-The framework lives in `manifest/`. It's ~2,500 lines total. Read it:
+The framework lives in `manifest/`. It's ~3,100 lines total. Read it:
 
 | File | Lines | What it does |
 |------|-------|-------------|
 | `types.ts` | 141 | Input type builders: `t.string()`, `t.integer()`, etc. |
-| `validator.ts` | 92 | Validates input against schema. Formats, lengths, ranges. |
+| `validator.ts` | 103 | Validates input against schema. Formats, lengths, ranges. |
 | `feature.ts` | 168 | `defineFeature()` and all feature types (request, stream, event). |
-| `server.ts` | 223 | `Bun.serve()` wrapper. Route matching → validation → execution → envelope. SSE streaming. |
-| `router.ts` | 76 | HTTP route matching with path parameters. |
+| `server.ts` | 280 | `Bun.serve()` wrapper. Route matching → validation → execution → envelope. SSE streaming. |
+| `router.ts` | 72 | HTTP route matching with path parameters. |
 | `envelope.ts` | 65 | Response formatting. `ok()`, `fail()`, `toEnvelope()`. |
-| `scanner.ts` | 71 | Scans features directory and extensions, dynamically imports `.ts` files. |
-| `testing.ts` | 121 | `createTestClient()` — call features by name without HTTP. Stream testing. |
+| `scanner.ts` | 78 | Scans features directory and extensions, dynamically imports `.ts` files. |
+| `testing.ts` | 124 | `createTestClient()` — call features by name without HTTP. Stream testing. |
+| `frontend.ts` | 181 | `Bun.build()` wrapper, static file serving, live reload. |
 | `index.ts` | 31 | Barrel export for framework types and utilities. |
-| `cli/` | ~1400 | CLI commands: serve, index, check, learn, doctor, make:feature, extension (make/install/list), frontend. |
+| `cli/` | ~1800 | CLI commands: serve, index, check, learn, doctor, make:feature, extension (make/install/list), frontend, spark, run. |
 
 If something in the framework doesn't work for your use case, modify it. It's your code.
 
@@ -410,7 +411,7 @@ Every event carries a `traceId` that links back to the original request. For ser
 
 ## When In Doubt
 
-1. Read the source. The framework is 1,700 lines. The answers are there.
+1. Read the source. The framework is ~3,100 lines. The answers are there.
 2. Read `MANIFEST.md` — it's the index of everything.
 3. Read the feature file — it's self-contained.
 4. Run `bun run manifest check` — it validates conventions.
