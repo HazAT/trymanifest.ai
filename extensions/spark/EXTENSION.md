@@ -64,9 +64,11 @@ You'll need an API key for your preferred LLM provider (Anthropic, OpenAI, etc.)
 
 ## Web UI Mode (Alternative)
 
-Spark can also run embedded in the Manifest server with a browser-based dashboard, instead of (or alongside) the standalone terminal. When the web UI is enabled, the Spark extension loads in-process via the Pi SDK — the event watching, system prompt injection, and error handling all work identically.
+Spark can also run as a **sidecar process** with a browser-based dashboard, instead of (or alongside) the standalone terminal. When the web UI is enabled, the main server auto-spawns a separate sidecar process on its own port (default 8081) that hosts a Pi agent session with the Spark extension loaded. The event watching, system prompt injection, and error handling all work identically.
 
-To enable: set `web.enabled: true` and `SPARK_WEB_TOKEN` in `config/spark.ts`, then restart the server. Open `http://localhost:8080/_spark/?token=your-token` to interact with Spark in the browser.
+**The sidecar survives main server crashes.** Because it runs as its own process, you can still access the dashboard and ask Spark to investigate what happened even if your app goes down.
+
+To enable: set `web.enabled: true` and `SPARK_WEB_TOKEN` in `config/spark.ts`, then restart the server. Open `http://localhost:8081/?token=your-token` to interact with Spark in the browser.
 
 The standalone `bunx pi` mode and web UI mode are fully compatible — you can use either, or both simultaneously.
 
