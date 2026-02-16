@@ -29,3 +29,5 @@ export type { ManifestServer, ManifestServerOptions } from './server'
 
 export { createTestClient } from './testing'
 export type { TestClient, TestResult, StreamEvent } from './testing'
+
+export type { RateLimitConfig } from '../services/rateLimiter'
