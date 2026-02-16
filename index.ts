@@ -8,6 +8,19 @@ const server = await createManifestServer({
 console.log(`🔧 Manifest server running on http://localhost:${server.port}`)
 console.log(`   Production is our dev environment.`)
 
+// Spark Web UI: spawn sidecar process if enabled
+try {
+  const sparkConfig = (await import('./config/spark')).default
+  if (sparkConfig.web?.enabled && sparkConfig.web.token) {
+    Bun.spawn(['bun', 'run', './extensions/spark-web/services/sparkWeb.ts'], {
+      cwd: import.meta.dir,
+      stdio: ['ignore', 'inherit', 'inherit'],
+    })
+  }
+} catch (err) {
+  console.warn('⚡ Spark sidecar failed to start:', err)
+}
+
 // Spark: resolve once at startup, emit events for unhandled errors
 try {
   const sparkConfig = (await import('./config/spark')).default

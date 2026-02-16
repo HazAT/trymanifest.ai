@@ -1,0 +1,243 @@
+---
+name: spark-web
+version: 0.1.0
+description: "Browser dashboard for the Spark AI sidekick. Runs as a sidecar process on its own port, serving a real-time web UI for interacting with Spark."
+author: "Manifest"
+services:
+  - sparkWeb: "Starts a standalone Bun.serve() sidecar with an in-process Pi AgentSession and the Spark extension, bridging WebSocket connections to browsers."
+config:
+  - web.enabled: "Enable the Spark web dashboard. (default: false)"
+  - web.port: "Port for the sidecar server. (default: 8081, env: SPARK_WEB_PORT)"
+  - web.token: "Auth token for accessing the dashboard. Required when enabled. (env: SPARK_WEB_TOKEN)"
+---
+
+# Spark Web
+
+A browser dashboard for the Spark AI sidekick. Instead of running Spark in a terminal via `bunx pi`, this extension runs a **separate sidecar process** on its own port (default 8081) that hosts a Pi agent session with the Spark extension loaded. You get the same Spark experience — error investigation, real-time fixes, conversation history — in a browser tab.
+
+**Key benefit: the sidecar survives main server crashes.** Because it runs as its own process, you can still talk to Spark and investigate what happened even if your app goes down.
+
+**This is opt-in.** Disabled by default. You must explicitly enable it and set an auth token.
+
+---
+
+## How It Works
+
+When enabled, the main Manifest server automatically spawns the sidecar process on startup. The sidecar:
+
+1. **Starts its own `Bun.serve()`** on a separate port (default 8081), independent of the main app server.
+2. **Creates a Pi AgentSession** using the Pi SDK, with the Spark extension loaded. This is the same agent that would run in your terminal — it watches `.spark/events/` for errors and reacts according to your environment config.
+3. **Serves a web dashboard** at `http://localhost:8081/` — a single HTML page with a conversation UI.
+4. **Bridges WebSocket connections** between the browser and the agent session. Messages you type go to the agent; responses, tool calls, and Spark events stream back in real time.
+
+The sidecar runs as a separate process. If your main server crashes, the sidecar keeps running — you can still access the dashboard and ask Spark to investigate the crash. If the sidecar is already running on that port (e.g., from a previous server start), starting it again exits silently (idempotent).
+
+---
+
+## Enabling the Dashboard
+
+### 1. Edit `config/spark.ts`
+
+Set `web.enabled` to `true` and provide a token:
+
+```typescript
+web: {
+  enabled: true,
+  port: Number(Bun.env.SPARK_WEB_PORT) || 8081,
+  token: Bun.env.SPARK_WEB_TOKEN || 'your-secret-token',
+},
+```
+
+### 2. Set the token
+
+For local development, a hardcoded token is fine. For production, use the environment variable:
+
+```bash
+export SPARK_WEB_TOKEN="a-strong-random-token"
+```
+
+**Both `web.enabled: true` AND a non-empty token are required.** If either is missing, the sidecar won't start.
+
+### 3. Start the server
+
+```bash
+bun --hot index.ts
+```
+
+The main server auto-spawns the sidecar. You'll see `⚡ Spark sidecar running on http://localhost:8081` in the output.
+
+### Manual start (optional)
+
+You can also start the sidecar manually, without the main server:
+
+```bash
+SPARK_WEB_TOKEN=your-secret-token bun extensions/spark-web/services/sparkWeb.ts
+```
+
+This is useful for investigating crashes when the main server won't start.
+
+---
+
+## Accessing the Dashboard
+
+Open your browser to:
+
+```
+http://localhost:8081/?token=your-secret-token
+```
+
+The token is passed as a query parameter. If the token is wrong or missing, you get a 401 response.
+
+Once loaded, the dashboard shows:
+- **Conversation history** — all messages between you and Spark
+- **Streaming responses** — tokens appear as they're generated
+- **Tool execution** — see what tools Spark is calling (file reads, edits, bash commands)
+- **Spark status** — environment, model, session state
+- **Error events** — when your app throws errors, they appear in the conversation as Spark investigates
+
+Type messages in the input box to interact with Spark. It's a full Pi agent — you can ask it questions, have it investigate errors, or request code changes (in development mode).
+
+---
+
+## Loading Additional Extensions
+
+You can load additional Pi extensions into the Spark agent session via the `web.extensions` config array. The Spark core extension (`extensions/spark/pi-extension/index.ts`) is always loaded automatically — you don't need to include it.
+
+Three source types are supported:
+
+| Type | Example | Resolution |
+|------|---------|------------|
+| Local path | `'./extensions/my-tool/index.ts'` | Resolved relative to project root |
+| npm package | `'npm:@someone/pi-search-tool@1.0.0'` | Installed and loaded via Pi's SettingsManager |
+| Git repo | `'git:github.com/user/pi-extensions@main'` or `'https://github.com/user/pi-tools'` | Cloned and loaded via Pi's SettingsManager |
+
+Example configuration in `config/spark.ts`:
+
+```typescript
+web: {
+  enabled: true,
+  port: Number(Bun.env.SPARK_WEB_PORT) || 8081,
+  token: Bun.env.SPARK_WEB_TOKEN || '',
+  extensions: [
+    './extensions/my-custom-tool/index.ts',
+    'npm:@someone/pi-search-tool@1.0.0',
+    'https://github.com/user/pi-tools',
+  ],
+},
+```
+
+---
+
+## Architecture
+
+The `sparkWeb` service (`extensions/spark-web/services/sparkWeb.ts`) runs as a **standalone sidecar process**, separate from the main Manifest server. It does three things:
+
+1. **Agent setup** — Imports the Pi SDK, creates an `AgentSession` with `createCodingTools`, loads the Spark extension from `extensions/spark/pi-extension/index.ts`, and subscribes to session events.
+2. **HTTP server** — Starts its own `Bun.serve()` on the configured port (default 8081). Serves the dashboard HTML at `/` and handles WebSocket upgrades at `/ws`. Both require token auth.
+3. **WebSocket bridge** — Connected browsers receive all agent events (message starts/updates/ends, tool execution, agent lifecycle). Browsers send `prompt` messages to talk to the agent and `abort` messages to cancel streaming.
+
+The main server spawns the sidecar as a child process when `web.enabled: true`. If the sidecar port is already in use (e.g., from a previous run that survived a server restart), the new sidecar instance exits silently — the existing one keeps serving.
+
+The session is in-memory. It persists as long as the sidecar process is running. Restarting the main server does **not** restart the sidecar (it's already running). To restart the sidecar, kill it manually and restart the main server.
+
+---
+
+## Security
+
+- **Token authentication** — Every HTTP request and WebSocket connection requires the correct token. There's no session cookie or login persistence.
+- **Don't expose to the public internet.** This dashboard gives direct access to a coding agent with full tools in development mode. Bind to localhost or put it behind a VPN/proxy.
+- **Use environment variables for the token** in any shared or deployed environment. Don't commit tokens to git.
+- **The agent inherits your API keys.** It uses whatever LLM API key is configured in the environment (e.g., `ANTHROPIC_API_KEY`). Treat the dashboard as having the same access as your terminal.
+
+---
+
+## Troubleshooting
+
+### Sidecar not starting
+
+1. Check that the web UI is enabled:
+   ```bash
+   grep -A 8 'web:' config/spark.ts
+   ```
+   Verify `enabled: true` and a non-empty `token`.
+2. Check server logs for `⚡ Spark sidecar` messages at startup.
+3. Try starting the sidecar manually to see errors directly:
+   ```bash
+   SPARK_WEB_TOKEN=your-token bun extensions/spark-web/services/sparkWeb.ts
+   ```
+
+### Port already in use (expected)
+
+If you see `⚡ Spark sidecar already running on port 8081`, that's normal — the sidecar from a previous server start is still running. This is by design (crash resilience). The existing sidecar keeps serving.
+
+To restart the sidecar fresh:
+```bash
+# Find and kill the existing sidecar
+lsof -ti:8081 | xargs kill
+# Then restart the main server
+bun --hot index.ts
+```
+
+### Dashboard not loading (404 or blank page)
+
+1. Check you're using the correct URL: `http://localhost:8081/?token=your-token` (port 8081, not the main app port).
+2. Verify the HTML file exists:
+   ```bash
+   ls extensions/spark-web/frontend/index.html
+   ```
+   If missing, the extension is incomplete — reinstall or recreate it.
+
+### WebSocket not connecting
+
+1. Open browser developer tools → Console tab. Look for WebSocket errors.
+2. Verify the token in your URL matches `config/spark.ts` exactly (check for trailing whitespace).
+3. Check that the sidecar is running:
+   ```bash
+   lsof -i:8081
+   ```
+4. If behind a reverse proxy, ensure it supports WebSocket upgrades.
+
+### Agent not responding to messages
+
+1. Check that an LLM API key is set:
+   ```bash
+   echo $ANTHROPIC_API_KEY  # or OPENAI_API_KEY, etc.
+   ```
+2. Check sidecar output for errors from the Pi SDK or model provider.
+3. The dashboard shows `sessionReady` status on connect — if it says the session failed, check the error message.
+4. Verify the model is available and your API key has access to it.
+
+### "Failed to create AgentSession" in sidecar output
+
+This means the Pi SDK couldn't initialize. Common causes:
+- Missing or incompatible `@mariozechner/pi-coding-agent` dependency — run `bun install`.
+- The Spark Pi extension failed to load — check `extensions/spark/pi-extension/index.ts` exists.
+- API key issues — the session may fail during model initialization.
+
+Check the full error message in the sidecar's output for specifics.
+
+### Spark events not appearing in conversation
+
+1. Check that Spark itself is enabled:
+   ```bash
+   bun run manifest spark status
+   ```
+2. Verify `.spark/events/` directory exists and events are being written:
+   ```bash
+   ls -la .spark/events/
+   ```
+3. Check `config/spark.ts` — ensure `enabled: true` and the relevant `watch` options are on.
+4. Trigger a test error and check if an event file appears in `.spark/events/`.
+
+### Sidecar keeps running after server stops
+
+This is expected — crash resilience means the sidecar outlives the main server. To stop it:
+```bash
+lsof -ti:8081 | xargs kill
+```
+
+### Blank page (HTML loads but nothing renders)
+
+1. Check browser developer tools → Console for JavaScript errors.
+2. Verify `extensions/spark-web/frontend/index.html` is a complete file (not truncated or empty).
+3. Try a hard refresh (Ctrl+Shift+R / Cmd+Shift+R) to clear cached assets.

@@ -32,7 +32,7 @@ Manifest ships with **Spark**, a reactive AI sidekick that watches your running 
 
 **Commands are agent prompts.** Manifest CLI commands don't silently generate files — they output structured prompts that tell the agent exactly what to do. Scaffolding commands (`manifest feature make`, `manifest extension make`, `manifest extension install`) produce pure prompts: pre-context, instructions, and actionable steps. The agent reads the prompt and does the work. Work commands (`check`, `index`, `learn`) do their job but frame output as agent instructions — telling you what to fix, update, or verify. Commands may reference skills for deeper context. The CLI is the briefing; the agent is the executor.
 
-**Your app watches itself.** Manifest applications are designed to be observed by AI. The Spark sidekick runs alongside your app — when a feature throws a 500, when an unhandled exception crashes a process, Spark captures the error with full context (stack trace, feature name, route, trace ID, request input) and delivers it to a Pi agent session. In development, Spark investigates and fixes issues automatically. In production, it analyzes and alerts without touching code. This isn't bolted on — it's baked into the server, the response envelope, and the framework's error handling. Every `request_id` in a response envelope doubles as a trace ID that Spark uses to connect errors back to requests. Build with the assumption that an agent is always watching.
+**Your app watches itself.** Manifest applications are designed to be observed by AI. The Spark sidekick runs alongside your app — when a feature throws a 500, when an unhandled exception crashes a process, Spark captures the error with full context (stack trace, feature name, route, trace ID, request input) and delivers it to a Pi agent session. In development, Spark investigates and fixes issues automatically. In production, it analyzes and alerts without touching code. This isn't bolted on — it's baked into the server, the response envelope, and the framework's error handling. Every `request_id` in a response envelope doubles as a trace ID that Spark uses to connect errors back to requests. Spark can run as a standalone terminal agent (`bunx pi`) or as a sidecar process with a browser dashboard on port 8081. Build with the assumption that an agent is always watching.
 
 **Share what works.** When you build something that could be useful to other Manifest projects, suggest packaging it as an extension. Extensions are how the Manifest ecosystem shares knowledge and working solutions.
 
@@ -57,6 +57,7 @@ That's fine. When you add things, just try to keep them explicit and self-explan
 │   └── spark.ts        # Spark sidekick config: environment, events, behavior.
 ├── extensions/         # Manifest extensions (each has EXTENSION.md).
 │   └── spark/          # The Spark sidekick. Event bus + Pi extension.
+│   └── spark-web/      # Opt-in browser dashboard for Spark (embeds Pi agent in-process).
 ├── .pi/                # Pi agent configuration for this project.
 │   └── settings.json   # Points Pi to the Spark extension.
 ├── .spark/             # Runtime artifacts (gitignored).
@@ -284,6 +285,16 @@ When Pi starts, Spark auto-loads (via `.pi/settings.json`), runs a health assess
 
 Read `extensions/spark/EXTENSION.md` for the full guide.
 
+### Spark Web UI (Alternative)
+
+Instead of a second terminal, you can run Spark as a sidecar process with a browser-based UI:
+
+1. Enable in `config/spark.ts`: set `web.enabled: true` and `SPARK_WEB_TOKEN`
+2. Start the app: `bun --hot index.ts` (the sidecar is auto-spawned on port 8081)
+3. Open `http://localhost:8081/?token=your-token`
+
+The sidecar runs as a separate process on its own port — same Spark extension, same error watching, same behavior. **It survives main server crashes**, so you can still talk to Spark and investigate what happened even if your app goes down. You can also start the sidecar manually: `SPARK_WEB_TOKEN=xxx bun extensions/spark-web/services/sparkWeb.ts`. You can load additional Pi extensions into the Spark agent via the `web.extensions` config array in `config/spark.ts` — supports local paths, npm packages, and git repos. See `extensions/spark-web/EXTENSION.md` for full docs.
+
 ## The Framework
 
 The framework lives in `manifest/`. It's ~3,100 lines total. Read it:
@@ -398,6 +409,8 @@ Spark is what makes Manifest applications self-aware. It's not a separate tool y
 
 Your Manifest server captures errors (500 responses, unhandled exceptions) and rate-limit violations and writes them as JSON event files to `.spark/events/`. A Pi extension watches that directory and injects events into the agent's conversation. The connection is a plain directory of files — no sockets, no message queues, no dependencies.
 
+In **web UI mode** (opt-in), a sidecar process runs on its own port with the Pi SDK and Spark extension loaded. The event watching and error handling work identically — the sidecar survives main server crashes, so Spark can investigate even when your app is down.
+
 ### Environment Modes
 
 | Environment | Tools | Behavior | Use Case |
@@ -405,7 +418,7 @@ Your Manifest server captures errors (500 responses, unhandled exceptions) and r
 | `development` | Full (read, write, edit, bash) | **Fix** — investigate and repair | Local dev, active building |
 | `production` | Read-only | **Alert** — analyze and report | Monitoring, incident response |
 
-Configure in `config/spark.ts`. The environment resolves from `SPARK_ENV` → `NODE_ENV` → `'development'`.
+Configure in `config/spark.ts`. The environment resolves from `SPARK_ENV` → `NODE_ENV` → `'development'`. The config also includes a `web` block for the opt-in browser dashboard (`web.enabled`, `web.port`, `web.token`).
 
 ### Pause/Resume Protocol
 
