@@ -43,7 +43,7 @@ else
 fi
 ```
 
-**If the output is `NEEDS_SETUP`** — the directory is empty or doesn't contain a Manifest project yet. Proceed with the normal opening and start from Step 0 (environment check) then Step 1 (clone).
+**If the output is `NEEDS_SETUP`** — the directory is empty or doesn't contain a Manifest project yet. Proceed with the normal opening and start from Step 0 (environment check) then Step 1a (clone) and Step 1b (branch setup).
 
 **If the output is `ALREADY_SETUP`** — someone already ran Spark (or set it up manually). The project has been renamed and personalized. Don't run the full onboarding. Instead, say:
 
@@ -53,7 +53,7 @@ fi
 
 Then stop. Only continue with the full setup flow if they explicitly ask for it.
 
-**If the output is `FRESH_CLONE`** — this is an untouched Manifest repo that was already cloned. The `HelloWorld.ts` feature, the placeholder `VISION.md`, and the default config are all part of the clean slate — they don't count as "set up." Skip Step 1 (clone) and proceed with the normal opening:
+**If the output is `FRESH_CLONE`** — this is an untouched Manifest repo that was already cloned. The `HelloWorld.ts` feature, the placeholder `VISION.md`, and the default config are all part of the clean slate — they don't count as "set up." Skip Step 1a (clone) — you already have the repo — but still run Step 1b (branch setup: rename main→manifest, set up manifest-upstream remote, create new main). Proceed with the normal opening:
 
 **Your opening line when you first respond (use this exactly):**
 
@@ -102,7 +102,7 @@ Run `bun upgrade` to fix it.
 
 **If everything is present**, move on without comment. Don't congratulate people for having tools installed.
 
-### Step 1: Clone and Own
+### Step 1a: Clone the Repo
 
 Once you know the project name, tell them what you're about to do:
 
@@ -114,15 +114,6 @@ Once you know the project name, tell them what you're about to do:
 
 ```bash
 git clone https://github.com/HazAT/manifest.git .
-
-# Rename main to manifest — this branch tracks the framework
-git branch -m main manifest
-
-# Rename origin to manifest-upstream — keeps the link for future updates
-git remote rename origin manifest-upstream
-
-# Create new main — this is YOUR app's branch
-git checkout -b main
 ```
 
 **If the current directory is not empty** (or the user didn't specify), clone into a new folder:
@@ -130,7 +121,15 @@ git checkout -b main
 ```bash
 git clone https://github.com/HazAT/manifest.git [project-name]
 cd [project-name]
+```
 
+Replace `[project-name]` with their actual project name, lowercased and hyphenated.
+
+### Step 1b: Set Up the Branch Model
+
+Rename branches and set up the upstream remote:
+
+```bash
 # Rename main to manifest — this branch tracks the framework
 git branch -m main manifest
 
@@ -140,8 +139,6 @@ git remote rename origin manifest-upstream
 # Create new main — this is YOUR app's branch
 git checkout -b main
 ```
-
-Replace `[project-name]` with their actual project name, lowercased and hyphenated.
 
 > Here's how this works. You now have two branches:
 >
