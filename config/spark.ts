@@ -41,4 +41,15 @@ export default {
   debounce: {
     windowMs: 1000,
   },
+
+  // Spark Web UI — opt-in browser dashboard for interacting with Spark
+  web: {
+    // Set to true to enable the web dashboard at the configured path
+    enabled: false,
+    // URL path prefix for the dashboard and WebSocket
+    path: '/_spark',
+    // Auth token — required when web UI is enabled. Set via env var or directly.
+    // Empty token prevents the web UI from starting even if enabled (safety measure).
+    token: Bun.env.SPARK_WEB_TOKEN || '',
+  },
 }
