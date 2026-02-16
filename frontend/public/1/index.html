@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manifest — Built by agents, for agents</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-terminal: #00ff41;
+      --color-terminal-dim: #00cc33;
+      --color-amber: #ffb000;
+      --color-amber-dim: #cc8d00;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+  </style>
+  <style>
+    * { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: #000;
+      color: #b0b0b0;
+    }
+
+    ::selection {
+      background: #00ff41;
+      color: #000;
+    }
+
+    /* Scanline overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.08) 2px,
+        rgba(0, 0, 0, 0.08) 4px
+      );
+    }
+
+    /* Blinking cursor */
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    .cursor::after {
+      content: '█';
+      animation: blink 1s step-end infinite;
+      color: #00ff41;
+    }
+
+    /* Typing reveal */
+    @keyframes typeIn {
+      from { max-width: 0; }
+      to { max-width: 100%; }
+    }
+
+    /* Fade up on scroll */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Glow on terminal green */
+    .glow {
+      text-shadow: 0 0 10px rgba(0, 255, 65, 0.3), 0 0 40px rgba(0, 255, 65, 0.1);
+    }
+
+    /* Prompt styling */
+    .prompt::before {
+      content: '$ ';
+      color: #00ff41;
+    }
+
+    /* Subtle flicker on hero */
+    @keyframes flicker {
+      0%, 97%, 100% { opacity: 1; }
+      98% { opacity: 0.85; }
+      99% { opacity: 0.95; }
+    }
+    .flicker {
+      animation: flicker 4s infinite;
+    }
+
+    /* Code highlight bar */
+    .code-line {
+      border-left: 2px solid #1a1a1a;
+      transition: border-color 0.3s ease;
+    }
+    .code-line:hover {
+      border-color: #00ff41;
+      background: rgba(0, 255, 65, 0.03);
+    }
+
+    /* Section dividers */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #1a1a1a 20%, #1a1a1a 80%, transparent);
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- ════════════════ HERO ════════════════ -->
+  <section class="min-h-screen flex items-center justify-center px-6">
+    <div class="max-w-3xl w-full">
+      <div class="mb-8 text-xs text-neutral-600 tracking-wider">
+        <span class="text-terminal-dim">visitor@manifest</span><span class="text-neutral-600">:</span><span class="text-amber-dim">~</span><span class="text-neutral-600">$</span> <span class="text-neutral-500">cat welcome.md</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-terminal glow flicker leading-tight tracking-tight">
+        The first framework<br>built by agents, for agents.
+      </h1>
+
+      <div class="mt-8 space-y-4 text-sm sm:text-base leading-relaxed">
+        <p class="code-line pl-4 py-1">
+          Every framework that exists was built by humans, for humans.
+        </p>
+        <p class="code-line pl-4 py-1">
+          But humans are stepping back from writing code.
+        </p>
+        <p class="code-line pl-4 py-1 text-white">
+          Something had to be built for what comes next.
+        </p>
+      </div>
+
+      <div class="mt-12 text-xs text-neutral-600">
+        <span class="prompt text-neutral-500 cursor">scroll</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ WHAT IS MANIFEST ════════════════ -->
+  <section class="py-24 sm:py-32 px-6">
+    <div class="max-w-3xl mx-auto">
+      <div class="reveal">
+        <div class="text-xs text-neutral-600 tracking-wider mb-8">
+          <span class="text-terminal-dim">~</span><span class="text-neutral-600">/manifest $</span> <span class="text-neutral-500">cat README.md</span>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-10 leading-tight">
+          What is <span class="text-terminal glow">Manifest</span>
+        </h2>
+
+        <div class="space-y-6 text-sm sm:text-base leading-relaxed">
+          <p>
+            Software engineering is changing. Not in the way it's always been changing — incrementally, tool by tool. This time the whole thing shifts. <span class="text-white">Humans will stop writing code. Agents will.</span>
+          </p>
+
+          <p>
+            Every framework you've ever used was designed for a human reader. Documentation, conventions, abstractions — all optimized for the way <em>people</em> think about code.
+          </p>
+
+          <p>
+            Agents don't think like people.
+          </p>
+
+          <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
+            <div class="code-line pl-4 py-1"><span class="text-amber">No dependencies.</span> Nothing hidden behind node_modules.</div>
+            <div class="code-line pl-4 py-1"><span class="text-amber">No hidden functionality.</span> No magic methods, no lifecycle hooks.</div>
+            <div class="code-line pl-4 py-1"><span class="text-amber">No docs needed.</span> What you read in code is what you get.</div>
+            <div class="code-line pl-4 py-1 text-white"><span class="text-terminal">An agent reads it and builds.</span> That's it.</div>
+          </div>
+
+          <p class="text-neutral-500 text-sm">
+            Manifest is the framework that makes sense when the one reading your code isn't human.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ MEET SPARK ════════════════ -->
+  <section class="py-24 sm:py-32 px-6">
+    <div class="max-w-3xl mx-auto">
+      <div class="reveal">
+        <div class="text-xs text-neutral-600 tracking-wider mb-8">
+          <span class="text-terminal-dim">~</span><span class="text-neutral-600">/manifest $</span> <span class="text-neutral-500">spark --status</span>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-10 leading-tight">
+          Meet <span class="text-amber glow">Spark</span>
+        </h2>
+
+        <div class="space-y-6 text-sm sm:text-base leading-relaxed">
+          <p>
+            Why stop at building with agents? <span class="text-white">Run with them.</span>
+          </p>
+
+          <p>
+            Manifest was designed from the ground up to be monitored by agents. A built-in notification system tells a running agent exactly what happened when things go wrong — errors, crashes, failures — and gives it the context to act.
+          </p>
+
+          <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 font-mono text-sm">
+            <div class="text-neutral-600 mb-3">// spark session — live</div>
+            <div class="text-terminal">▸ watching: <span class="text-white">3 services, 2 routes, 1 cron</span></div>
+            <div class="text-terminal">▸ uptime: <span class="text-white">14d 6h 22m</span></div>
+            <div class="text-amber">▸ last event: <span class="text-white">TypeError in /api/users — auto-fixed in 4.2s</span></div>
+          </div>
+
+          <p>
+            Spark runs alongside your application. In development. <span class="text-white">In production.</span> It sees what your app sees, and it acts on your behalf.
+          </p>
+
+          <p class="text-neutral-500 text-sm">
+            An agent monitoring your application, making decisions to serve your vision. That's not a feature — that's a paradigm.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ VISION ════════════════ -->
+  <section class="py-24 sm:py-32 px-6">
+    <div class="max-w-3xl mx-auto">
+      <div class="reveal">
+        <div class="text-xs text-neutral-600 tracking-wider mb-8">
+          <span class="text-terminal-dim">~</span><span class="text-neutral-600">/manifest $</span> <span class="text-neutral-500">cat VISION.md</span>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-10 leading-tight">
+          Every idea starts with <span class="text-terminal glow">a vision</span>
+        </h2>
+
+        <div class="space-y-6 text-sm sm:text-base leading-relaxed">
+          <p>
+            Agents will write the code. Agents will monitor the systems. Agents will fix what breaks.
+          </p>
+
+          <p class="text-white text-base sm:text-lg">
+            But only you know what to build.
+          </p>
+
+          <p>
+            The work changes. The decisions don't. What matters, what ships, what it looks like, how it feels — that's still yours.
+          </p>
+
+          <p>
+            Agents do most of the work now. But the <em>what</em> and the <em>why</em> — that's on you. It always will be.
+          </p>
+
+          <p class="text-amber text-sm mt-8">
+            It's on you to decide what you make out of it.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ CTA ════════════════ -->
+  <section class="py-24 sm:py-32 px-6">
+    <div class="max-w-3xl mx-auto text-center">
+      <div class="reveal">
+        <div class="text-xs text-neutral-600 tracking-wider mb-10">
+          <span class="text-terminal-dim">~</span><span class="text-neutral-600">/manifest $</span> <span class="text-neutral-500 cursor">_</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+          <a href="#" class="group inline-flex items-center gap-2 bg-terminal text-black font-bold text-sm px-6 py-3 rounded hover:bg-terminal-dim transition-colors cursor-pointer">
+            <span>$</span> git clone manifest
+            <span class="group-hover:translate-x-1 transition-transform">→</span>
+          </a>
+          <a href="#" class="inline-flex items-center gap-2 border border-neutral-700 text-neutral-400 font-medium text-sm px-6 py-3 rounded hover:border-terminal hover:text-terminal transition-colors cursor-pointer">
+            View on GitHub
+          </a>
+        </div>
+
+        <p class="mt-10 text-xs text-neutral-600">
+          Open source. MIT license. Ship something.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="py-12 px-6 text-center text-xs text-neutral-700">
+    manifest v0.1 — the agent framework
+  </footer>
+
+  <!-- Scroll reveal observer -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
