@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manifest — Built by agents, for agents</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-ink: #1a1a1a;
+      --color-warm-white: #fafaf9;
+      --color-rule: #e5e2de;
+      --color-muted: #6b6560;
+      --color-accent: #b8860b;
+      --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+  </style>
+  <style>
+    html {
+      scroll-behavior: smooth;
+      background-color: #fafaf9;
+      color: #1a1a1a;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-weight: 300;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="bg-warm-white text-ink">
+
+  <!-- Hero -->
+  <section class="min-h-screen flex flex-col justify-center px-6 md:px-12 lg:px-24 xl:px-40">
+    <div class="max-w-4xl fade-in">
+      <h1 class="font-serif text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-900 leading-[0.95] tracking-tight mb-10">
+        Built by agents,<br>for agents.
+      </h1>
+      <p class="text-muted text-lg md:text-xl font-light max-w-lg">
+        The first framework that doesn't pretend<br class="hidden md:inline"> you're the one writing the code.
+      </p>
+    </div>
+  </section>
+
+  <!-- Rule -->
+  <div class="mx-6 md:mx-12 lg:mx-24 xl:mx-40 border-t border-rule"></div>
+
+  <!-- What is Manifest -->
+  <section class="px-6 md:px-12 lg:px-24 xl:px-40 py-28 md:py-40">
+    <div class="max-w-3xl fade-in">
+      <p class="font-serif text-2xl md:text-3xl lg:text-4xl leading-snug font-400 mb-16">
+        Software engineering is being rewritten. Not by new languages or better tooling — by a shift in who does the writing.
+      </p>
+    </div>
+
+    <div class="max-w-2xl ml-auto fade-in">
+      <p class="text-base md:text-lg text-muted leading-relaxed mb-8">
+        Every framework that exists was designed for human hands and human minds. Convention over configuration. Syntactic sugar. Clever abstractions to save keystrokes.
+      </p>
+      <p class="text-base md:text-lg text-muted leading-relaxed mb-8">
+        Agents don't need any of that. They need clarity. They need to read a file and know exactly what it does — no hidden behavior, no inherited magic, no documentation to cross-reference.
+      </p>
+      <p class="text-base md:text-lg text-ink leading-relaxed font-normal">
+        Manifest is what you get when you strip everything back to what matters. No dependencies. No abstractions. What you read is what you get.
+      </p>
+    </div>
+
+    <div class="mt-20 md:mt-28 border-l-2 border-accent pl-8 md:pl-12 max-w-2xl fade-in">
+      <p class="font-serif text-xl md:text-2xl lg:text-3xl italic leading-snug text-ink/80">
+        "There are no docs because there is nothing to document. The code is the documentation."
+      </p>
+    </div>
+  </section>
+
+  <!-- Rule -->
+  <div class="mx-6 md:mx-12 lg:mx-24 xl:mx-40 border-t border-rule"></div>
+
+  <!-- Meet Spark -->
+  <section class="px-6 md:px-12 lg:px-24 xl:px-40 py-28 md:py-40">
+    <div class="max-w-3xl fade-in">
+      <h2 class="font-serif text-4xl md:text-5xl lg:text-6xl font-700 tracking-tight mb-6">
+        Meet Spark.
+      </h2>
+      <p class="text-muted text-lg md:text-xl font-light max-w-xl mb-16">
+        Why build with agents and then stop?
+      </p>
+    </div>
+
+    <div class="max-w-2xl ml-auto fade-in">
+      <p class="text-base md:text-lg text-muted leading-relaxed mb-8">
+        Spark runs alongside your application. Dev, staging, production — it doesn't matter. When something breaks, Spark knows. When something needs attention, Spark acts.
+      </p>
+      <p class="text-base md:text-lg text-muted leading-relaxed mb-8">
+        Think of it as a notification system for agents. Errors, crashes, failures — routed to an intelligence that can read your codebase, understand the context, and make decisions.
+      </p>
+      <p class="text-base md:text-lg text-ink leading-relaxed font-normal">
+        Agents monitoring your application, making decisions to serve your vision. Run with them.
+      </p>
+    </div>
+  </section>
+
+  <!-- Rule -->
+  <div class="mx-6 md:mx-12 lg:mx-24 xl:mx-40 border-t border-rule"></div>
+
+  <!-- Vision -->
+  <section class="px-6 md:px-12 lg:px-24 xl:px-40 py-32 md:py-48">
+    <div class="max-w-3xl mx-auto text-center fade-in">
+      <h2 class="font-serif text-4xl md:text-5xl lg:text-7xl font-700 tracking-tight mb-12 md:mb-16">
+        Every idea starts<br>with a vision.
+      </h2>
+      <p class="text-muted text-base md:text-lg leading-relaxed max-w-xl mx-auto mb-8">
+        Only you know what you want to build. The shape of it. The feel of it. The thing it needs to become.
+      </p>
+      <p class="text-muted text-base md:text-lg leading-relaxed max-w-xl mx-auto mb-8">
+        Agents handle the work. You handle the intent.
+      </p>
+      <p class="font-serif text-xl md:text-2xl italic text-ink/70 mt-16">
+        It's on you to decide what you make of it.
+      </p>
+    </div>
+  </section>
+
+  <!-- Rule -->
+  <div class="mx-6 md:mx-12 lg:mx-24 xl:mx-40 border-t border-rule"></div>
+
+  <!-- CTA -->
+  <section class="px-6 md:px-12 lg:px-24 xl:px-40 py-28 md:py-40">
+    <div class="max-w-3xl fade-in">
+      <p class="font-serif text-3xl md:text-4xl lg:text-5xl font-400 tracking-tight mb-10">
+        Start building.
+      </p>
+      <a href="#" class="text-muted text-base md:text-lg underline underline-offset-4 decoration-rule hover:text-ink hover:decoration-ink transition-colors duration-300 cursor-pointer">
+        GitHub →
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="px-6 md:px-12 lg:px-24 xl:mx-40 py-12 border-t border-rule">
+    <p class="text-muted/60 text-sm font-light">
+      Manifest
+    </p>
+  </footer>
+
+  <!-- Scroll fade-in observer -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
