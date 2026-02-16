@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manifest — Philosophy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-terminal: #00ff41;
+      --color-terminal-dim: #00cc33;
+      --color-amber: #ffb000;
+      --color-amber-dim: #cc8d00;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+  </style>
+  <style>
+    * { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    html { scroll-behavior: smooth; }
+    body { background: #000; color: #b0b0b0; }
+    ::selection { background: #00ff41; color: #000; }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0, 0, 0, 0.08) 2px, rgba(0, 0, 0, 0.08) 4px
+      );
+    }
+
+    .glow { text-shadow: 0 0 10px rgba(0, 255, 65, 0.3), 0 0 40px rgba(0, 255, 65, 0.1); }
+    .glow-amber { text-shadow: 0 0 10px rgba(255, 176, 0, 0.3), 0 0 40px rgba(255, 176, 0, 0.1); }
+
+    .code-line {
+      border-left: 2px solid #1a1a1a;
+      transition: border-color 0.3s ease;
+    }
+    .code-line:hover {
+      border-color: #00ff41;
+      background: rgba(0, 255, 65, 0.03);
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #1a1a1a 20%, #1a1a1a 80%, transparent);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- ════════════════ HEADER ════════════════ -->
+  <header class="py-6 px-6">
+    <div class="max-w-3xl mx-auto">
+      <a href="/" class="text-xs text-neutral-600 hover:text-terminal transition-colors cursor-pointer">
+        <span class="text-terminal-dim">←</span> back to manifest
+      </a>
+    </div>
+  </header>
+
+  <!-- ════════════════ TITLE ════════════════ -->
+  <section class="pt-16 sm:pt-24 pb-16 px-6">
+    <div class="max-w-3xl mx-auto">
+      <div class="text-xs text-neutral-600 tracking-wider mb-8">
+        <span class="text-terminal-dim">~</span><span class="text-neutral-600">/manifest $</span> <span class="text-neutral-500">cat PHILOSOPHY.md</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl font-bold text-terminal glow leading-tight tracking-tight mb-6">
+        Why Manifest exists
+      </h1>
+
+      <p class="text-sm sm:text-base leading-relaxed text-neutral-400">
+        An honest look at what we're building, why we think it matters, and where it's headed.
+      </p>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ THE SHIFT ════════════════ -->
+  <section class="py-16 sm:py-20 px-6">
+    <div class="max-w-3xl mx-auto reveal">
+      <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
+        Software engineering is <span class="text-terminal glow">changing</span>
+      </h2>
+
+      <div class="space-y-6 text-sm sm:text-base leading-relaxed">
+        <p>
+          For decades we organized ourselves by layer. Front-end engineers. Back-end engineers. Infrastructure engineers. Data engineers. Each with their own languages, tools, communities, and mental models.
+        </p>
+
+        <p>
+          That specialization made sense. Building a responsive UI and tuning a database query are genuinely different skills. They still are. <span class="text-white">Specialization will always exist</span> — someone will always care more about pixel-perfect layouts, and someone else about query plans.
+        </p>
+
+        <p>
+          But the lines are blurring. Agents don't see layers the same way humans do. An agent reading your codebase doesn't think "I'm a front-end engineer" — it reads the feature file, understands the API, writes the component, sets up the database table, and moves on. The full stack isn't a career path. It's a single context window.
+        </p>
+
+        <p class="text-white">
+          In the end, we're all just engineers building applications.
+        </p>
+
+        <p>
+          The tools need to catch up to that reality.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ THE PROBLEM ════════════════ -->
+  <section class="py-16 sm:py-20 px-6">
+    <div class="max-w-3xl mx-auto reveal">
+      <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
+        The problem with <span class="text-amber glow-amber">current frameworks</span>
+      </h2>
+
+      <div class="space-y-6 text-sm sm:text-base leading-relaxed">
+        <p>
+          Every framework you've used was designed by humans for humans. That's not a criticism — it was the right choice when humans were the ones writing code. But it produced a particular kind of complexity.
+        </p>
+
+        <p>
+          Middleware chains. Decorator-based dependency injection. File-system routing conventions. Auto-discovery. Lifecycle hooks. Magic methods. Convention over configuration taken so far that understanding a single request requires knowing the framework by heart.
+        </p>
+
+        <p>
+          If you're an expert in Next.js or NestJS or Rails, you navigate this fluently. You've built the mental model. You know where things happen even when the code doesn't say so.
+        </p>
+
+        <p>
+          Agents don't have that luxury. They don't have years of framework-specific intuition. And more importantly — <span class="text-white">all the code agents write needs to be explicit.</span> An agent can't rely on "well, the framework does this behind the scenes." It reads code. If the code doesn't say it, the agent doesn't know it.
+        </p>
+
+        <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
+          <div class="code-line pl-4 py-1"><span class="text-amber">Hidden behavior</span> is the enemy of agent comprehension.</div>
+          <div class="code-line pl-4 py-1"><span class="text-amber">Scattered logic</span> makes one behavior span six files.</div>
+          <div class="code-line pl-4 py-1"><span class="text-amber">Framework-specific knowledge</span> can't be assumed.</div>
+          <div class="code-line pl-4 py-1 text-white"><span class="text-terminal">What you read should be what you get.</span></div>
+        </div>
+
+        <p class="text-neutral-500 text-sm">
+          The irony: optimizing for agent comprehension produces code that's easier for humans to understand too. Explicit is just good engineering.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ THE APPROACH ════════════════ -->
+  <section class="py-16 sm:py-20 px-6">
+    <div class="max-w-3xl mx-auto reveal">
+      <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
+        What Manifest <span class="text-terminal glow">does differently</span>
+      </h2>
+
+      <div class="space-y-6 text-sm sm:text-base leading-relaxed">
+        <p>
+          Manifest is a TypeScript framework that runs on Bun. That part is normal. What's different is the design constraint: <span class="text-white">every line of code must be readable by an agent that has zero framework-specific knowledge.</span>
+        </p>
+
+        <p>
+          One feature, one file. A feature declares its route, inputs, authentication, side effects, error cases, and business logic in a single <code class="text-terminal text-xs">defineFeature()</code> call. An agent reads one file and understands one complete behavior. No hunting across directories.
+        </p>
+
+        <p>
+          The framework itself is ~1,000 lines of TypeScript source code that ships inside your project — not as an npm package. When an agent needs to understand how routing works, it reads <code class="text-terminal text-xs">manifest/router.ts</code> — 76 lines. When it needs to change validation, it edits <code class="text-terminal text-xs">manifest/validator.ts</code> — 92 lines. There is no black box.
+        </p>
+
+        <p>
+          No dependencies. No hidden functionality. No middleware. No decorators. No dependency injection. No file-system routing. No convention-based auto-discovery. If something happens, it's because the code says so.
+        </p>
+
+        <p class="text-neutral-500 text-sm">
+          The whole framework fits in a single context window. An agent doesn't just use Manifest — it understands every line of it.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ AGENTS EVERYWHERE ════════════════ -->
+  <section class="py-16 sm:py-20 px-6">
+    <div class="max-w-3xl mx-auto reveal">
+      <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
+        Agents at <span class="text-amber glow-amber">every step</span>
+      </h2>
+
+      <div class="space-y-6 text-sm sm:text-base leading-relaxed">
+        <p>
+          Most tools treat agents as a development aid — a smarter autocomplete, a code reviewer, a pair programmer. Manifest goes further. Agents aren't just part of the writing process. They're part of the entire lifecycle.
+        </p>
+
+        <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-3 text-sm">
+          <div class="code-line pl-4 py-1"><span class="text-terminal">Development.</span> <span class="text-neutral-500">Agents read your codebase and build features on top of it.</span></div>
+          <div class="code-line pl-4 py-1"><span class="text-terminal">Onboarding.</span> <span class="text-neutral-500">Spark walks you through setup — an agent bootstrapping your project.</span></div>
+          <div class="code-line pl-4 py-1"><span class="text-terminal">Refactoring.</span> <span class="text-neutral-500">The framework is source code. Agents evolve it alongside your app.</span></div>
+          <div class="code-line pl-4 py-1"><span class="text-terminal">Monitoring.</span> <span class="text-neutral-500">Spark watches your running application, catches errors, acts on your behalf.</span></div>
+          <div class="code-line pl-4 py-1"><span class="text-terminal">Self-healing.</span> <span class="text-neutral-500">Error fires → agent reads the feature → fixes it → Bun hot-reloads → next request works.</span></div>
+        </div>
+
+        <p>
+          The self-healing loop is the most ambitious part. An error occurs. The agent reads <code class="text-terminal text-xs">MANIFEST.md</code> to orient itself. It reads the feature file — one file, complete behavior. It diagnoses the issue, edits the code, and Bun hot-reloads the module. No deploy. No restart. The next request runs the new code.
+        </p>
+
+        <p>
+          This only works because every design decision in Manifest was made to support it. One file per feature so the agent edits one file. Declared side effects so the agent knows the blast radius. Source-code framework so the agent can fix anything. No hidden behavior so the agent's model matches reality.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ EARLY DAYS ════════════════ -->
+  <section class="py-16 sm:py-20 px-6">
+    <div class="max-w-3xl mx-auto reveal">
+      <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
+        It's <span class="text-terminal glow">early</span>
+      </h2>
+
+      <div class="space-y-6 text-sm sm:text-base leading-relaxed">
+        <p>
+          Manifest is young. The core framework works — features, validation, routing, testing, CLI, frontend support, streaming. You can build real things with it today. But large parts of the vision are still ahead: database integration, authentication, the full production agent sidecar.
+        </p>
+
+        <p>
+          We're not hiding that. The roadmap is public. The framework is 1,055 lines you can read in minutes. There are no announcements about announcements.
+        </p>
+
+        <p>
+          What exists is solid. What's coming is ambitious. The gap between the two is where the experiment lives.
+        </p>
+
+        <p class="text-white">
+          This is for people who want to try a different way of working with agents.
+        </p>
+
+        <p>
+          Not everyone will want this. If your team has deep Rails expertise and it serves you well, keep using Rails. If Next.js gives you what you need and you understand the trade-offs, use Next.js. We're not here to tell you your tools are wrong.
+        </p>
+
+        <p>
+          But if you've felt the friction — agents struggling with framework conventions they can't see, code scattered across files for organizational reasons that don't help the reader, abstractions that hide more than they reveal — then Manifest might be worth an afternoon.
+        </p>
+
+        <p class="text-amber text-sm mt-8">
+          Fork it. Read the code. See if it changes how you think about what a framework can be.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ CTA ════════════════ -->
+  <section class="py-16 sm:py-20 px-6">
+    <div class="max-w-3xl mx-auto text-center reveal">
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+        <a href="/" class="group inline-flex items-center gap-2 bg-terminal text-black font-bold text-sm px-6 py-3 rounded hover:bg-terminal-dim transition-colors cursor-pointer">
+          <span>←</span> Back to Manifest
+        </a>
+        <a href="#" class="inline-flex items-center gap-2 border border-neutral-700 text-neutral-400 font-medium text-sm px-6 py-3 rounded hover:border-terminal hover:text-terminal transition-colors cursor-pointer">
+          View on GitHub
+        </a>
+      </div>
+
+      <p class="mt-10 text-xs text-neutral-600">
+        Open source. MIT license. Read every line.
+      </p>
+    </div>
+  </section>
+
+  <footer class="py-12 px-6 text-center text-xs text-neutral-700">
+    manifest v0.1 — the agent framework
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
