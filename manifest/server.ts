@@ -160,6 +160,24 @@ export async function createManifestServer(options: ManifestServerOptions) {
               } catch (err) {
                 const message = err instanceof Error ? err.message : 'Internal server error'
                 fail(message)
+                try {
+                  const sparkConfig = (await import('../config/spark')).default
+                  if (sparkConfig.enabled && sparkConfig.watch.serverErrors) {
+                    const { spark } = await import('../extensions/spark/services/spark')
+                    spark.emit({
+                      type: 'server-error',
+                      traceId: requestId,
+                      feature: feature.name,
+                      route: `${method} ${pathname}`,
+                      status: 500,
+                      error: {
+                        message: err instanceof Error ? err.message : String(err),
+                        stack: err instanceof Error ? err.stack : undefined,
+                      },
+                      request: { input },
+                    })
+                  }
+                } catch {} // Spark emission must never break the server
               }
             },
           })
@@ -182,6 +200,24 @@ export async function createManifestServer(options: ManifestServerOptions) {
         return Response.json(envelope, { status: result.status })
       } catch (err) {
         const durationMs = Math.round((performance.now() - start) * 100) / 100
+        try {
+          const sparkConfig = (await import('../config/spark')).default
+          if (sparkConfig.enabled && sparkConfig.watch.serverErrors) {
+            const { spark } = await import('../extensions/spark/services/spark')
+            spark.emit({
+              type: 'server-error',
+              traceId: requestId,
+              feature: feature.name,
+              route: `${method} ${pathname}`,
+              status: 500,
+              error: {
+                message: err instanceof Error ? err.message : String(err),
+                stack: err instanceof Error ? err.stack : undefined,
+              },
+              request: { input },
+            })
+          }
+        } catch {} // Spark emission must never break the server
         return Response.json(
           {
             status: 500,
