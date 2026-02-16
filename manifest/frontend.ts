@@ -7,6 +7,7 @@ interface FrontendConfig {
   sourceMaps: boolean
   spaFallback: boolean
   devReload: boolean
+  copyHtml: boolean
 }
 
 export interface BuildResult {
@@ -43,10 +44,12 @@ export async function buildFrontend(projectDir: string): Promise<BuildResult> {
   })
 
   // Copy HTML files from frontend/ to outDir
-  const frontendDir = path.resolve(projectDir, 'frontend')
-  for (const entry of fs.readdirSync(frontendDir)) {
-    if (entry.endsWith('.html')) {
-      fs.copyFileSync(path.join(frontendDir, entry), path.join(outDir, entry))
+  if (config.copyHtml !== false) {
+    const frontendDir = path.resolve(projectDir, 'frontend')
+    for (const entry of fs.readdirSync(frontendDir)) {
+      if (entry.endsWith('.html')) {
+        fs.copyFileSync(path.join(frontendDir, entry), path.join(outDir, entry))
+      }
     }
   }
 

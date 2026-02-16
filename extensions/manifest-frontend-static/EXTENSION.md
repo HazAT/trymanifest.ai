@@ -57,13 +57,23 @@ export default {
 }
 ```
 
-### 5. Add dist to .gitignore
+### 5. (Optional) Disable HTML copying
+
+If your project generates its own HTML files (e.g., a blog build script, static site generator), set `copyHtml: false` in `config/frontend.ts` to prevent the build from copying `frontend/*.html` into `dist/`:
+
+```typescript
+copyHtml: false,
+```
+
+This is not needed for normal usage — only for projects with custom HTML pipelines.
+
+### 6. Add dist to .gitignore
 
 ```bash
 echo 'dist/' >> .gitignore
 ```
 
-### 6. Verify the build
+### 7. Verify the build
 
 ```bash
 bun manifest frontend build
@@ -71,7 +81,7 @@ bun manifest frontend build
 
 You should see output listing built files in `dist/`.
 
-### 7. Start development
+### 8. Start development
 
 ```bash
 bun --hot index.ts

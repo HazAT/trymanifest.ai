@@ -8,4 +8,6 @@ export default {
   sourceMaps: true,
   spaFallback: true,
   devReload: true,
+  // Set to false if your project generates its own HTML (e.g., blog build script)
+  copyHtml: true,
 }
