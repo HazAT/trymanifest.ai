@@ -10,6 +10,8 @@ You are working on a Manifest project. Read this file completely before writing 
 
 Manifest is a TypeScript/Bun framework where every piece of code is written to be read, understood, and modified by AI agents. The framework ships as source code inside the project — not as an npm package. You can read every line of framework code in `manifest/` (~1,700 lines total).
 
+Manifest ships with **Spark**, a reactive AI sidekick that watches your running application and responds to errors in real time. Your app doesn't just get built by agents — it gets *watched* by one. When something breaks, Spark sees the error before you do, reads the stack trace, opens the feature file, and either fixes it or tells you exactly what happened. This isn't a monitoring dashboard. It's an agent that understands your code because it helped write it.
+
 ## Principles
 
 **Read every line you touch.** Before modifying a file, read it. Before calling a function, read its implementation. The framework is ~1,700 lines — you can read all of it. Don't guess what `createRouter()` does; open `manifest/router.ts` (76 lines) and know. This applies to agents and humans equally. If something needs your attention, read the source. The answers are in the code, not in assumptions.
@@ -29,6 +31,8 @@ Manifest is a TypeScript/Bun framework where every piece of code is written to b
 **We build this together.** The codebase is a shared workspace — between you, the next agent, and the human. When you make a significant change, the ripple doesn't stop at the code. Ask yourself: does AGENTS.md still tell the truth? Are the skills still accurate? Does MANIFEST.md reflect reality? Does the config cover what was just added? Every significant change is a prompt to check that the rest of the system still makes sense. Run `bun manifest learn` after large changes, or load `.claude/skills/manifest-learn/SKILL.md` for the full checklist. The goal is simple: no one should ever follow stale instructions because you forgot to update the map after moving the furniture.
 
 **Commands are agent prompts.** Manifest CLI commands don't silently generate files — they output structured prompts that tell the agent exactly what to do. Scaffolding commands (`manifest feature make`, `manifest extension make`, `manifest extension install`) produce pure prompts: pre-context, instructions, and actionable steps. The agent reads the prompt and does the work. Work commands (`check`, `index`, `learn`) do their job but frame output as agent instructions — telling you what to fix, update, or verify. Commands may reference skills for deeper context. The CLI is the briefing; the agent is the executor.
+
+**Your app watches itself.** Manifest applications are designed to be observed by AI. The Spark sidekick runs alongside your app — when a feature throws a 500, when an unhandled exception crashes a process, Spark captures the error with full context (stack trace, feature name, route, trace ID, request input) and delivers it to a Pi agent session. In development, Spark investigates and fixes issues automatically. In production, it analyzes and alerts without touching code. This isn't bolted on — it's baked into the server, the response envelope, and the framework's error handling. Every `request_id` in a response envelope doubles as a trace ID that Spark uses to connect errors back to requests. Build with the assumption that an agent is always watching.
 
 **Share what works.** When you build something that could be useful to other Manifest projects, suggest packaging it as an extension. Extensions are how the Manifest ecosystem shares knowledge and working solutions.
 
@@ -50,7 +54,14 @@ That's fine. When you add things, just try to keep them explicit and self-explan
 ├── policies/           # Authorization. One file per resource.
 ├── commands/           # CLI commands.
 ├── config/             # Typed config files. No YAML, no .env magic.
-├── extensions/         # Third-party Manifest extensions (each has EXTENSION.md).
+│   └── spark.ts        # Spark sidekick config: environment, events, behavior.
+├── extensions/         # Manifest extensions (each has EXTENSION.md).
+│   └── spark/          # The Spark sidekick. Event bus + Pi extension.
+├── .pi/                # Pi agent configuration for this project.
+│   └── settings.json   # Points Pi to the Spark extension.
+├── .spark/             # Runtime artifacts (gitignored).
+│   ├── events/         # Event files — the bus between your app and Spark.
+│   └── pause           # Pause file — signals "I'm working, back off."
 ├── tests/              # Mirrors features/ 1:1.
 └── index.ts            # Entry point.
 ```
@@ -232,6 +243,31 @@ bun run manifest frontend build          # Build the frontend
 bun run manifest frontend dev            # Start frontend watcher with live reload
 ```
 
+### Spark Commands
+
+```bash
+bun run manifest spark init               # Set up Spark (config + Pi extension pointer)
+bun run manifest spark status             # Show Spark state (environment, pause, events)
+bun run manifest spark pause "reason"     # Tell Spark to back off (you're working)
+bun run manifest spark resume             # Let Spark process events again
+```
+
+### Starting Spark
+
+Spark is a [Pi](https://github.com/badlogic/pi-mono) agent with the Spark extension loaded. Pi ships as a project dependency.
+
+```bash
+# Terminal 1: your app
+bun --hot index.ts
+
+# Terminal 2: Spark sidekick
+bunx pi                                   # or just `pi` if installed globally
+```
+
+When Pi starts, Spark auto-loads (via `.pi/settings.json`), runs a health assessment, and begins watching `.spark/events/`. You can type to Pi normally — it's a full coding agent — AND it reacts to errors from your running app.
+
+Read `extensions/spark/EXTENSION.md` for the full guide.
+
 ## The Framework
 
 The framework lives in `manifest/`. It's ~2,500 lines total. Read it:
@@ -336,6 +372,41 @@ Read and follow .claude/skills/manifest-update/SKILL.md
 ```
 
 The skill walks you through reading upstream commits, understanding what changed, and applying updates intelligently — adapting to what your project has become rather than creating merge conflicts.
+
+## Spark — The Sidekick
+
+Spark is what makes Manifest applications self-aware. It's not a separate tool you install — it's part of the framework's philosophy that your app should be observable by the same agents that build it.
+
+### How It Works
+
+Your Manifest server captures errors (500 responses, unhandled exceptions) and writes them as JSON event files to `.spark/events/`. A Pi extension watches that directory and injects events into the agent's conversation. The connection is a plain directory of files — no sockets, no message queues, no dependencies.
+
+### Environment Modes
+
+| Environment | Tools | Behavior | Use Case |
+|-------------|-------|----------|----------|
+| `development` | Full (read, write, edit, bash) | **Fix** — investigate and repair | Local dev, active building |
+| `production` | Read-only | **Alert** — analyze and report | Monitoring, incident response |
+
+Configure in `config/spark.ts`. The environment resolves from `SPARK_ENV` → `NODE_ENV` → `'development'`.
+
+### Pause/Resume Protocol
+
+When you (or another agent) are actively making changes, tell Spark to hold off:
+
+```bash
+bun run manifest spark pause "refactoring auth flow"
+# ... make changes ...
+bun run manifest spark resume
+```
+
+While paused, Spark buffers events but doesn't act on them. When resumed, it reviews buffered events and acts on anything still relevant. If a pause goes stale (>30 minutes), Spark clears it on next startup and runs a doctor check to assess the damage.
+
+**This matters for multi-agent workflows.** If you're using Claude Code, Cursor, or any other agent alongside Spark, have that agent run `spark pause` before making changes. This prevents Spark from reacting to transient errors caused by in-progress work.
+
+### Trace IDs
+
+Every event carries a `traceId` that links back to the original request. For server errors, this is the same `request_id` from the response envelope — the ID the client sees. For unhandled errors, Spark generates a standalone trace ID. Follow the trace from client response → event file → agent investigation.
 
 ## When In Doubt
 
