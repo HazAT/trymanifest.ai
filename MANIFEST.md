@@ -8,7 +8,7 @@
 This is a Manifest application. All behavior lives in feature files.
 - features/ - One file per application behavior (2 features)
 - schemas/ - Drizzle ORM table definitions (0 schemas)
-- services/ - Shared services (0 services)
+- services/ - Shared services (1 services)
 - commands/ - CLI commands (0 commands)
 
 ## Conventions
