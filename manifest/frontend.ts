@@ -73,7 +73,8 @@ export async function watchFrontend(projectDir: string, onRebuild?: () => void) 
   const frontendDir = path.resolve(projectDir, 'frontend')
   let timeout: ReturnType<typeof setTimeout> | null = null
 
-  fs.watch(frontendDir, { recursive: true }, () => {
+  fs.watch(frontendDir, { recursive: true }, (_event, filename) => {
+    if (filename && (filename.startsWith('public/') || filename.includes('/public/'))) return
     if (timeout) clearTimeout(timeout)
     timeout = setTimeout(async () => {
       const start = performance.now()
@@ -102,6 +103,14 @@ export function createStaticHandler(distDir: string, options: { spaFallback: boo
     if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
       return new Response(file, { headers: { 'Cache-Control': 'no-cache' } })
     }
+
+    // Directory → index.html resolution
+    const indexFilePath = path.join(filePath, 'index.html')
+    if (fs.existsSync(indexFilePath) && fs.statSync(indexFilePath).isFile()) {
+      return new Response(Bun.file(indexFilePath), { headers: { 'Cache-Control': 'no-cache' } })
+    }
+
+    if (pathname.startsWith('/api/')) return null
 
     if (options.spaFallback) {
       const indexPath = path.join(distDir, 'index.html')
