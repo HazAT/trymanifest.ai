@@ -179,6 +179,7 @@
       <span class="text-sm font-bold text-white tracking-widest uppercase">Manifest</span>
       <div class="flex items-center gap-6">
         <a href="/philosophy" class="text-xs text-neutral-600 hover:text-terminal transition-colors cursor-pointer">Philosophy</a>
+        <a href="/workflow" class="text-xs text-neutral-600 hover:text-terminal transition-colors cursor-pointer">Workflow</a>
         <a href="https://github.com/HazAT/manifest" class="text-xs text-neutral-600 hover:text-terminal transition-colors cursor-pointer">GitHub</a>
       </div>
     </div>
@@ -321,6 +322,50 @@
           <p class="text-neutral-500 text-sm">
             Your code. Your repo. Your infrastructure. Manifest just gives you a foundation worth building on.
           </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ AGENT WORKFLOW ════════════════ -->
+  <section class="py-16 sm:py-32 px-6">
+    <div class="max-w-3xl mx-auto">
+      <div class="reveal">
+        <div class="text-xs text-neutral-600 tracking-wider mb-8">
+          <span class="text-terminal-dim">~</span><span class="text-neutral-600">/manifest $</span> <span class="text-neutral-500">manifest update</span>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-10 leading-tight">
+          Tell your agent. <span class="text-terminal glow">It knows what to do.</span>
+        </h2>
+
+        <div class="space-y-6 text-sm sm:text-base leading-relaxed">
+          <p>
+            Manifest isn't just code your agent can read — it's code your agent can <span class="text-white">operate</span>. Every CLI command is an agent prompt. Every operation is structured for machines.
+          </p>
+
+          <p>
+            Say <span class="text-white">"update from upstream"</span> and watch it work.
+          </p>
+
+          <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 font-mono text-sm space-y-2">
+            <div class="code-line pl-4 py-1"><span class="text-terminal">$</span> <span class="text-white">manifest update</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-neutral-500">fetching upstream...</span> <span class="text-terminal">done</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-neutral-500">reading 14 new commits...</span> <span class="text-terminal">understood</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-neutral-500">rebasing onto main...</span> <span class="text-amber">1 conflict</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-neutral-500">resolving server.ts...</span> <span class="text-terminal">merged</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-neutral-500">running tests...</span> <span class="text-terminal">all passing</span></div>
+          </div>
+
+          <p class="text-neutral-500 text-sm">
+            Updates, migrations, scaffolding, diagnostics — your agent handles the workflow. You handle the vision.
+          </p>
+
+          <div class="mt-6">
+            <a href="/workflow" class="text-terminal text-sm hover:underline cursor-pointer">See the full workflow →</a>
+          </div>
         </div>
       </div>
     </div>

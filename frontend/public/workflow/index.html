@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Manifest — Workflow</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-terminal: #00ff41;
+      --color-terminal-dim: #00cc33;
+      --color-amber: #ffb000;
+      --color-amber-dim: #cc8d00;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+  </style>
+  <style>
+    * { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    html { scroll-behavior: smooth; }
+    body { background: #000; color: #b0b0b0; }
+    ::selection { background: #00ff41; color: #000; }
+
+
+
+    /* Blinking cursor */
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    .cursor::after {
+      content: '';
+      display: inline-block;
+      width: 0.65em;
+      height: 1em;
+      background: #00ff41;
+      vertical-align: -0.15em;
+      margin-left: 1px;
+      animation: blink 1s step-end infinite;
+    }
+
+    /* Fade up on scroll */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Glow effects with scanline overlay */
+    .glow, .glow-amber {
+      position: relative;
+      display: inline-block;
+    }
+    .glow { text-shadow: 0 0 10px rgba(0, 255, 65, 0.3), 0 0 40px rgba(0, 255, 65, 0.1); }
+    .glow-amber { text-shadow: 0 0 10px rgba(255, 176, 0, 0.3), 0 0 40px rgba(255, 176, 0, 0.1); }
+    .glow::after, .glow-amber::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0, 0, 0, 0.08) 2px, rgba(0, 0, 0, 0.08) 4px
+      );
+    }
+
+    /* Code highlight bar */
+    .code-line {
+      border-left: 2px solid #1a1a1a;
+      transition: border-color 0.3s ease;
+    }
+    .code-line:hover {
+      border-color: #00ff41;
+      background: rgba(0, 255, 65, 0.03);
+    }
+
+    /* Section dividers */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #1a1a1a 20%, #1a1a1a 80%, transparent);
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <nav class="fixed top-0 left-0 right-0 z-50 px-6 py-5" style="background: linear-gradient(to bottom, #000 0%, #000 40%, transparent 100%);">
+    <div class="max-w-3xl mx-auto flex items-center justify-between">
+      <a href="/" class="text-xs text-neutral-500 hover:text-terminal transition-colors cursor-pointer">
+        <span class="text-terminal-dim">←</span> Manifest
+      </a>
+      <div class="flex items-center gap-6">
+        <a href="/philosophy" class="text-xs text-neutral-600 hover:text-terminal transition-colors cursor-pointer">Philosophy</a>
+        <a href="/workflow" class="text-xs text-neutral-600 hover:text-terminal transition-colors cursor-pointer">Workflow</a>
+        <a href="https://github.com/HazAT/manifest" class="text-xs text-neutral-600 hover:text-terminal transition-colors cursor-pointer">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ════════════════ TITLE ════════════════ -->
+  <section class="pt-24 sm:pt-32 pb-16 px-6">
+    <div class="max-w-3xl mx-auto">
+      <div class="text-xs text-neutral-600 tracking-wider mb-8">
+        <span class="text-terminal-dim">~</span><span class="text-neutral-600">/manifest $</span> <span class="text-neutral-500">cat WORKFLOW.md</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl font-bold text-terminal glow leading-tight tracking-tight mb-6">
+        A new way of working
+      </h1>
+
+      <p class="text-sm sm:text-base leading-relaxed text-neutral-400">
+        Manifest doesn't just help you write code. It changes how you maintain, update, and evolve a codebase — with agents that understand both your application and its relationship to the framework.
+      </p>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ NARRATIVE HOOK ════════════════ -->
+  <section class="py-16 sm:py-20 px-6">
+    <div class="max-w-3xl mx-auto reveal">
+      <div class="space-y-6 text-sm sm:text-base leading-relaxed">
+        <p>
+          You clone Manifest. You build your app — features, schemas, services. Weeks pass. You add authentication, wire up a database, build an API that your frontend talks to. The framework source lives right there in <code class="text-terminal text-xs">manifest/</code>, and you've read it. Maybe you've even tweaked a few things.
+        </p>
+
+        <p>
+          Meanwhile, upstream evolves. New CLI commands. Better validation. Improved error handling. The framework keeps getting better — and your project has diverged from it in ways that matter.
+        </p>
+
+        <p>
+          In any other framework, this is where things get painful. <span class="text-white">In Manifest, this is where agents earn their keep.</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ MANIFEST UPDATE ════════════════ -->
+  <section class="py-16 sm:py-20 px-6">
+    <div class="max-w-3xl mx-auto reveal">
+      <div class="text-xs text-neutral-600 tracking-wider mb-6">
+        <span class="text-terminal-dim">$</span> <span class="text-neutral-500">manifest update</span>
+      </div>
+
+      <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
+        You say <span class="text-terminal glow">update</span>. The agent understands both sides.
+      </h2>
+
+      <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">fetching upstream...</span> <span class="text-terminal">3 new commits</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">reading commit messages...</span> <span class="text-neutral-500">understanding intent</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">rebasing your work on top...</span> <span class="text-terminal">12 commits replayed</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-amber">▸</span> <span class="text-neutral-400">conflict in AGENTS.md...</span> <span class="text-amber">framework docs → accept upstream, your notes → keep yours</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">bun test / tsc / manifest check</span> <span class="text-terminal">all pass</span></div>
+      </div>
+
+      <div class="space-y-6 text-sm sm:text-base leading-relaxed">
+        <p>
+          This isn't <code class="text-terminal text-xs">npm update</code>. There's no black-box package to upgrade. The framework is source code in your project — and the agent reads every upstream commit message, understands what changed and why, then rebases your local work on top. Your commits stay linear. Your history stays clean.
+        </p>
+
+        <p>
+          When there's a conflict, the agent doesn't blindly pick a side. It reads both versions, categorizes the file — <span class="text-white">framework improvement or application code</span> — and makes the right call. Your features are sovereign. Framework improvements are welcome. The agent knows the difference.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ MANIFEST COMMIT ════════════════ -->
+  <section class="py-16 sm:py-20 px-6">
+    <div class="max-w-3xl mx-auto reveal">
+      <div class="text-xs text-neutral-600 tracking-wider mb-6">
+        <span class="text-terminal-dim">$</span> <span class="text-neutral-500">manifest commit</span>
+      </div>
+
+      <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
+        Every commit is a <span class="text-amber glow-amber">letter to the next agent</span>
+      </h2>
+
+      <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-4 text-sm">
+        <div>
+          <div class="text-neutral-600 text-xs mb-2">Before — what most projects get:</div>
+          <div class="code-line pl-4 py-1"><span class="text-neutral-500">fix stuff</span></div>
+        </div>
+        <div class="border-t border-neutral-800 pt-4">
+          <div class="text-neutral-600 text-xs mb-2">After — what Manifest expects:</div>
+          <div class="code-line pl-4 py-1"><span class="text-terminal">fix(registration):</span> <span class="text-white">handle null displayName from OAuth providers</span></div>
+          <div class="code-line pl-4 py-1 mt-2"><span class="text-neutral-400">OAuth providers can omit the display name field entirely.</span></div>
+          <div class="code-line pl-4 py-1"><span class="text-neutral-400">The registration feature assumed it was always present</span></div>
+          <div class="code-line pl-4 py-1"><span class="text-neutral-400">because the input schema marks it required — but OAuth</span></div>
+          <div class="code-line pl-4 py-1"><span class="text-neutral-400">registrations bypass input validation.</span></div>
+          <div class="code-line pl-4 py-1 mt-2"><span class="text-neutral-500">Root cause: features/UserRegistration.ts line 34</span></div>
+          <div class="code-line pl-4 py-1"><span class="text-neutral-500">accessed input.displayName without a null check.</span></div>
+        </div>
+      </div>
+
+      <div class="space-y-6 text-sm sm:text-base leading-relaxed">
+        <p>
+          In Manifest, commits aren't an afterthought — they're infrastructure. The commit history is how agents orient themselves when they arrive at your codebase. It's how <code class="text-terminal text-xs">manifest update</code> knows what to accept, skip, or adapt. It's how debugging works without <code class="text-terminal text-xs">git bisect</code>.
+        </p>
+
+        <p>
+          <span class="text-white">A commit message is a letter to the next agent explaining what you did and why.</span> What changed. Why it changed. The approach taken. What was deliberately left out. When the next agent reads <code class="text-terminal text-xs">git log</code>, it should understand the progression without looking at a single diff.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ MANIFEST LEARN ════════════════ -->
+  <section class="py-16 sm:py-20 px-6">
+    <div class="max-w-3xl mx-auto reveal">
+      <div class="text-xs text-neutral-600 tracking-wider mb-6">
+        <span class="text-terminal-dim">$</span> <span class="text-neutral-500">manifest learn</span>
+      </div>
+
+      <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
+        After big changes, <span class="text-terminal glow">nothing drifts</span>
+      </h2>
+
+      <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">checking MANIFEST.md...</span> <span class="text-amber">stale — 2 new features not indexed</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">checking AGENTS.md...</span> <span class="text-terminal">accurate</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">checking skills...</span> <span class="text-terminal">all current</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">checking types...</span> <span class="text-terminal">tsc clean</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">checking tests...</span> <span class="text-amber">1 feature missing test file</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">checking conventions...</span> <span class="text-terminal">manifest check clean</span></div>
+      </div>
+
+      <div class="space-y-6 text-sm sm:text-base leading-relaxed">
+        <p>
+          You added three features, installed an extension, and modified a service. The code works. But does the rest of the codebase know? Is <code class="text-terminal text-xs">MANIFEST.md</code> still accurate? Do the skills still reflect reality? Are there test files for everything?
+        </p>
+
+        <p>
+          <code class="text-terminal text-xs">manifest learn</code> treats your codebase as a living system. When one part changes, the agent checks whether other parts need to catch up — documentation, indexes, types, tests, conventions. <span class="text-white">The next agent that arrives should never follow stale instructions</span> because you forgot to update the map after moving the furniture.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ MANIFEST MERGE-CONFLICTS ════════════════ -->
+  <section class="py-16 sm:py-20 px-6">
+    <div class="max-w-3xl mx-auto reveal">
+      <div class="text-xs text-neutral-600 tracking-wider mb-6">
+        <span class="text-neutral-700">&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span> <span class="text-neutral-500">HEAD</span>
+      </div>
+
+      <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
+        Conflicts happen. The agent knows <span class="text-amber glow-amber">the difference</span>.
+      </h2>
+
+      <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">manifest/server.ts</span> <span class="text-neutral-600">→</span> <span class="text-terminal">framework → accept upstream improvements</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">features/UserRegistration.ts</span> <span class="text-neutral-600">→</span> <span class="text-amber">your app → keep yours</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">AGENTS.md</span> <span class="text-neutral-600">→</span> <span class="text-white">both → accept framework docs, keep your architecture</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">VISION.md</span> <span class="text-neutral-600">→</span> <span class="text-amber">sacred → always yours</span></div>
+      </div>
+
+      <div class="space-y-6 text-sm sm:text-base leading-relaxed">
+        <p>
+          Merge conflicts in Manifest aren't just code conflicts — they're <span class="text-white">intent conflicts</span>. The upstream repo evolves the framework. Your project evolves the application. When they collide, the agent categorizes every file: framework code, application code, shared documentation, or your vision.
+        </p>
+
+        <p>
+          Framework improvements get accepted. Your features stay untouched. Shared files like <code class="text-terminal text-xs">AGENTS.md</code> get both sides — upstream's wording polish and your architecture notes. And <code class="text-terminal text-xs">VISION.md</code>? <span class="text-white">That's your app's soul. Upstream has no say.</span> The agent will never change what your application is supposed to be.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ CTA ════════════════ -->
+  <section class="py-16 sm:py-20 px-6">
+    <div class="max-w-3xl mx-auto text-center reveal">
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+        <a href="/" class="group inline-flex items-center gap-2 bg-terminal text-black font-bold text-sm px-6 py-3 rounded hover:bg-terminal-dim transition-colors cursor-pointer">
+          <span>←</span> Back to Manifest
+        </a>
+        <a href="https://github.com/HazAT/manifest" class="inline-flex items-center gap-2 border border-neutral-700 text-neutral-400 font-medium text-sm px-6 py-3 rounded hover:border-terminal hover:text-terminal transition-colors cursor-pointer">
+          View on GitHub
+        </a>
+      </div>
+
+      <p class="mt-10 text-xs text-neutral-600">
+        Open source. MIT license. Read every line.
+      </p>
+    </div>
+  </section>
+
+  <footer class="py-12 px-6 text-center">
+    <div class="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <span class="text-xs text-neutral-700">manifest v0.1 — the agent framework · built with <a href="https://github.com/mariozechner/pi-coding-agent" class="hover:text-terminal transition-colors cursor-pointer">pi</a> using manifest</span>
+      <div class="flex items-center gap-6">
+        <a href="/philosophy" class="text-xs text-neutral-700 hover:text-terminal transition-colors cursor-pointer">Philosophy</a>
+        <a href="https://github.com/HazAT/manifest" class="text-xs text-neutral-700 hover:text-terminal transition-colors cursor-pointer">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Dev reload -->
+  <script>
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      const source = new EventSource('/__dev/reload');
+      source.addEventListener('reload', () => location.reload());
+    }
+  </script>
+
+  <!-- Scroll reveal observer -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
