@@ -147,18 +147,21 @@
   <section class="py-16 sm:py-20 px-6">
     <div class="max-w-3xl mx-auto reveal">
       <div class="text-xs text-neutral-600 tracking-wider mb-6">
-        <span class="text-terminal-dim">$</span> <span class="text-neutral-500">manifest update</span>
+        <span class="text-neutral-500">agent skill —</span> <span class="text-terminal text-xs">manifest-update</span>
       </div>
 
       <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
-        You say <span class="text-terminal glow">update</span>. The agent understands both sides.
+        You say <span class="text-terminal glow">"update"</span>. The agent understands both sides.
       </h2>
 
       <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
+        <div class="code-line pl-4 py-1"><span class="text-neutral-600">›</span> <span class="text-white">update from upstream</span></div>
+        <div class="code-line pl-4 py-1 mt-1"><span class="text-neutral-600 text-xs">loading skill:</span> <span class="text-terminal text-xs">manifest-update</span></div>
         <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">fetching manifest-upstream...</span> <span class="text-terminal">5 new commits</span></div>
         <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">reading commit messages...</span> <span class="text-neutral-500">grouping by area</span></div>
         <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">batch 1: CLI improvements (3 commits)...</span> <span class="text-terminal">recommend: pick</span></div>
         <div class="code-line pl-4 py-1"><span class="text-neutral-500">▸</span> <span class="text-neutral-400">batch 2: example feature (2 commits)...</span> <span class="text-neutral-500">recommend: skip</span></div>
+        <div class="code-line pl-4 py-1 mt-1"><span class="text-neutral-600">›</span> <span class="text-white">pick batch 1, skip batch 2</span></div>
         <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">cherry-picking batch 1 onto main...</span> <span class="text-terminal">clean</span></div>
         <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">bun test / tsc / manifest check</span> <span class="text-terminal">all pass</span></div>
       </div>
@@ -181,7 +184,7 @@
   <section class="py-16 sm:py-20 px-6">
     <div class="max-w-3xl mx-auto reveal">
       <div class="text-xs text-neutral-600 tracking-wider mb-6">
-        <span class="text-terminal-dim">$</span> <span class="text-neutral-500">manifest commit</span>
+        <span class="text-neutral-500">agent skill —</span> <span class="text-terminal text-xs">manifest-commit</span>
       </div>
 
       <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
@@ -207,7 +210,7 @@
 
       <div class="space-y-6 text-sm sm:text-base leading-relaxed">
         <p>
-          In Manifest, commits aren't an afterthought — they're infrastructure. The commit history is how agents orient themselves when they arrive at your codebase. It's how <code class="text-terminal text-xs">manifest update</code> knows what to accept, skip, or adapt. It's how debugging works without <code class="text-terminal text-xs">git bisect</code>.
+          In Manifest, commits aren't an afterthought — they're infrastructure. The commit history is how agents orient themselves when they arrive at your codebase. It's how the update skill knows what to accept, skip, or adapt. It's how debugging works without <code class="text-terminal text-xs">git bisect</code>.
         </p>
 
         <p>

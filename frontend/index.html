@@ -340,7 +340,7 @@
     <div class="max-w-3xl mx-auto">
       <div class="reveal">
         <div class="text-xs text-neutral-600 tracking-wider mb-8">
-          <span class="text-terminal-dim">~</span><span class="text-neutral-600">/manifest $</span> <span class="text-neutral-500">manifest update</span>
+          <span class="text-neutral-500">agent skills — not CLI commands</span>
         </div>
 
         <h2 class="text-2xl sm:text-3xl font-bold text-white mb-10 leading-tight">
@@ -349,25 +349,27 @@
 
         <div class="space-y-6 text-sm sm:text-base leading-relaxed">
           <p>
-            Manifest isn't just code your agent can read — it's code your agent can <span class="text-white">operate</span>. Every CLI command is an agent prompt. Every operation is structured for machines.
+            Manifest isn't just code your agent can read — it's code your agent can <span class="text-white">operate</span>. Some things are CLI commands. Others are <span class="text-white">skills</span> — structured workflows your agent loads and executes when you ask.
           </p>
 
           <p>
-            Say <span class="text-white">"update from upstream"</span> and watch it work.
+            Say <span class="text-white">"update from upstream"</span> and the agent loads the update skill, fetches upstream, reads every commit, and walks you through what to pick.
           </p>
 
           <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 font-mono text-sm space-y-2">
-            <div class="code-line pl-4 py-1"><span class="text-terminal">$</span> <span class="text-white">bun manifest update</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-neutral-500">fetching manifest-upstream...</span> <span class="text-terminal">3 new commits</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-neutral-500">reading commit messages...</span> <span class="text-terminal">understood intent</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-neutral-500">recommending: pick 2, skip 1...</span> <span class="text-terminal">your call</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-neutral-500">cherry-picking onto main...</span> <span class="text-amber">1 conflict</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-neutral-500">resolving server.ts...</span> <span class="text-terminal">framework → accept</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-neutral-500">running tests...</span> <span class="text-terminal">all passing</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-neutral-600">›</span> <span class="text-white">update from upstream</span></div>
+            <div class="code-line pl-4 py-1 mt-1"><span class="text-neutral-600 text-xs">loading skill:</span> <span class="text-terminal text-xs">manifest-update</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">fetching manifest-upstream...</span> <span class="text-terminal">3 new commits</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">reading commit messages...</span> <span class="text-terminal">understood intent</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">recommending: pick 2, skip 1...</span> <span class="text-terminal">your call</span></div>
+            <div class="code-line pl-4 py-1 mt-1"><span class="text-neutral-600">›</span> <span class="text-white">pick both</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">cherry-picking onto main...</span> <span class="text-amber">1 conflict</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">resolving server.ts...</span> <span class="text-terminal">framework → accept</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">running tests...</span> <span class="text-terminal">all passing</span></div>
           </div>
 
           <p class="text-neutral-500 text-sm">
-            Updates, migrations, scaffolding, diagnostics — your agent handles the workflow. You handle the vision.
+            Updates, commits, conflict resolution — these are agent skills, not shell commands. Your agent handles the workflow. You handle the vision.
           </p>
 
           <div class="mt-6">
