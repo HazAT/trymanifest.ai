@@ -713,6 +713,12 @@
   let localSentMessages = [];  // { text, queued, el? }
   const queuedContainer = document.getElementById('queued-messages');
 
+  // Track messages sent by this client.
+  // Non-queued: rendered immediately in chat, echo suppressed.
+  // Queued (sent while agent is streaming): shown in queued area, moved to chat on echo.
+  let localSentMessages = [];  // { text, queued, el? }
+  const queuedContainer = document.getElementById('queued-messages');
+
   connect();
 
   function connect() {
