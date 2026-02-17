@@ -117,15 +117,15 @@
         </p>
 
         <p>
-          The framework itself is ~1,000 lines of TypeScript source code that ships inside your project — not as an npm package. When an agent needs to understand how routing works, it reads <code class="text-terminal text-xs">manifest/router.ts</code> — 76 lines. When it needs to change validation, it edits <code class="text-terminal text-xs">manifest/validator.ts</code> — 92 lines. There is no black box.
+          The entire framework is ~3,100 lines of TypeScript source code that ships inside your project — not as an npm package. That's small enough to fit in a single context window. <span class="text-white">Your agent doesn't burn tokens guessing what the framework does — it reads it.</span> Router, validator, server, scanner, testing, CLI — all right there. When something breaks, the agent opens the file and fixes it. No Stack Overflow. No docs site. Just source code.
         </p>
 
         <p>
-          No dependencies. No hidden functionality. No middleware. No decorators. No dependency injection. No file-system routing. No convention-based auto-discovery. If something happens, it's because the code says so.
+          No hidden functionality. No middleware. No decorators. No dependency injection. No file-system routing. No convention-based auto-discovery. If something happens, it's because the code says so.
         </p>
 
         <p class="text-neutral-500 text-sm">
-          The whole framework fits in a single context window. An agent doesn't just use Manifest — it understands every line of it.
+          Token-efficient by design. The agent reads the framework once, understands it completely, and never wastes context on abstractions it can't see.
         </p>
 
         <p class="mt-4">
@@ -137,7 +137,7 @@
         </p>
 
         <p>
-          What it does ask is that you <span class="text-white">change how you think about writing software.</span> Not "learn a new framework" — the framework is 1,000 lines, you'll read it in ten minutes. The shift is in how you approach the work: writing code that's meant to be read by something other than you, declaring intent explicitly, keeping behavior visible. That's a mindset change, not a tooling change.
+          What it does ask is that you <span class="text-white">change how you think about writing software.</span> Not "learn a new framework" — the framework is ~3,100 lines, your agent reads it in seconds. The shift is in how you approach the work: writing code that's meant to be read by something other than you, declaring intent explicitly, keeping behavior visible. That's a mindset change, not a tooling change.
         </p>
       </div>
     </div>
@@ -187,11 +187,11 @@
 
       <div class="space-y-6 text-sm sm:text-base leading-relaxed">
         <p>
-          Manifest is young. The core framework works — features, validation, routing, testing, CLI, frontend support, streaming. You can build real things with it today. But large parts of the vision are still ahead: database integration, authentication, the full production agent sidecar.
+          Manifest is young. The core framework works — features, validation, routing, testing, CLI, frontend support, streaming, rate limiting, event-triggered features, database integration, Docker deployment. Spark — the agent sidecar — watches your app in development and production. You can build real things with it today.
         </p>
 
         <p>
-          We're not hiding that. The roadmap is public. The framework is 1,055 lines you can read in minutes. There are no announcements about announcements.
+          We're not hiding what's still ahead. The roadmap is public. The framework is ~3,100 lines you can read in minutes. There are no announcements about announcements.
         </p>
 
         <p>

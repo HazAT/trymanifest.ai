@@ -305,18 +305,18 @@
           </p>
 
           <p>
-            Fork the repo. Clone it. That's your project now — every file, every line. You and your agent build on top of it, change whatever you want, delete what you don't need.
+            Clone the repo. Your agent sets up a two-branch model — <code class="text-terminal text-xs">manifest</code> tracks the upstream framework, <code class="text-terminal text-xs">main</code> is your app. You develop on <code class="text-terminal text-xs">main</code>, and when upstream improves, your agent cherry-picks what you want. You control what enters your project.
           </p>
 
           <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 font-mono text-sm space-y-2">
-            <div class="code-line pl-4 py-1"><span class="text-terminal">$</span> <span class="text-white">git clone manifest my-project</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">$</span> <span class="text-white">git clone https://github.com/HazAT/manifest.git my-project</span></div>
             <div class="code-line pl-4 py-1"><span class="text-terminal">$</span> <span class="text-white">cd my-project</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-terminal">$</span> <span class="text-white">docker build -t my-app .</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-terminal">$</span> <span class="text-white">docker run my-app</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-neutral-500"># Spark sets up branches, renames the project, writes your VISION.md</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">$</span> <span class="text-white">bun --hot index.ts</span></div>
           </div>
 
           <p>
-            When you're ready to ship, build a Docker image and deploy it anywhere. That's the whole story. No build pipeline to configure, no platform lock-in.
+            When you're ready to ship, <code class="text-terminal text-xs">docker compose up --build</code> and deploy anywhere. No build pipeline to configure, no platform lock-in.
           </p>
 
           <p>
@@ -355,11 +355,12 @@
           </p>
 
           <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 font-mono text-sm space-y-2">
-            <div class="code-line pl-4 py-1"><span class="text-terminal">$</span> <span class="text-white">manifest update</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-neutral-500">fetching upstream...</span> <span class="text-terminal">done</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-neutral-500">reading 14 new commits...</span> <span class="text-terminal">understood</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-neutral-500">rebasing onto main...</span> <span class="text-amber">1 conflict</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-neutral-500">resolving server.ts...</span> <span class="text-terminal">merged</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">$</span> <span class="text-white">bun manifest update</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-neutral-500">fetching manifest-upstream...</span> <span class="text-terminal">3 new commits</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-neutral-500">reading commit messages...</span> <span class="text-terminal">understood intent</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-neutral-500">recommending: pick 2, skip 1...</span> <span class="text-terminal">your call</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-neutral-500">cherry-picking onto main...</span> <span class="text-amber">1 conflict</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-neutral-500">resolving server.ts...</span> <span class="text-terminal">framework → accept</span></div>
             <div class="code-line pl-4 py-1"><span class="text-neutral-500">running tests...</span> <span class="text-terminal">all passing</span></div>
           </div>
 
@@ -400,9 +401,10 @@
 
           <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 font-mono text-sm">
             <div class="text-neutral-600 mb-3">// spark session — live</div>
-            <div class="text-terminal">▸ watching: <span class="text-white">3 services, 2 routes, 1 cron</span></div>
-            <div class="text-terminal">▸ uptime: <span class="text-white">14d 6h 22m</span></div>
-            <div class="text-amber">▸ last event: <span class="text-white">TypeError in /api/users — auto-fixed in 4.2s</span></div>
+            <div class="text-terminal">▸ environment: <span class="text-white">production</span> · mode: <span class="text-white">fix</span></div>
+            <div class="text-terminal">▸ watching: <span class="text-white">.spark/events/</span></div>
+            <div class="text-amber">▸ event: <span class="text-white">500 in user-registration — reading feature file...</span></div>
+            <div class="text-terminal">▸ fixed: <span class="text-white">null check on displayName · hot-reloaded · 4.2s</span></div>
           </div>
 
           <p>

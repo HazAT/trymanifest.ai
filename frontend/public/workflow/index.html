@@ -155,20 +155,21 @@
       </h2>
 
       <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
-        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">fetching upstream...</span> <span class="text-terminal">3 new commits</span></div>
-        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">reading commit messages...</span> <span class="text-neutral-500">understanding intent</span></div>
-        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">rebasing your work on top...</span> <span class="text-terminal">12 commits replayed</span></div>
-        <div class="code-line pl-4 py-1"><span class="text-amber">▸</span> <span class="text-neutral-400">conflict in AGENTS.md...</span> <span class="text-amber">framework docs → accept upstream, your notes → keep yours</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">fetching manifest-upstream...</span> <span class="text-terminal">5 new commits</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">reading commit messages...</span> <span class="text-neutral-500">grouping by area</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">batch 1: CLI improvements (3 commits)...</span> <span class="text-terminal">recommend: pick</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-neutral-500">▸</span> <span class="text-neutral-400">batch 2: example feature (2 commits)...</span> <span class="text-neutral-500">recommend: skip</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">cherry-picking batch 1 onto main...</span> <span class="text-terminal">clean</span></div>
         <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">bun test / tsc / manifest check</span> <span class="text-terminal">all pass</span></div>
       </div>
 
       <div class="space-y-6 text-sm sm:text-base leading-relaxed">
         <p>
-          This isn't <code class="text-terminal text-xs">npm update</code>. There's no black-box package to upgrade. The framework is source code in your project — and the agent reads every upstream commit message, understands what changed and why, then rebases your local work on top. Your commits stay linear. Your history stays clean.
+          This isn't <code class="text-terminal text-xs">npm update</code>. There's no black-box package to upgrade. The framework is source code in your project — and the agent reads every upstream commit, groups them by area, and recommends what to cherry-pick and what to skip. <span class="text-white">You decide what enters your app.</span>
         </p>
 
         <p>
-          When there's a conflict, the agent doesn't blindly pick a side. It reads both versions, categorizes the file — <span class="text-white">framework improvement or application code</span> — and makes the right call. Your features are sovereign. Framework improvements are welcome. The agent knows the difference.
+          The two-branch model makes this clean. The <code class="text-terminal text-xs">manifest</code> branch tracks upstream. Your <code class="text-terminal text-xs">main</code> branch is your app. Updates flow one direction: upstream → <code class="text-terminal text-xs">manifest</code> → cherry-pick onto <code class="text-terminal text-xs">main</code>. When there's a conflict, the agent categorizes the file — <span class="text-white">framework improvement or application code</span> — and makes the right call. Your features are sovereign. Framework improvements are welcome. The agent knows the difference.
         </p>
       </div>
     </div>
@@ -272,7 +273,7 @@
 
       <div class="space-y-6 text-sm sm:text-base leading-relaxed">
         <p>
-          Merge conflicts in Manifest aren't just code conflicts — they're <span class="text-white">intent conflicts</span>. The upstream repo evolves the framework. Your project evolves the application. When they collide, the agent categorizes every file: framework code, application code, shared documentation, or your vision.
+          Conflicts during cherry-picks aren't just code conflicts — they're <span class="text-white">intent conflicts</span>. The upstream repo evolves the framework. Your project evolves the application. When they collide, the agent categorizes every file: framework code, application code, shared documentation, or your vision.
         </p>
 
         <p>
