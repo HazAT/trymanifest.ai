@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Manifest — Built by agents, for agents</title>
+  <title>Manifest — What if frameworks were built for agents?</title>
 <!-- include: head.html -->
   <style>
     /* Opening headline — breaks from terminal aesthetic */
@@ -132,7 +132,7 @@
         </div>
 
         <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-terminal glow leading-tight tracking-tight">
-          The first framework<br>built by agents, for agents.
+          What if the framework<br>was built for the agent?
         </h2>
 
         <div class="mt-8 space-y-4 text-sm sm:text-base leading-relaxed">
@@ -140,10 +140,10 @@
             Every framework that exists was built by humans, for humans.
           </p>
           <p class="code-line pl-4 py-1">
-            But humans are stepping back from writing code.
+            But more and more, agents are the ones writing the code.
           </p>
           <p class="code-line pl-4 py-1 text-white">
-            Something had to be built for what comes next.
+            What would it look like to design for that?
           </p>
         </div>
       </div>
@@ -166,26 +166,22 @@
 
         <div class="space-y-6 text-sm sm:text-base leading-relaxed">
           <p>
-            Software is changing. Not in the way it's always been changing — incrementally, tool by tool. This time the whole thing shifts. <span class="text-white">Humans will stop writing code. Agents will.</span>
+            An experiment in framework design. The premise: as agents take on more of the coding, the frameworks they work with could be designed around how <em>they</em> read and reason — not just how humans do.
           </p>
 
           <p>
-            Every framework you've ever used was designed for a human reader. Documentation, conventions, abstractions — all optimized for the way <em>people</em> think about code.
-          </p>
-
-          <p>
-            Agents don't think like people.
+            Every framework you've used was designed for human readers. Documentation, conventions, abstractions — optimized for the way people think about code. That works. But agents process code differently. What if the foundation accounted for that?
           </p>
 
           <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
             <div class="code-line pl-4 py-1"><span class="text-amber">No dependencies.</span> Nothing hidden behind node_modules.</div>
             <div class="code-line pl-4 py-1"><span class="text-amber">No hidden functionality.</span> No magic methods, no lifecycle hooks.</div>
             <div class="code-line pl-4 py-1"><span class="text-amber">No docs needed.</span> What you read in code is what you get.</div>
-            <div class="code-line pl-4 py-1 text-white"><span class="text-terminal">An agent reads it and builds.</span> That's it.</div>
+            <div class="code-line pl-4 py-1 text-white"><span class="text-terminal">The idea:</span> an agent reads it and builds. No framework knowledge required.</div>
           </div>
 
           <p class="text-neutral-500 text-sm">
-            No framework to learn. No conventions to memorize. Just code that means what it says.
+            Whether that trade-off is worth it is something you'd have to try and decide for yourself.
           </p>
         </div>
       </div>
@@ -203,16 +199,16 @@
         </div>
 
         <h2 class="text-2xl sm:text-3xl font-bold text-white mb-10 leading-tight">
-          How to <span class="text-terminal glow">ship</span>
+          How it <span class="text-terminal glow">works</span>
         </h2>
 
         <div class="space-y-6 text-sm sm:text-base leading-relaxed">
           <p>
-            Manifest is not a dependency you install. <span class="text-white">It's a codebase you own.</span>
+            Manifest isn't a dependency you install — <span class="text-white">it's source code you own.</span> The entire framework lives in your project. You can read every line, modify anything, and your agent can too.
           </p>
 
           <p>
-            You don't set it up. Your agent does. Paste the Spark prompt, tell it what you're building, and it handles everything — cloning the repo, setting up the two-branch model, renaming the project, writing your <code class="text-terminal text-xs">VISION.md</code>, and getting the server running. You describe the app. The agent builds the foundation.
+            Setup is agent-driven. Paste the Spark prompt, describe what you want to build, and the agent handles the scaffolding — cloning the repo, setting up branches, writing your <code class="text-terminal text-xs">VISION.md</code>, getting the server running.
           </p>
 
           <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 font-mono text-sm space-y-2">
@@ -225,15 +221,11 @@
           </div>
 
           <p>
-            When you're ready to ship, <code class="text-terminal text-xs">docker compose up --build</code> and deploy anywhere. No build pipeline to configure, no platform lock-in.
-          </p>
-
-          <p>
-            Already have an existing project? <span class="text-white">Start fresh.</span> Define your vision, point an agent at your old codebase, and let it migrate what matters into a clean Manifest project. A clean start beats a messy migration every time.
+            When you're ready to deploy, <code class="text-terminal text-xs">docker compose up --build</code> works out of the box. No build pipeline to configure, no platform lock-in.
           </p>
 
           <p class="text-neutral-500 text-sm">
-            Your code. Your repo. Your infrastructure. The agent just gets you there faster.
+            Your code. Your repo. Your infrastructure. Nothing opaque between you and what's running.
           </p>
         </div>
       </div>
@@ -251,12 +243,12 @@
         </div>
 
         <h2 class="text-2xl sm:text-3xl font-bold text-white mb-10 leading-tight">
-          Tell your agent. <span class="text-terminal glow">It knows what to do.</span>
+          What if your agent could <span class="text-terminal glow">operate</span> the framework?
         </h2>
 
         <div class="space-y-6 text-sm sm:text-base leading-relaxed">
           <p>
-            Manifest isn't just code your agent can read — it's code your agent can <span class="text-white">operate</span>. Some things are CLI commands. Others are <span class="text-white">skills</span> — structured workflows your agent loads and executes when you ask.
+            Manifest isn't just code your agent can read — it's designed so your agent can <span class="text-white">operate</span> it. Some things are CLI commands. Others are <span class="text-white">skills</span> — structured workflows your agent loads and executes when you ask.
           </p>
 
           <p>
@@ -276,7 +268,7 @@
           </div>
 
           <p class="text-neutral-500 text-sm">
-            Updates, commits, conflict resolution — these are agent skills, not shell commands. Your agent handles the workflow. You handle the vision.
+            Updates, commits, conflict resolution — these are agent skills, not shell commands. The agent handles the workflow. You handle the decisions.
           </p>
 
           <div class="mt-6">
@@ -303,11 +295,11 @@
 
         <div class="space-y-6 text-sm sm:text-base leading-relaxed">
           <p>
-            Why stop at building with agents? <span class="text-white">Run with them.</span>
+            If agents can read the code, can they also <span class="text-white">watch it run?</span>
           </p>
 
           <p>
-            Manifest was designed from the ground up to be monitored by agents. A built-in notification system tells a running agent exactly what happened when things go wrong — errors, crashes, failures — and gives it the context to act.
+            Spark is a sidekick agent that runs alongside your application. When something goes wrong — an error, a crash, an unhandled exception — it sees it with full context and can investigate, diagnose, and fix.
           </p>
 
           <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 font-mono text-sm">
@@ -319,15 +311,11 @@
           </div>
 
           <p>
-            Every request through the system is just JSON — a structured envelope with status, context, and trace ID. Every error Spark catches is written as a JSON file. <span class="text-white">Always inspectable. By you. By the agent. By anything.</span>
+            Every request is a structured JSON envelope with status, context, and trace ID. Every error is a JSON file. <span class="text-white">Always inspectable. By you. By the agent. By anything.</span>
           </p>
 
           <p>
-            Spark runs alongside your application. In development. <span class="text-white">In production.</span> It sees what your app sees, and it acts on your behalf.
-          </p>
-
-          <p class="text-neutral-500 text-sm">
-            An agent monitoring your application, making decisions to serve your vision. That's not a feature — that's a paradigm.
+            This is the part of the experiment we're most curious about. An agent that doesn't just build your app but monitors it — in development and in production. It works surprisingly well for some things. For others, it's still early. That's kind of the point.
           </p>
         </div>
       </div>
@@ -350,23 +338,23 @@
 
         <div class="space-y-6 text-sm sm:text-base leading-relaxed">
           <p>
-            Agents will write the code. Agents will monitor the systems. Agents will fix what breaks.
+            However far agents go — writing code, monitoring systems, fixing what breaks — one thing doesn't change.
           </p>
 
           <p class="text-white text-base sm:text-lg">
-            But only you know what to build.
+            You decide what gets built.
           </p>
 
           <p>
-            The work changes. The decisions don't. What matters, what ships, what it looks like, how it feels — that's still yours.
+            The tools shift. The decisions don't. What matters, what ships, what it looks like, how it feels — those are still yours.
           </p>
 
           <p>
-            Agents do most of the work now. But the <em>what</em> and the <em>why</em> — that's on you. It always will be.
+            Manifest is one way to explore that relationship. The agent handles more of the how. You own the what and the why.
           </p>
 
           <p class="text-amber text-sm mt-8">
-            It's on you to decide what you make out of it.
+            What you make of it is up to you.
           </p>
         </div>
       </div>

@@ -111,43 +111,43 @@
       </div>
 
       <h1 class="text-3xl sm:text-4xl font-bold text-terminal glow leading-tight tracking-tight mb-6">
-        Why Manifest exists
+        An experiment
       </h1>
 
       <p class="text-sm sm:text-base leading-relaxed text-neutral-400">
-        An honest look at what we're building, why we think it matters, and where it's headed.
+        Manifest is an idea first, a framework second. This is an honest look at what we're exploring and why we think it's worth trying.
       </p>
     </div>
   </section>
 
   <div class="divider mx-6"></div>
 
-  <!-- ════════════════ THE SHIFT ════════════════ -->
+  <!-- ════════════════ THE QUESTION ════════════════ -->
   <section class="py-16 sm:py-20 px-6">
     <div class="max-w-3xl mx-auto reveal">
       <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
-        Software engineering is <span class="text-terminal glow">changing</span>
+        A question worth <span class="text-terminal glow">asking</span>
       </h2>
 
       <div class="space-y-6 text-sm sm:text-base leading-relaxed">
         <p>
-          For decades we organized ourselves by layer. Front-end engineers. Back-end engineers. Infrastructure engineers. Data engineers. Each with their own languages, tools, communities, and mental models.
+          Agents are writing more and more of our code. Not autocomplete — actual implementation. Reading codebases, understanding intent, building features end to end. This is happening now, and it's accelerating.
         </p>
 
         <p>
-          That specialization made sense. Building a responsive UI and tuning a database query are genuinely different skills. They still are. <span class="text-white">Specialization will always exist</span> — someone will always care more about pixel-perfect layouts, and someone else about query plans.
+          Which raises a question nobody has a definitive answer to: <span class="text-white">what should a framework look like if agents are the primary authors?</span>
         </p>
 
         <p>
-          But the lines are blurring. Agents don't see layers the same way humans do. An agent reading your codebase doesn't think "I'm a front-end engineer" — it reads the feature file, understands the API, writes the component, sets up the database table, and moves on. The full stack isn't a career path. It's a single context window.
+          Every framework that exists today was designed for human readers. That made perfect sense — humans were the ones writing and reading the code. But as that changes, is there a better foundation? One designed around how agents actually work?
         </p>
 
         <p class="text-white">
-          In the end, we're all just engineers building applications.
+          Manifest is our attempt to find out.
         </p>
 
         <p>
-          The tools need to catch up to that reality.
+          Maybe this is the right approach. Maybe it's not. Maybe agent-first is a category that matters, or maybe agents will get good enough that it doesn't. We don't know yet. <span class="text-white">The only way to find out is to build it and see how far it goes.</span>
         </p>
       </div>
     </div>
@@ -155,39 +155,39 @@
 
   <div class="divider mx-6"></div>
 
-  <!-- ════════════════ THE PROBLEM ════════════════ -->
+  <!-- ════════════════ THE OBSERVATION ════════════════ -->
   <section class="py-16 sm:py-20 px-6">
     <div class="max-w-3xl mx-auto reveal">
       <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
-        The problem with <span class="text-amber glow-amber">current frameworks</span>
+        What we <span class="text-amber glow-amber">noticed</span>
       </h2>
 
       <div class="space-y-6 text-sm sm:text-base leading-relaxed">
         <p>
-          Every framework you've used was designed by humans for humans. That's not a criticism — it was the right choice when humans were the ones writing code. But it produced a particular kind of complexity.
+          When you watch agents work with existing frameworks, patterns emerge. They struggle with the same things humans struggle with — but for different reasons.
         </p>
 
         <p>
-          Middleware chains. Decorator-based dependency injection. File-system routing conventions. Auto-discovery. Lifecycle hooks. Magic methods. Convention over configuration taken so far that understanding a single request requires knowing the framework by heart.
+          Middleware chains. Decorator-based dependency injection. File-system routing conventions. Auto-discovery. Lifecycle hooks. Convention over configuration taken so far that understanding a single request requires knowing the framework by heart.
         </p>
 
         <p>
-          If you're an expert in Next.js or NestJS or Rails, you navigate this fluently. You've built the mental model. You know where things happen even when the code doesn't say so.
+          Humans deal with this through years of experience and intuition. Agents deal with it by burning context tokens on abstractions they can't see, or by guessing at behavior they can't verify.
         </p>
 
         <p>
-          Agents don't have that luxury. They don't have years of framework-specific intuition. And more importantly — <span class="text-white">all the code agents write needs to be explicit.</span> An agent can't rely on "well, the framework does this behind the scenes." It reads code. If the code doesn't say it, the agent doesn't know it.
+          So we started wondering: <span class="text-white">what if the framework was just... explicit?</span> What if every behavior was visible in the code? What if an agent — or a human — could read one file and understand one complete thing?
         </p>
 
         <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
-          <div class="code-line pl-4 py-1"><span class="text-amber">Hidden behavior</span> is the enemy of agent comprehension.</div>
-          <div class="code-line pl-4 py-1"><span class="text-amber">Scattered logic</span> makes one behavior span six files.</div>
-          <div class="code-line pl-4 py-1"><span class="text-amber">Framework-specific knowledge</span> can't be assumed.</div>
-          <div class="code-line pl-4 py-1 text-white"><span class="text-terminal">What you read should be what you get.</span></div>
+          <div class="code-line pl-4 py-1"><span class="text-amber">Hidden behavior</span> makes agents guess. What if nothing was hidden?</div>
+          <div class="code-line pl-4 py-1"><span class="text-amber">Scattered logic</span> loses context. What if one file = one behavior?</div>
+          <div class="code-line pl-4 py-1"><span class="text-amber">Framework knowledge</span> can't be assumed. What if you could just read it?</div>
+          <div class="code-line pl-4 py-1 text-white"><span class="text-terminal">These are hypotheses, not conclusions.</span></div>
         </div>
 
         <p class="text-neutral-500 text-sm">
-          The irony: optimizing for agent comprehension produces code that's easier for humans to understand too. Explicit is just good engineering.
+          An interesting side effect: optimizing for agent comprehension seems to produce code that's easier for humans to read too. That might be a signal — or just a coincidence. We're still figuring it out.
         </p>
       </div>
     </div>
@@ -195,44 +195,44 @@
 
   <div class="divider mx-6"></div>
 
-  <!-- ════════════════ THE APPROACH ════════════════ -->
+  <!-- ════════════════ THE EXPERIMENT ════════════════ -->
   <section class="py-16 sm:py-20 px-6">
     <div class="max-w-3xl mx-auto reveal">
       <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
-        What Manifest <span class="text-terminal glow">does differently</span>
+        The <span class="text-terminal glow">experiment</span>
       </h2>
 
       <div class="space-y-6 text-sm sm:text-base leading-relaxed">
         <p>
-          Manifest is a TypeScript framework that runs on Bun. That part is normal. What's different is the design constraint: <span class="text-white">every line of code must be readable by an agent that has zero framework-specific knowledge.</span>
+          Manifest is, first and foremost, an idea: <span class="text-white">what happens when you design a framework around agent comprehension instead of human convention?</span>
         </p>
 
         <p>
-          One feature, one file. A feature declares its route, inputs, authentication, side effects, error cases, and business logic in a single <code class="text-terminal text-xs">defineFeature()</code> call. An agent reads one file and understands one complete behavior. No hunting across directories.
+          The framework itself is one take on that idea. It's a TypeScript framework running on Bun — that part is normal. What's different is the design constraint: every line of code should be readable by an agent with zero framework-specific knowledge.
         </p>
 
         <p>
-          The entire framework is ~3,100 lines of TypeScript source code that ships inside your project — not as an npm package. That's small enough to fit in a single context window. <span class="text-white">Your agent doesn't burn tokens guessing what the framework does — it reads it.</span> Router, validator, server, scanner, testing, CLI — all right there. When something breaks, the agent opens the file and fixes it. No Stack Overflow. No docs site. Just source code.
+          One feature, one file. A feature declares its route, inputs, authentication, side effects, error cases, and business logic in a single <code class="text-terminal text-xs">defineFeature()</code> call. The entire framework is ~3,100 lines of source code that ships inside your project — not as an npm package. Small enough that an agent reads it once and understands the whole thing.
         </p>
 
         <p>
-          No hidden functionality. No middleware. No decorators. No dependency injection. No file-system routing. No convention-based auto-discovery. If something happens, it's because the code says so.
+          No hidden functionality. No middleware. No decorators. No dependency injection. No file-system routing. If something happens, it's because the code says so.
         </p>
 
         <p class="text-neutral-500 text-sm">
-          Token-efficient by design. The agent reads the framework once, understands it completely, and never wastes context on abstractions it can't see.
+          These are our bets. They might be the right ones, or they might be constraints that don't matter as much as we think.
         </p>
 
         <p class="mt-4">
-          But let's be clear: <span class="text-white">none of this is a guarantee your project won't become a mess.</span> Manifest can't do magic — in fact, it tries to do as little magic as possible. It gives you a clean foundation and gets out of the way. What you build on top of it is entirely up to you.
+          The honest truth: <span class="text-white">we don't know how complex you can go with this approach.</span> Can you build a simple API? Yes, easily. Can you build something with fifty features, multiple databases, real-time streaming, and background jobs? That's what we're trying to find out.
         </p>
 
         <p>
-          You can make it as complex as you want. You can scatter logic across files, bury intent behind abstractions, build the same tangled architecture you're used to. Manifest won't stop you. It's a foundation, not a guardrail.
+          Every project built with Manifest pushes the boundary a little further. Some things work beautifully. Some things reveal gaps. The framework evolves from what we learn — and because it ships as source code, you evolve it too.
         </p>
 
         <p>
-          What it does ask is that you <span class="text-white">change how you think about writing software.</span> Not "learn a new framework" — the framework is ~3,100 lines, your agent reads it in seconds. The shift is in how you approach the work: writing code that's meant to be read by something other than you, declaring intent explicitly, keeping behavior visible. That's a mindset change, not a tooling change.
+          What Manifest does ask is that you <span class="text-white">try a different way of thinking about software.</span> Not "learn a new framework" — the framework is small, your agent reads it in seconds. The shift is in how you approach the work: writing code that's meant to be read by something other than you, declaring intent explicitly, keeping behavior visible. That's a mindset change, not a tooling change. It might click. It might not. The only way to know is to try.
         </p>
       </div>
     </div>
@@ -240,16 +240,16 @@
 
   <div class="divider mx-6"></div>
 
-  <!-- ════════════════ AGENTS EVERYWHERE ════════════════ -->
+  <!-- ════════════════ HOW FAR CAN IT GO ════════════════ -->
   <section class="py-16 sm:py-20 px-6">
     <div class="max-w-3xl mx-auto reveal">
       <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
-        Agents at <span class="text-amber glow-amber">every step</span>
+        How far can <span class="text-amber glow-amber">this go?</span>
       </h2>
 
       <div class="space-y-6 text-sm sm:text-base leading-relaxed">
         <p>
-          Most tools treat agents as a development aid — a smarter autocomplete, a code reviewer, a pair programmer. Manifest goes further. Agents aren't just part of the writing process. They're part of the entire lifecycle.
+          The experiment doesn't stop at "agents can read the code." The deeper question is: <span class="text-white">can agents own the entire lifecycle?</span> Not just writing — building, monitoring, fixing, evolving.
         </p>
 
         <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-3 text-sm">
@@ -261,11 +261,15 @@
         </div>
 
         <p>
-          The self-healing loop is the most ambitious part. An error occurs. The agent reads <code class="text-terminal text-xs">MANIFEST.md</code> to orient itself. It reads the feature file — one file, complete behavior. It diagnoses the issue, edits the code, and Bun hot-reloads the module. No deploy. No restart. The next request runs the new code.
+          The self-healing loop is the most ambitious bet. An error occurs. The agent reads <code class="text-terminal text-xs">MANIFEST.md</code> to orient itself. It reads the feature file — one file, complete behavior. It diagnoses the issue, edits the code, and Bun hot-reloads the module. No deploy. No restart. The next request runs the new code.
         </p>
 
         <p>
-          This only works because every design decision in Manifest was made to support it. One file per feature so the agent edits one file. Declared side effects so the agent knows the blast radius. Source-code framework so the agent can fix anything. No hidden behavior so the agent's model matches reality.
+          Does it work? Sometimes, remarkably well. Sometimes, not at all. The design decisions — one file per feature, declared side effects, source-code framework, no hidden behavior — exist to make it <em>possible</em>. Whether it's practical at scale is something we're actively learning.
+        </p>
+
+        <p>
+          That's the nature of this experiment. We're not presenting a finished product. We're exploring a design space and sharing what we find along the way.
         </p>
       </div>
     </div>
@@ -273,40 +277,40 @@
 
   <div class="divider mx-6"></div>
 
-  <!-- ════════════════ EARLY DAYS ════════════════ -->
+  <!-- ════════════════ WHY TRY ════════════════ -->
   <section class="py-16 sm:py-20 px-6">
     <div class="max-w-3xl mx-auto reveal">
       <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
-        It's <span class="text-terminal glow">early</span>
+        Why <span class="text-terminal glow">try</span>
       </h2>
 
       <div class="space-y-6 text-sm sm:text-base leading-relaxed">
         <p>
-          Manifest is young. The core framework works — features, validation, routing, testing, CLI, frontend support, streaming, rate limiting, event-triggered features, database integration, Docker deployment. Spark — the agent sidecar — watches your app in development and production. You can build real things with it today.
+          Manifest works today. Features, validation, routing, testing, CLI, frontend, streaming, rate limiting, database integration, Docker deployment. You can build real things with it. Spark watches your app and fixes what breaks. That part is solid.
         </p>
 
         <p>
-          We're not hiding what's still ahead. The roadmap is public. The framework is ~3,100 lines you can read in minutes. There are no announcements about announcements.
+          But we're not claiming this is the future of software. <span class="text-white">We're claiming it's an idea worth testing.</span>
         </p>
 
         <p>
-          What exists is solid. What's coming is ambitious. The gap between the two is where the experiment lives.
+          Maybe agent-first frameworks become a real category. Maybe existing frameworks adapt and the distinction stops mattering. Maybe the constraints we chose are the wrong ones. We genuinely don't know — and anyone who tells you they do is selling something.
+        </p>
+
+        <p>
+          What we do know is that the question is interesting enough to build toward an answer. Every project that uses Manifest teaches us something about where this approach works, where it breaks, and what agents actually need from the code they work with.
         </p>
 
         <p class="text-white">
-          This is for people who want to try a different way of working with agents.
+          This is for people who are curious about the same question.
         </p>
 
         <p>
-          Not everyone will want this. If your team has deep Rails expertise and it serves you well, keep using Rails. If Next.js gives you what you need and you understand the trade-offs, use Next.js. We're not here to tell you your tools are wrong.
-        </p>
-
-        <p>
-          But if you've felt the friction — agents struggling with framework conventions they can't see, code scattered across files for organizational reasons that don't help the reader, abstractions that hide more than they reveal — then Manifest might be worth an afternoon.
+          Not everyone will be. If your team has deep Rails expertise and it serves you well, keep using Rails. If Next.js gives you what you need, use Next.js. We're not here to tell you your tools are wrong. We're exploring a different set of trade-offs and sharing what we learn.
         </p>
 
         <p class="text-amber text-sm mt-8">
-          Fork it. Read the code. See if it changes how you think about what a framework can be.
+          Fork it. Read the code. Try building something. See if the idea resonates — or if it doesn't.
         </p>
       </div>
     </div>

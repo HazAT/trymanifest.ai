@@ -111,11 +111,11 @@
       </div>
 
       <h1 class="text-3xl sm:text-4xl font-bold text-terminal glow leading-tight tracking-tight mb-6">
-        A new way of working
+        Working with agents
       </h1>
 
       <p class="text-sm sm:text-base leading-relaxed text-neutral-400">
-        Manifest doesn't just help you write code. It changes how you maintain, update, and evolve a codebase — with agents that understand both your application and its relationship to the framework.
+        What does maintenance, updating, and evolving a codebase look like when agents understand both your application and the framework underneath it?
       </p>
     </div>
   </section>
@@ -135,7 +135,7 @@
         </p>
 
         <p>
-          In any other framework, this is where things get painful. <span class="text-white">In Manifest, this is where agents earn their keep.</span>
+          This is usually where things get messy. <span class="text-white">Here's how Manifest tries to handle it.</span>
         </p>
       </div>
     </div>
@@ -151,7 +151,7 @@
       </div>
 
       <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
-        You say <span class="text-terminal glow">"update"</span>. The agent understands both sides.
+        You say <span class="text-terminal glow">"update"</span>. The agent reads both sides.
       </h2>
 
       <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
@@ -168,11 +168,11 @@
 
       <div class="space-y-6 text-sm sm:text-base leading-relaxed">
         <p>
-          This isn't <code class="text-terminal text-xs">npm update</code>. There's no black-box package to upgrade. The framework is source code in your project — and the agent reads every upstream commit, groups them by area, and recommends what to cherry-pick and what to skip. <span class="text-white">You decide what enters your app.</span>
+          Because the framework is source code — not an npm package — updating looks different. The agent reads every upstream commit, groups them by area, and recommends what to cherry-pick and what to skip. <span class="text-white">You decide what enters your app.</span>
         </p>
 
         <p>
-          The two-branch model makes this clean. The <code class="text-terminal text-xs">manifest</code> branch tracks upstream. Your <code class="text-terminal text-xs">main</code> branch is your app. Updates flow one direction: upstream → <code class="text-terminal text-xs">manifest</code> → cherry-pick onto <code class="text-terminal text-xs">main</code>. When there's a conflict, the agent categorizes the file — <span class="text-white">framework improvement or application code</span> — and makes the right call. Your features are sovereign. Framework improvements are welcome. The agent knows the difference.
+          The two-branch model keeps this clean. The <code class="text-terminal text-xs">manifest</code> branch tracks upstream. Your <code class="text-terminal text-xs">main</code> branch is your app. Updates flow one direction: upstream → <code class="text-terminal text-xs">manifest</code> → cherry-pick onto <code class="text-terminal text-xs">main</code>. When there's a conflict, the agent categorizes the file — framework or application code — and tries to make the right call. It usually gets it right. When it doesn't, you're there.
         </p>
       </div>
     </div>
@@ -188,7 +188,7 @@
       </div>
 
       <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
-        Every commit is a <span class="text-amber glow-amber">letter to the next agent</span>
+        What if commits were <span class="text-amber glow-amber">written for agents?</span>
       </h2>
 
       <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-4 text-sm">
@@ -210,11 +210,11 @@
 
       <div class="space-y-6 text-sm sm:text-base leading-relaxed">
         <p>
-          In Manifest, commits aren't an afterthought — they're infrastructure. The commit history is how agents orient themselves when they arrive at your codebase. It's how the update skill knows what to accept, skip, or adapt. It's how debugging works without <code class="text-terminal text-xs">git bisect</code>.
+          Here's an idea Manifest leans into: the commit history is how agents orient themselves when they arrive at your codebase. If commit messages explain what changed and why — not just "fix stuff" — the next agent can read <code class="text-terminal text-xs">git log</code> and understand the project's progression without looking at a single diff.
         </p>
 
         <p>
-          <span class="text-white">A commit message is a letter to the next agent explaining what you did and why.</span> What changed. Why it changed. The approach taken. What was deliberately left out. When the next agent reads <code class="text-terminal text-xs">git log</code>, it should understand the progression without looking at a single diff.
+          <span class="text-white">Think of each commit as a knowledge transfer.</span> What changed. Why it changed. The approach taken. What was deliberately left out. This also helps the update skill know what to accept, skip, or adapt when upstream evolves.
         </p>
       </div>
     </div>
@@ -230,7 +230,7 @@
       </div>
 
       <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
-        After big changes, <span class="text-terminal glow">nothing drifts</span>
+        Can the codebase <span class="text-terminal glow">stay coherent?</span>
       </h2>
 
       <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
@@ -248,7 +248,7 @@
         </p>
 
         <p>
-          <code class="text-terminal text-xs">manifest learn</code> treats your codebase as a living system. When one part changes, the agent checks whether other parts need to catch up — documentation, indexes, types, tests, conventions. <span class="text-white">The next agent that arrives should never follow stale instructions</span> because you forgot to update the map after moving the furniture.
+          <code class="text-terminal text-xs">manifest learn</code> checks whether other parts need to catch up after changes — documentation, indexes, types, tests, conventions. The idea: <span class="text-white">the next agent that arrives shouldn't follow stale instructions</span> because someone forgot to update the map after moving the furniture.
         </p>
       </div>
     </div>
@@ -264,7 +264,7 @@
       </div>
 
       <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
-        Conflicts happen. The agent knows <span class="text-amber glow-amber">the difference</span>.
+        What about <span class="text-amber glow-amber">conflicts?</span>
       </h2>
 
       <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
@@ -276,11 +276,11 @@
 
       <div class="space-y-6 text-sm sm:text-base leading-relaxed">
         <p>
-          Conflicts during cherry-picks aren't just code conflicts — they're <span class="text-white">intent conflicts</span>. The upstream repo evolves the framework. Your project evolves the application. When they collide, the agent categorizes every file: framework code, application code, shared documentation, or your vision.
+          Conflicts during cherry-picks aren't just code conflicts — they're <span class="text-white">intent conflicts</span>. The upstream repo evolves the framework. Your project evolves the application. When they collide, the agent tries to categorize every file: framework code, application code, shared documentation, or your vision.
         </p>
 
         <p>
-          Framework improvements get accepted. Your features stay untouched. Shared files like <code class="text-terminal text-xs">AGENTS.md</code> get both sides — upstream's wording polish and your architecture notes. And <code class="text-terminal text-xs">VISION.md</code>? <span class="text-white">That's your app's soul. Upstream has no say.</span> The agent will never change what your application is supposed to be.
+          The heuristic: framework improvements get accepted, your features stay untouched, shared files get merged thoughtfully. And <code class="text-terminal text-xs">VISION.md</code> — what your application is supposed to be — is always yours. That boundary seems to work well, though edge cases still come up. It's part of what we're learning.
         </p>
       </div>
     </div>
