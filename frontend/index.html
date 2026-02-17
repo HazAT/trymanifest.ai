@@ -305,14 +305,16 @@
           </p>
 
           <p>
-            Clone the repo. Your agent sets up a two-branch model — <code class="text-terminal text-xs">manifest</code> tracks the upstream framework, <code class="text-terminal text-xs">main</code> is your app. You develop on <code class="text-terminal text-xs">main</code>, and when upstream improves, your agent cherry-picks what you want. You control what enters your project.
+            You don't set it up. Your agent does. Paste the Spark prompt, tell it what you're building, and it handles everything — cloning the repo, setting up the two-branch model, renaming the project, writing your <code class="text-terminal text-xs">VISION.md</code>, and getting the server running. You describe the app. The agent builds the foundation.
           </p>
 
           <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 font-mono text-sm space-y-2">
-            <div class="code-line pl-4 py-1"><span class="text-terminal">$</span> <span class="text-white">git clone https://github.com/HazAT/manifest.git my-project</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-terminal">$</span> <span class="text-white">cd my-project</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-neutral-500"># Spark sets up branches, renames the project, writes your VISION.md</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-terminal">$</span> <span class="text-white">bun --hot index.ts</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-neutral-500">// you say:</span> <span class="text-white">"a recipe app for meal planning"</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">cloning manifest...</span> <span class="text-terminal">done</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">setting up branches...</span> <span class="text-terminal">manifest ↔ main</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">renaming to meal-planner...</span> <span class="text-terminal">done</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">writing VISION.md...</span> <span class="text-terminal">done</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">bun --hot index.ts</span> <span class="text-terminal">server running on :8080</span></div>
           </div>
 
           <p>
@@ -324,7 +326,7 @@
           </p>
 
           <p class="text-neutral-500 text-sm">
-            Your code. Your repo. Your infrastructure. Manifest just gives you a foundation worth building on.
+            Your code. Your repo. Your infrastructure. The agent just gets you there faster.
           </p>
         </div>
       </div>
