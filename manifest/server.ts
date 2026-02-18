@@ -49,6 +49,7 @@ export async function createManifestServer(options: ManifestServerOptions) {
       const url = new URL(req.url)
       const method = req.method
       const pathname = url.pathname
+      const requestStart = performance.now()
 
       // Health check endpoint (no auth required)
       if (pathname === '/__health') {
@@ -91,7 +92,19 @@ export async function createManifestServer(options: ManifestServerOptions) {
         // Fallback to static files
         if (staticHandler) {
           const staticResponse = staticHandler(pathname)
-          if (staticResponse) return staticResponse
+          if (staticResponse) {
+            if (sparkEnabled) {
+              try {
+                const staticDurationMs = Math.round((performance.now() - requestStart) * 100) / 100
+                sparkDb.logAccess({
+                  timestamp: new Date().toISOString(), method, path: pathname, status: 200,
+                  duration_ms: staticDurationMs, ip: server.requestIP(req)?.address ?? undefined,
+                  user_agent: req.headers.get('user-agent') ?? undefined,
+                })
+              } catch {}
+            }
+            return staticResponse
+          }
         }
 
         if (sparkEnabled) {
@@ -108,7 +121,7 @@ export async function createManifestServer(options: ManifestServerOptions) {
 
       const { feature, params } = match
       const requestId = Bun.randomUUIDv7()
-      const start = performance.now()
+      const start = requestStart
 
       // Rate limit check (before input parsing)
       if (feature.rateLimit) {
