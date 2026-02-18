@@ -111,10 +111,6 @@
         </div>
       </div>
 
-      <p class="mt-8 text-xs text-neutral-600">
-        Works best with <a href="https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent" class="text-neutral-500 hover:text-terminal transition-colors cursor-pointer">pi</a> — ships with a built-in extension
-      </p>
-
       <div class="mt-12 text-xs text-neutral-600">
         <span class="prompt text-neutral-500 cursor">scroll</span>
       </div>
@@ -131,8 +127,8 @@
           <span class="text-terminal-dim">visitor@manifest</span><span class="text-neutral-600">:</span><span class="text-amber-dim">~</span><span class="text-neutral-600">$</span> <span class="text-neutral-500">cat welcome.md</span>
         </div>
 
-        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-terminal glow leading-tight tracking-tight">
-          What if the framework<br>was built for the agent?
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight tracking-tight">
+          <span class="text-white">What if the framework<br>was</span> <span class="text-terminal glow">built for the agent?</span>
         </h2>
 
         <div class="mt-8 space-y-4 text-sm sm:text-base leading-relaxed">
@@ -166,22 +162,34 @@
 
         <div class="space-y-6 text-sm sm:text-base leading-relaxed">
           <p>
-            An experiment in framework design. The premise: as agents take on more of the coding, the frameworks they work with could be designed around how <em>they</em> read and reason — not just how humans do.
+            A <span class="text-white">TypeScript backend framework</span> that runs on Bun. Routing, validation, auth, rate limiting, error handling, streaming — the things you need to build an API. About 3,100 lines of source code total.
           </p>
 
           <p>
-            Every framework you've used was designed for human readers. Documentation, conventions, abstractions — optimized for the way people think about code. That works. But agents process code differently. What if the foundation accounted for that?
+            The difference: <span class="text-white">the entire framework ships as source code inside your project.</span> Not an npm package — actual <code class="text-terminal text-xs">.ts</code> files your agent can read, understand, and modify. Every behavior is defined in a single file. No hidden middleware, no decorators, no magic. An agent reads one feature file and knows exactly what it does.
           </p>
 
-          <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
-            <div class="code-line pl-4 py-1"><span class="text-amber">No dependencies.</span> Nothing hidden behind node_modules.</div>
-            <div class="code-line pl-4 py-1"><span class="text-amber">No hidden functionality.</span> No magic methods, no lifecycle hooks.</div>
-            <div class="code-line pl-4 py-1"><span class="text-amber">No docs needed.</span> What you read in code is what you get.</div>
-            <div class="code-line pl-4 py-1 text-white"><span class="text-terminal">The idea:</span> an agent reads it and builds. No framework knowledge required.</div>
+          <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 font-mono text-xs sm:text-sm overflow-x-auto">
+            <div class="text-neutral-600 mb-3">// features/UserRegistration.ts — one file, complete behavior</div>
+            <div><span class="text-amber">export default</span> <span class="text-terminal">defineFeature</span>({</div>
+            <div class="pl-4"><span class="text-neutral-500">name:</span> <span class="text-white">'user-registration'</span>,</div>
+            <div class="pl-4"><span class="text-neutral-500">route:</span> [<span class="text-white">'POST'</span>, <span class="text-white">'/api/users'</span>],</div>
+            <div class="pl-4"><span class="text-neutral-500">authentication:</span> <span class="text-white">'none'</span>,</div>
+            <div class="pl-4"><span class="text-neutral-500">sideEffects:</span> [<span class="text-white">'Inserts row into users table'</span>],</div>
+            <div class="pl-4"><span class="text-neutral-500">errorCases:</span> [<span class="text-white">'409 — Email already taken'</span>],</div>
+            <div class="mt-2 pl-4"><span class="text-neutral-500">input:</span> {</div>
+            <div class="pl-8"><span class="text-neutral-500">email:</span> t.string({ <span class="text-neutral-500">description:</span> <span class="text-white">'User email'</span> }),</div>
+            <div class="pl-8"><span class="text-neutral-500">password:</span> t.string({ <span class="text-neutral-500">description:</span> <span class="text-white">'Password'</span> }),</div>
+            <div class="pl-4">},</div>
+            <div class="mt-2 pl-4"><span class="text-amber">async</span> <span class="text-terminal">handle</span>({ input, ok, fail }) {</div>
+            <div class="pl-8 text-neutral-500">// All logic here. No hidden layers.</div>
+            <div class="pl-8"><span class="text-amber">return</span> ok(<span class="text-white">'User created'</span>, { <span class="text-neutral-500">status:</span> <span class="text-white">201</span> })</div>
+            <div class="pl-4">}</div>
+            <div>})</div>
           </div>
 
           <p class="text-neutral-500 text-sm">
-            Whether that trade-off is worth it is something you'd have to try and decide for yourself.
+            Route, inputs, auth, side effects, error cases, logic — all in one place. Your agent reads this and knows what to build on, what to test, and what might break.
           </p>
         </div>
       </div>
@@ -190,35 +198,73 @@
 
   <div class="divider mx-6"></div>
 
-  <!-- ════════════════ HOW TO SHIP ════════════════ -->
+  <!-- ════════════════ WHAT YOU GET ════════════════ -->
   <section class="py-16 sm:py-32 px-6">
     <div class="max-w-3xl mx-auto">
       <div class="reveal">
         <div class="text-xs text-neutral-600 tracking-wider mb-8">
-          <span class="text-terminal-dim">~</span><span class="text-neutral-600">/manifest $</span> <span class="text-neutral-500">cat SHIPPING.md</span>
+          <span class="text-terminal-dim">~</span><span class="text-neutral-600">/manifest $</span> <span class="text-neutral-500">manifest status</span>
         </div>
 
         <h2 class="text-2xl sm:text-3xl font-bold text-white mb-10 leading-tight">
-          How it <span class="text-terminal glow">works</span>
+          What you <span class="text-terminal glow">get</span>
         </h2>
 
         <div class="space-y-6 text-sm sm:text-base leading-relaxed">
           <p>
-            Manifest isn't a dependency you install — <span class="text-white">it's source code you own.</span> The entire framework lives in your project. You can read every line, modify anything, and your agent can too.
+            A complete foundation for building APIs — all as readable source code in your project.
           </p>
 
+          <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
+            <div class="code-line pl-4 py-1"><span class="text-terminal">Routing & validation</span> <span class="text-neutral-600">—</span> <span class="text-neutral-400">Path params, typed inputs, automatic error responses</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">Authentication</span> <span class="text-neutral-600">—</span> <span class="text-neutral-400">Declare per-feature: required, optional, or none</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">Rate limiting</span> <span class="text-neutral-600">—</span> <span class="text-neutral-400">Sliding window per IP, declared in the feature file</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">SSE streaming</span> <span class="text-neutral-600">—</span> <span class="text-neutral-400">Stream features with emit(), named events, auto-close</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">Error envelopes</span> <span class="text-neutral-600">—</span> <span class="text-neutral-400">Consistent JSON responses with trace IDs</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">Testing</span> <span class="text-neutral-600">—</span> <span class="text-neutral-400">Call features by name, no HTTP required</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">CLI tools</span> <span class="text-neutral-600">—</span> <span class="text-neutral-400">Status, check, index, doctor — your agent runs these too</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">Extensions</span> <span class="text-neutral-600">—</span> <span class="text-neutral-400">Blog, database, frontend presets — drop in and go</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">Docker</span> <span class="text-neutral-600">—</span> <span class="text-neutral-400">docker compose up --build, no config needed</span></div>
+          </div>
+
+          <p class="text-neutral-500 text-sm">
+            No dependencies to install. No docs to cross-reference. Your agent reads <code class="text-terminal text-xs">manifest/</code> once and understands the whole framework.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ HOW TO START ════════════════ -->
+  <section class="py-16 sm:py-32 px-6">
+    <div class="max-w-3xl mx-auto">
+      <div class="reveal">
+        <div class="text-xs text-neutral-600 tracking-wider mb-8">
+          <span class="text-terminal-dim">~</span><span class="text-neutral-600">/ $</span> <span class="text-neutral-500">cat GETTING_STARTED.md</span>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-10 leading-tight">
+          How to <span class="text-terminal glow">start</span>
+        </h2>
+
+        <div class="space-y-6 text-sm sm:text-base leading-relaxed">
           <p>
-            Setup is agent-driven. Paste the Spark prompt, describe what you want to build, and the agent handles the scaffolding — cloning the repo, setting up branches, writing your <code class="text-terminal text-xs">VISION.md</code>, getting the server running.
+            Paste the Spark prompt into your agent. Describe what you want to build. It handles the rest — cloning, setup, getting the server running.
           </p>
 
           <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 font-mono text-sm space-y-2">
             <div class="code-line pl-4 py-1"><span class="text-neutral-500">// you say:</span> <span class="text-white">"a recipe app for meal planning"</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">cloning manifest...</span> <span class="text-terminal">done</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">setting up branches...</span> <span class="text-terminal">manifest ↔ main</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">renaming to meal-planner...</span> <span class="text-terminal">done</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">cloning manifest into meal-planner/...</span> <span class="text-terminal">done</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">installing dependencies...</span> <span class="text-terminal">done</span></div>
             <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">writing VISION.md...</span> <span class="text-terminal">done</span></div>
             <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">bun --hot index.ts</span> <span class="text-terminal">server running on :8080</span></div>
           </div>
+
+          <p>
+            The framework source code is now in your project at <code class="text-terminal text-xs">manifest/</code>. Your features go in <code class="text-terminal text-xs">features/</code>. Your agent already knows the conventions — it read them.
+          </p>
 
           <p>
             When you're ready to deploy, <code class="text-terminal text-xs">docker compose up --build</code> works out of the box. No build pipeline to configure, no platform lock-in.
@@ -227,53 +273,6 @@
           <p class="text-neutral-500 text-sm">
             Your code. Your repo. Your infrastructure. Nothing opaque between you and what's running.
           </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="divider mx-6"></div>
-
-  <!-- ════════════════ AGENT WORKFLOW ════════════════ -->
-  <section class="py-16 sm:py-32 px-6">
-    <div class="max-w-3xl mx-auto">
-      <div class="reveal">
-        <div class="text-xs text-neutral-600 tracking-wider mb-8">
-          <span class="text-neutral-500">agent skills — not CLI commands</span>
-        </div>
-
-        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-10 leading-tight">
-          What if your agent could <span class="text-terminal glow">operate</span> the framework?
-        </h2>
-
-        <div class="space-y-6 text-sm sm:text-base leading-relaxed">
-          <p>
-            Manifest isn't just code your agent can read — it's designed so your agent can <span class="text-white">operate</span> it. Some things are CLI commands. Others are <span class="text-white">skills</span> — structured workflows your agent loads and executes when you ask.
-          </p>
-
-          <p>
-            Say <span class="text-white">"update from upstream"</span> and the agent loads the update skill, fetches upstream, reads every commit, and walks you through what to pick.
-          </p>
-
-          <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 font-mono text-sm space-y-2">
-            <div class="code-line pl-4 py-1"><span class="text-neutral-600">›</span> <span class="text-white">update from upstream</span></div>
-            <div class="code-line pl-4 py-1 mt-1"><span class="text-neutral-600 text-xs">loading skill:</span> <span class="text-terminal text-xs">manifest-update</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">fetching manifest-upstream...</span> <span class="text-terminal">3 new commits</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">reading commit messages...</span> <span class="text-terminal">understood intent</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">recommending: pick 2, skip 1...</span> <span class="text-terminal">your call</span></div>
-            <div class="code-line pl-4 py-1 mt-1"><span class="text-neutral-600">›</span> <span class="text-white">pick both</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">cherry-picking onto main...</span> <span class="text-amber">1 conflict</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">resolving server.ts...</span> <span class="text-terminal">framework → accept</span></div>
-            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">running tests...</span> <span class="text-terminal">all passing</span></div>
-          </div>
-
-          <p class="text-neutral-500 text-sm">
-            Updates, commits, conflict resolution — these are agent skills, not shell commands. The agent handles the workflow. You handle the decisions.
-          </p>
-
-          <div class="mt-6">
-            <a href="/workflow" class="text-terminal text-sm hover:underline cursor-pointer">See the full workflow →</a>
-          </div>
         </div>
       </div>
     </div>
@@ -290,33 +289,90 @@
         </div>
 
         <h2 class="text-2xl sm:text-3xl font-bold text-white mb-10 leading-tight">
-          Meet <span class="text-amber glow">Spark</span>
+          Meet <span class="text-amber glow-amber">Spark</span>
         </h2>
 
         <div class="space-y-6 text-sm sm:text-base leading-relaxed">
           <p>
-            If agents can read the code, can they also <span class="text-white">watch it run?</span>
+            If your agent can read and build the code — can it also <span class="text-white">watch it run?</span>
           </p>
 
           <p>
-            Spark is a sidekick agent that runs alongside your application. When something goes wrong — an error, a crash, an unhandled exception — it sees it with full context and can investigate, diagnose, and fix.
+            Spark is a sidekick agent that runs alongside your application during development. When something breaks — an error, a crash, an unhandled exception — Spark sees it with full context: the stack trace, the feature file, the request that caused it. It reads the code, diagnoses the issue, and fixes it — often before you even switch tabs.
           </p>
 
           <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 font-mono text-sm">
-            <div class="text-neutral-600 mb-3">// spark session — live</div>
-            <div class="text-terminal">▸ environment: <span class="text-white">production</span> · mode: <span class="text-white">fix</span></div>
-            <div class="text-terminal">▸ watching: <span class="text-white">.spark/events/</span></div>
-            <div class="text-amber">▸ event: <span class="text-white">500 in user-registration — reading feature file...</span></div>
-            <div class="text-terminal">▸ fixed: <span class="text-white">null check on displayName · hot-reloaded · 4.2s</span></div>
+            <div class="text-neutral-600 mb-3">// spark — watching your dev server</div>
+            <div class="text-terminal">▸ environment: <span class="text-white">development</span></div>
+            <div class="text-terminal">▸ watching: <span class="text-white">your running app</span></div>
+            <div class="text-amber">▸ error: <span class="text-white">500 in user-registration — null displayName</span></div>
+            <div class="text-terminal">▸ reading: <span class="text-white">features/UserRegistration.ts</span></div>
+            <div class="text-terminal">▸ fix: <span class="text-white">added null check on line 34 · hot-reloaded</span></div>
+            <div class="text-terminal">▸ next request: <span class="text-white">200 OK</span></div>
           </div>
 
           <p>
-            Every request is a structured JSON envelope with status, context, and trace ID. Every error is a JSON file. <span class="text-white">Always inspectable. By you. By the agent. By anything.</span>
+            Every request gets a JSON envelope with a trace ID. Every error becomes a structured event. <span class="text-white">Always inspectable — by you, by the agent, by anything.</span>
+          </p>
+
+          <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
+            <div class="text-neutral-600 mb-2">You control what Spark does:</div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">development</span> <span class="text-neutral-600">—</span> <span class="text-neutral-400">full access, fixes issues as they happen</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">production</span> <span class="text-neutral-600">—</span> <span class="text-neutral-400">same tools, but acts with extreme care — smallest surgical fix only</span></div>
+          </div>
+
+          <p class="text-neutral-500 text-sm">
+            This is the most experimental part of Manifest. It works remarkably well for some things. For others, it's still early. That's kind of the point.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider mx-6"></div>
+
+  <!-- ════════════════ AGENT WORKFLOW ════════════════ -->
+  <section class="py-16 sm:py-32 px-6">
+    <div class="max-w-3xl mx-auto">
+      <div class="reveal">
+        <div class="text-xs text-neutral-600 tracking-wider mb-8">
+          <span class="text-neutral-500">agent skills — not just CLI commands</span>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-10 leading-tight">
+          Your agent doesn't just write code — it <span class="text-terminal glow">operates</span> the framework
+        </h2>
+
+        <div class="space-y-6 text-sm sm:text-base leading-relaxed">
+          <p>
+            Manifest comes with <span class="text-white">skills</span> — structured workflows your agent loads and follows. Say what you want, and the agent handles the execution.
+          </p>
+
+          <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 font-mono text-sm space-y-2">
+            <div class="code-line pl-4 py-1"><span class="text-neutral-600">›</span> <span class="text-white">add a login feature with email and password</span></div>
+            <div class="code-line pl-4 py-1 mt-1"><span class="text-neutral-600 text-xs">loading skill:</span> <span class="text-terminal text-xs">manifest-feature</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">reading MANIFEST.md...</span> <span class="text-terminal">understood project</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">scaffolding features/Login.ts...</span> <span class="text-terminal">route, input, auth</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">writing tests/Login.test.ts...</span> <span class="text-terminal">3 cases</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">running bun test...</span> <span class="text-terminal">all passing</span></div>
+            <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">updating MANIFEST.md...</span> <span class="text-terminal">indexed</span></div>
+          </div>
+
+          <p>
+            The agent reads the project conventions, scaffolds the feature following the patterns, writes tests, verifies everything passes, and keeps the index up to date.
           </p>
 
           <p>
-            This is the part of the experiment we're most curious about. An agent that doesn't just build your app but monitors it — in development and in production. It works surprisingly well for some things. For others, it's still early. That's kind of the point.
+            Because the framework is source code in your repo, the agent can also keep it up to date. When the upstream Manifest project improves, say <span class="text-white">"update from upstream"</span> and the agent fetches changes, reads every commit, and walks you through what to pick — you decide what enters your app.
           </p>
+
+          <p class="text-neutral-500 text-sm">
+            Features, commits, updates, conflict resolution — these are agent skills, not shell commands. The agent handles the workflow. You handle the decisions.
+          </p>
+
+          <div class="mt-6">
+            <a href="/workflow" class="text-terminal text-sm hover:underline cursor-pointer">See the full workflow →</a>
+          </div>
         </div>
       </div>
     </div>
