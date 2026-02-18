@@ -444,7 +444,7 @@ If the project needs real architecture work:
 > 2. Tell it what you're building. It has the full context of how Manifest works — one feature per file, explicit inputs, declared side effects.
 > 3. Start building: create feature files using `defineFeature()` and follow the conventions in `AGENTS.md`.
 >
-> The framework is ~3,100 lines in `manifest/`. The conventions are in `AGENTS.md`. Everything the next agent needs is already here.
+> The framework is ~1,400 lines in `manifest/`. The conventions are in `AGENTS.md`. Everything the next agent needs is already here.
 
 ---
 
