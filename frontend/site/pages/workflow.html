@@ -36,7 +36,7 @@
         </p>
 
         <p>
-          Meanwhile, upstream evolves. New CLI commands. Better validation. Improved error handling. The framework keeps getting better — and your project has diverged from it in ways that matter.
+          Meanwhile, upstream evolves. Better validation. Improved error handling. New extensions. The framework keeps getting better — and your project has diverged from it in ways that matter.
         </p>
 
         <p>
@@ -64,11 +64,11 @@
         <div class="code-line pl-4 py-1 mt-1"><span class="text-neutral-600 text-xs">loading skill:</span> <span class="text-terminal text-xs">manifest-update</span></div>
         <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">fetching manifest-upstream...</span> <span class="text-terminal">5 new commits</span></div>
         <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">reading commit messages...</span> <span class="text-neutral-500">grouping by area</span></div>
-        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">batch 1: CLI improvements (3 commits)...</span> <span class="text-terminal">recommend: pick</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">batch 1: framework improvements (3 commits)...</span> <span class="text-terminal">recommend: pick</span></div>
         <div class="code-line pl-4 py-1"><span class="text-neutral-500">▸</span> <span class="text-neutral-400">batch 2: example feature (2 commits)...</span> <span class="text-neutral-500">recommend: skip</span></div>
         <div class="code-line pl-4 py-1 mt-1"><span class="text-neutral-600">›</span> <span class="text-white">pick batch 1, skip batch 2</span></div>
         <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">cherry-picking batch 1 onto main...</span> <span class="text-terminal">clean</span></div>
-        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">bun test / tsc / manifest check</span> <span class="text-terminal">all pass</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">bun test / tsc --noEmit</span> <span class="text-terminal">all pass</span></div>
       </div>
 
       <div class="space-y-6 text-sm sm:text-base leading-relaxed">
@@ -127,11 +127,11 @@
 
   <div class="divider mx-6"></div>
 
-  <!-- ════════════════ MANIFEST LEARN ════════════════ -->
+  <!-- ════════════════ STAYING COHERENT ════════════════ -->
   <section class="py-16 sm:py-20 px-6">
     <div class="max-w-3xl mx-auto reveal">
       <div class="text-xs text-neutral-600 tracking-wider mb-6">
-        <span class="text-terminal-dim">$</span> <span class="text-neutral-500">manifest learn</span>
+        <span class="text-neutral-500">agent skill —</span> <span class="text-terminal text-xs">manifest-learn</span>
       </div>
 
       <h2 class="text-xl sm:text-2xl font-bold text-white mb-8 leading-tight">
@@ -139,21 +139,20 @@
       </h2>
 
       <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 space-y-2 text-sm">
-        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">checking MANIFEST.md...</span> <span class="text-amber">stale — 2 new features not indexed</span></div>
-        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">checking AGENTS.md...</span> <span class="text-terminal">accurate</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">checking AGENTS.md...</span> <span class="text-amber">stale — new extension not documented</span></div>
         <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">checking skills...</span> <span class="text-terminal">all current</span></div>
         <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">checking types...</span> <span class="text-terminal">tsc clean</span></div>
         <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">checking tests...</span> <span class="text-amber">1 feature missing test file</span></div>
-        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">checking conventions...</span> <span class="text-terminal">manifest check clean</span></div>
+        <div class="code-line pl-4 py-1"><span class="text-terminal">▸</span> <span class="text-neutral-400">checking git log...</span> <span class="text-terminal">recent commits descriptive</span></div>
       </div>
 
       <div class="space-y-6 text-sm sm:text-base leading-relaxed">
         <p>
-          You added three features, installed an extension, and modified a service. The code works. But does the rest of the codebase know? Is <code class="text-terminal text-xs">MANIFEST.md</code> still accurate? Do the skills still reflect reality? Are there test files for everything?
+          You added three features, installed an extension, and modified a service. The code works. But does the rest of the codebase know? Does <code class="text-terminal text-xs">AGENTS.md</code> still reflect reality? Do the skills still make sense? Are there test files for everything?
         </p>
 
         <p>
-          <code class="text-terminal text-xs">manifest learn</code> checks whether other parts need to catch up after changes — documentation, indexes, types, tests, conventions. The idea: <span class="text-white">the next agent that arrives shouldn't follow stale instructions</span> because someone forgot to update the map after moving the furniture.
+          The learn skill checks whether the surrounding context needs to catch up after changes — documentation, skills, types, tests, commit quality. The idea: <span class="text-white">the next agent that arrives shouldn't follow stale instructions</span> because someone forgot to update the map after moving the furniture.
         </p>
       </div>
     </div>

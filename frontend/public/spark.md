@@ -31,7 +31,7 @@ grep -q '"name": "manifest-app"' package.json 2>/dev/null && echo "FRESH_CLONE" 
 
 **If the output is `ALREADY_SETUP`** — someone already ran Spark (or set it up manually). The project has been renamed and personalized. Don't run the full onboarding. Instead, say:
 
-> Looks like Manifest is already set up here. The framework is in `manifest/`, features are in `features/`, and `MANIFEST.md` exists.
+> Looks like Manifest is already set up here. The framework is in `manifest/`, features are in `features/`, and conventions are in `CLAUDE.md`.
 >
 > Spark is just the setup guide — there's no magic beyond getting you started. If you want to run through the setup again anyway, say the word. Otherwise, read `CLAUDE.md` for conventions and start building. You've got everything you need.
 
@@ -252,7 +252,7 @@ Show the user the JSON response. Then:
 
 ```bash
 # Build the frontend first
-bun manifest frontend build
+bun run build
 
 # Start server and check the frontend is served
 bun index.ts > /dev/null 2>&1 &
@@ -272,19 +272,18 @@ If anything fails, investigate and fix before moving on.
 
 This is the one step where you DON'T do the work. The user needs to read.
 
-> Now read these four things. In this order. Don't skim.
+> Now read these three things. In this order. Don't skim.
 >
 > 1. `VISION.md` — your app's vision. What you're building and why. This is the first thing any agent reads. (If you skipped writing it earlier, that's fine — come back to it when you're ready.)
-> 2. `MANIFEST.md` — the index of everything in your project. Auto-generated. This is what an agent reads to orient itself.
-> 3. `CLAUDE.md` — the conventions and rules for working in this project. This is how you (and any agent) should write code here.
-> 4. `features/HelloWorld.ts` — your first feature. This is the pattern everything follows.
+> 2. `CLAUDE.md` — the conventions and rules for working in this project. This is how you (and any agent) should write code here. This is also what an agent reads to orient itself.
+> 3. `features/HelloWorld.ts` — your first feature. This is the pattern everything follows.
 
 **If a frontend was installed in Step 3**, add to the reading list:
 
 > Also read:
 >
-> 5. `config/frontend.ts` — your frontend configuration. Entry point, output directory, source maps, SPA fallback.
-> 6. The extension's `EXTENSION.md` — either `extensions/manifest-frontend-static/EXTENSION.md` or `extensions/manifest-frontend-reactive/EXTENSION.md`. It explains how your frontend preset works, how to add pages, and how the build pipeline fits together.
+> 4. `config/frontend.ts` — your frontend configuration. Entry point, output directory, source maps, SPA fallback.
+> 5. The extension's `EXTENSION.md` — either `extensions/manifest-frontend-static/EXTENSION.md` or `extensions/manifest-frontend-reactive/EXTENSION.md`. It explains how your frontend preset works, how to add pages, and how the build pipeline fits together.
 
 Give them a moment. Then:
 
@@ -303,7 +302,7 @@ Give them a moment. Then:
 | `manifest-sse-example` | SSE streaming example |
 | `spark` | Reactive error watching sidekick |
 
-If an extension exists that handles part or all of what the user wants, install it with `bun manifest extension install [name]`, read its `EXTENSION.md`, and follow its instructions instead of building from scratch. Don't reinvent what's already packaged.
+If an extension exists that handles part or all of what the user wants, read its `EXTENSION.md` and follow its setup instructions instead of building from scratch. Don't reinvent what's already packaged.
 
 ### Migrating an Existing Site
 
@@ -340,28 +339,27 @@ Go back to what the user said they're building in the beginning. Decide which pa
 
 If you're one-shotting it:
 
-1. Scaffold each feature: `bun run manifest make:feature [Name] --route="[METHOD] /api/[path]"`
+1. Create each feature file in `features/` using `defineFeature()`, following the conventions in `CLAUDE.md`
 2. Write the full implementation for each feature file
 3. Write test files for each feature
 4. Run `bun test` — make sure everything passes
-5. Run `bun run manifest index` and `bun run manifest check`
-6. Walk the user through what you built — explain the patterns, point out the descriptions, the side effects, the error cases
+5. Walk the user through what you built — explain the patterns, point out the descriptions, the side effects, the error cases
 
 Then hand off:
 
-> That's your project — [N] features, tested and indexed. Start a fresh session when you want to keep building. The agent will read `CLAUDE.md` and know exactly how to work here.
+> That's your project — [N] features, tested and ready. Start a fresh session when you want to keep building. The agent will read `CLAUDE.md` and know exactly how to work here.
 
 ### Path B: Hand Off
 
 If the project needs real architecture work:
 
-> Your Manifest project is set up: framework, config, tests passing, manifest indexed. Here's what to do next:
+> Your Manifest project is set up: framework, config, tests passing. Here's what to do next:
 >
 > 1. Start a fresh session in this directory. The agent will read `CLAUDE.md` and understand the conventions.
 > 2. Tell it what you're building. It has the full context of how Manifest works — one feature per file, explicit inputs, declared side effects.
-> 3. Let it scaffold features with `bun manifest make:feature` and build from there.
+> 3. Create feature files in `features/` using `defineFeature()` and build from there.
 >
-> The framework is ~1,000 lines in `manifest/`. The conventions are in `CLAUDE.md`. The index is in `MANIFEST.md`. Everything the next agent needs is already here.
+> The framework source is in `manifest/`. The conventions are in `CLAUDE.md`. Everything the next agent needs is already here.
 
 ---
 
