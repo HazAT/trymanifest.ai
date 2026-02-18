@@ -63,8 +63,8 @@ describe('sparkDb', () => {
 
     const polled = sparkDb.pollEvents()
     expect(polled).toHaveLength(1)
-    expect(polled[0].traceId).toBe(event.traceId)
-    expect(polled[0].type).toBe('server-error')
+    expect(polled[0]!.traceId).toBe(event.traceId)
+    expect(polled[0]!.type).toBe('server-error')
 
     // Second poll returns empty
     expect(sparkDb.pollEvents()).toHaveLength(0)
@@ -93,7 +93,7 @@ describe('sparkDb', () => {
     const recent = sparkDb.getRecentEvents(10)
     expect(recent).toHaveLength(3)
     // Most recent first
-    expect(recent[0].traceId).toBe('c')
+    expect(recent[0]!.traceId).toBe('c')
   })
 
   test('logAccess + queryAccess: insert and retrieve', () => {
@@ -102,13 +102,13 @@ describe('sparkDb', () => {
 
     const results = sparkDb.queryAccess()
     expect(results).toHaveLength(1)
-    expect(results[0].method).toBe('GET')
-    expect(results[0].path).toBe('/api/test')
-    expect(results[0].status).toBe(200)
-    expect(results[0].duration_ms).toBe(42)
-    expect(results[0].ip).toBe('127.0.0.1')
-    expect(results[0].feature).toBe('test-feature')
-    expect(results[0].request_id).toBe(log.request_id)
+    expect(results[0]!.method).toBe('GET')
+    expect(results[0]!.path).toBe('/api/test')
+    expect(results[0]!.status).toBe(200)
+    expect(results[0]!.duration_ms).toBe(42)
+    expect(results[0]!.ip).toBe('127.0.0.1')
+    expect(results[0]!.feature).toBe('test-feature')
+    expect(results[0]!.request_id).toBe(log.request_id)
   })
 
   test('logAccess truncation: input >64KB is truncated', () => {
@@ -116,7 +116,7 @@ describe('sparkDb', () => {
     sparkDb.logAccess(makeAccessLog({ input: bigInput }))
 
     const results = sparkDb.queryAccess()
-    expect(results[0].input!.length).toBe(64 * 1024)
+    expect(results[0]!.input!.length).toBe(64 * 1024)
   })
 
   test('queryAccess filters: by feature, status, since, limit', () => {

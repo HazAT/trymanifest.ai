@@ -301,7 +301,7 @@ export const sparkDb = {
                  FROM access_logs ${where} ORDER BY id DESC LIMIT $limit`
     params.$limit = limit
 
-    return getDb().prepare(sql).all(params) as AccessLog[]
+    return getDb().prepare(sql).all(params as any) as AccessLog[]
   },
 
   /**
