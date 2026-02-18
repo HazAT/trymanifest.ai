@@ -9,7 +9,7 @@ import { checkRateLimit, startCleanup } from '../services/rateLimiter'
 import frontendConfig from '../config/frontend'
 import manifestConfig from '../config/manifest'
 import sparkConfig from '../config/spark'
-import { sparkDb } from '../services/sparkDb'
+import { sparkDb, type AccessLog, type SparkEvent } from '../services/sparkDb'
 
 const textEncoder = new TextEncoder()
 
@@ -26,6 +26,21 @@ export async function createManifestServer(options: ManifestServerOptions) {
 
   const sparkEnabled = sparkConfig.enabled
   const sparkWatchErrors = sparkEnabled && sparkConfig.watch.serverErrors
+
+  const log = {
+    access(entry: AccessLog) {
+      if (!sparkEnabled) return
+      try { sparkDb.logAccess(entry) } catch {}
+    },
+    event(event: SparkEvent) {
+      if (!sparkWatchErrors) return
+      try { sparkDb.logEvent(event) } catch {}
+    },
+  }
+
+  function elapsed(start: number): number {
+    return Math.round((performance.now() - start) * 100) / 100
+  }
 
   // Static file serving (only if dist/ exists)
   const distDir = path.resolve(options.projectDir, frontendConfig.outputDir)
@@ -49,7 +64,6 @@ export async function createManifestServer(options: ManifestServerOptions) {
       const url = new URL(req.url)
       const method = req.method
       const pathname = url.pathname
-      const requestStart = performance.now()
 
       // Health check endpoint (no auth required)
       if (pathname === '/__health') {
@@ -76,15 +90,11 @@ export async function createManifestServer(options: ManifestServerOptions) {
       const match = router.match(method, pathname)
 
       if (match.kind === 'method_not_allowed') {
-        if (sparkEnabled) {
-          try {
-            sparkDb.logAccess({
-              timestamp: new Date().toISOString(), method, path: pathname, status: 405,
-              duration_ms: 0, ip: server.requestIP(req)?.address ?? undefined,
-              user_agent: req.headers.get('user-agent') ?? undefined,
-            })
-          } catch {}
-        }
+        log.access({
+          timestamp: new Date().toISOString(), method, path: pathname, status: 405,
+          duration_ms: 0, ip: server.requestIP(req)?.address ?? undefined,
+          user_agent: req.headers.get('user-agent') ?? undefined,
+        })
         return Response.json({ status: 405, message: 'Method not allowed' }, { status: 405 })
       }
 
@@ -93,35 +103,26 @@ export async function createManifestServer(options: ManifestServerOptions) {
         if (staticHandler) {
           const staticResponse = staticHandler(pathname)
           if (staticResponse) {
-            if (sparkEnabled) {
-              try {
-                const staticDurationMs = Math.round((performance.now() - requestStart) * 100) / 100
-                sparkDb.logAccess({
-                  timestamp: new Date().toISOString(), method, path: pathname, status: 200,
-                  duration_ms: staticDurationMs, ip: server.requestIP(req)?.address ?? undefined,
-                  user_agent: req.headers.get('user-agent') ?? undefined,
-                })
-              } catch {}
-            }
+            log.access({
+              timestamp: new Date().toISOString(), method, path: pathname, status: staticResponse.status,
+              duration_ms: 0, ip: server.requestIP(req)?.address ?? undefined,
+              user_agent: req.headers.get('user-agent') ?? undefined,
+            })
             return staticResponse
           }
         }
 
-        if (sparkEnabled) {
-          try {
-            sparkDb.logAccess({
-              timestamp: new Date().toISOString(), method, path: pathname, status: 404,
-              duration_ms: 0, ip: server.requestIP(req)?.address ?? undefined,
-              user_agent: req.headers.get('user-agent') ?? undefined,
-            })
-          } catch {}
-        }
+        log.access({
+          timestamp: new Date().toISOString(), method, path: pathname, status: 404,
+          duration_ms: 0, ip: server.requestIP(req)?.address ?? undefined,
+          user_agent: req.headers.get('user-agent') ?? undefined,
+        })
         return Response.json({ status: 404, message: 'Not found' }, { status: 404 })
       }
 
       const { feature, params } = match
       const requestId = Bun.randomUUIDv7()
-      const start = requestStart
+      const start = performance.now()
 
       // Rate limit check (before input parsing)
       if (feature.rateLimit) {
@@ -129,25 +130,19 @@ export async function createManifestServer(options: ManifestServerOptions) {
         const key = `${feature.name}:${ip}`
         const result = checkRateLimit(key, feature.rateLimit)
         if (!result.allowed) {
-          const durationMs = Math.round((performance.now() - start) * 100) / 100
-          if (sparkEnabled) {
-            try {
-              sparkDb.logAccess({
-                timestamp: new Date().toISOString(), method, path: pathname, status: 429,
-                duration_ms: durationMs, ip, feature: feature.name, request_id: requestId,
-                user_agent: req.headers.get('user-agent') ?? undefined,
-              })
-              if (sparkWatchErrors) {
-                sparkDb.logEvent({
-                  type: 'rate-limit',
-                  traceId: requestId,
-                  feature: feature.name,
-                  route: `${method} ${pathname}`,
-                  status: 429,
-                })
-              }
-            } catch {}
-          }
+          const durationMs = elapsed(start)
+          log.access({
+            timestamp: new Date().toISOString(), method, path: pathname, status: 429,
+            duration_ms: durationMs, ip, feature: feature.name, request_id: requestId,
+            user_agent: req.headers.get('user-agent') ?? undefined,
+          })
+          log.event({
+            type: 'rate-limit',
+            traceId: requestId,
+            feature: feature.name,
+            route: `${method} ${pathname}`,
+            status: 429,
+          })
           return Response.json(
             {
               status: 429,
@@ -184,17 +179,13 @@ export async function createManifestServer(options: ManifestServerOptions) {
               Object.assign(input, body)
             }
           } catch {
-            const durationMs400 = Math.round((performance.now() - start) * 100) / 100
-            if (sparkEnabled) {
-              try {
-                sparkDb.logAccess({
-                  timestamp: new Date().toISOString(), method, path: pathname, status: 400,
-                  duration_ms: durationMs400, ip: server.requestIP(req)?.address ?? undefined,
-                  feature: feature.name, request_id: requestId,
-                  user_agent: req.headers.get('user-agent') ?? undefined,
-                })
-              } catch {}
-            }
+            const durationMs400 = elapsed(start)
+            log.access({
+              timestamp: new Date().toISOString(), method, path: pathname, status: 400,
+              duration_ms: durationMs400, ip: server.requestIP(req)?.address ?? undefined,
+              feature: feature.name, request_id: requestId,
+              user_agent: req.headers.get('user-agent') ?? undefined,
+            })
             return Response.json(
               { status: 400, message: 'Invalid JSON body', meta: { request_id: requestId, duration_ms: durationMs400 } },
               { status: 400 },
@@ -208,17 +199,13 @@ export async function createManifestServer(options: ManifestServerOptions) {
         // Validate
         const errors = validateInput(feature.input, input)
         if (Object.keys(errors).length > 0) {
-          const durationMs = Math.round((performance.now() - start) * 100) / 100
-          if (sparkEnabled) {
-            try {
-              sparkDb.logAccess({
-                timestamp: new Date().toISOString(), method, path: pathname, status: 422,
-                duration_ms: durationMs, ip: server.requestIP(req)?.address ?? undefined,
-                feature: feature.name, request_id: requestId, input: JSON.stringify(input),
-                user_agent: req.headers.get('user-agent') ?? undefined,
-              })
-            } catch {}
-          }
+          const durationMs = elapsed(start)
+          log.access({
+            timestamp: new Date().toISOString(), method, path: pathname, status: 422,
+            duration_ms: durationMs, ip: server.requestIP(req)?.address ?? undefined,
+            feature: feature.name, request_id: requestId, input: JSON.stringify(input),
+            user_agent: req.headers.get('user-agent') ?? undefined,
+          })
           return Response.json(
             {
               status: 422,
@@ -276,38 +263,29 @@ export async function createManifestServer(options: ManifestServerOptions) {
               } catch (err) {
                 const message = err instanceof Error ? err.message : 'Internal server error'
                 fail(message)
-                if (sparkWatchErrors) {
-                  try {
-                    sparkDb.logEvent({
-                      type: 'server-error',
-                      traceId: requestId,
-                      feature: feature.name,
-                      route: `${method} ${pathname}`,
-                      status: 500,
-                      error: {
-                        message: err instanceof Error ? err.message : String(err),
-                        stack: err instanceof Error ? err.stack : undefined,
-                      },
-                      request: { input },
-                    })
-                  } catch {}
-                }
+                log.event({
+                  type: 'server-error',
+                  traceId: requestId,
+                  feature: feature.name,
+                  route: `${method} ${pathname}`,
+                  status: 500,
+                  error: {
+                    message: err instanceof Error ? err.message : String(err),
+                    stack: err instanceof Error ? err.stack : undefined,
+                  },
+                  request: { input },
+                })
               }
             },
           })
 
           // Log access for stream features (time-to-first-byte, status 200)
-          if (sparkEnabled) {
-            try {
-              const streamDurationMs = Math.round((performance.now() - start) * 100) / 100
-              sparkDb.logAccess({
-                timestamp: new Date().toISOString(), method, path: pathname, status: 200,
-                duration_ms: streamDurationMs, ip: server.requestIP(req)?.address ?? undefined,
-                feature: feature.name, request_id: requestId, input: JSON.stringify(input),
-                user_agent: req.headers.get('user-agent') ?? undefined,
-              })
-            } catch {}
-          }
+          log.access({
+            timestamp: new Date().toISOString(), method, path: pathname, status: 200,
+            duration_ms: elapsed(start), ip: server.requestIP(req)?.address ?? undefined,
+            feature: feature.name, request_id: requestId, input: JSON.stringify(input),
+            user_agent: req.headers.get('user-agent') ?? undefined,
+          })
 
           return new Response(stream, {
             headers: {
@@ -321,49 +299,39 @@ export async function createManifestServer(options: ManifestServerOptions) {
         // Execute request features
         const helpers = createResultHelpers()
         const result = await feature.handle({ input, ok: helpers.ok, fail: helpers.fail })
-        const durationMs = Math.round((performance.now() - start) * 100) / 100
+        const durationMs = elapsed(start)
         const envelope = toEnvelope(result, { featureName: feature.name, requestId, durationMs })
 
-        if (sparkEnabled) {
-          try {
-            sparkDb.logAccess({
-              timestamp: new Date().toISOString(), method, path: pathname, status: result.status,
-              duration_ms: durationMs, ip: server.requestIP(req)?.address ?? undefined,
-              feature: feature.name, request_id: requestId, input: JSON.stringify(input),
-              error: result.status >= 500 ? (result as any).message : undefined,
-              user_agent: req.headers.get('user-agent') ?? undefined,
-            })
-          } catch {}
-        }
+        log.access({
+          timestamp: new Date().toISOString(), method, path: pathname, status: result.status,
+          duration_ms: durationMs, ip: server.requestIP(req)?.address ?? undefined,
+          feature: feature.name, request_id: requestId, input: JSON.stringify(input),
+          error: result.status >= 500 ? (result as any).message : undefined,
+          user_agent: req.headers.get('user-agent') ?? undefined,
+        })
 
         return Response.json(envelope, { status: result.status })
       } catch (err) {
-        const durationMs = Math.round((performance.now() - start) * 100) / 100
-        if (sparkEnabled) {
-          try {
-            const errorMsg = err instanceof Error ? err.message : String(err)
-            sparkDb.logAccess({
-              timestamp: new Date().toISOString(), method, path: pathname, status: 500,
-              duration_ms: durationMs, ip: server.requestIP(req)?.address ?? undefined,
-              feature: feature.name, request_id: requestId, input: JSON.stringify(input),
-              error: errorMsg, user_agent: req.headers.get('user-agent') ?? undefined,
-            })
-            if (sparkWatchErrors) {
-              sparkDb.logEvent({
-                type: 'server-error',
-                traceId: requestId,
-                feature: feature.name,
-                route: `${method} ${pathname}`,
-                status: 500,
-                error: {
-                  message: errorMsg,
-                  stack: err instanceof Error ? err.stack : undefined,
-                },
-                request: { input },
-              })
-            }
-          } catch {}
-        }
+        const durationMs = elapsed(start)
+        const errorMsg = err instanceof Error ? err.message : String(err)
+        log.access({
+          timestamp: new Date().toISOString(), method, path: pathname, status: 500,
+          duration_ms: durationMs, ip: server.requestIP(req)?.address ?? undefined,
+          feature: feature.name, request_id: requestId, input: JSON.stringify(input),
+          error: errorMsg, user_agent: req.headers.get('user-agent') ?? undefined,
+        })
+        log.event({
+          type: 'server-error',
+          traceId: requestId,
+          feature: feature.name,
+          route: `${method} ${pathname}`,
+          status: 500,
+          error: {
+            message: errorMsg,
+            stack: err instanceof Error ? err.stack : undefined,
+          },
+          request: { input },
+        })
         return Response.json(
           {
             status: 500,
