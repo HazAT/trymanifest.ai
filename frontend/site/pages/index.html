@@ -251,7 +251,19 @@
 
         <div class="space-y-6 text-sm sm:text-base leading-relaxed">
           <p>
-            Paste the Spark prompt into your agent. Describe what you want to build. It handles the rest — cloning, setup, getting the server running.
+            Copy and paste the prompt into your agent to get started.
+          </p>
+
+          <div class="max-w-full overflow-hidden">
+            <div class="inline-flex items-center gap-3 max-w-full bg-neutral-950 border border-neutral-800 rounded px-4 py-2.5 text-xs sm:text-sm group cursor-pointer" onclick="navigator.clipboard.writeText('read and follow https://github.com/hazat/manifest/blob/main/SPARK.md');this.querySelector('.copy-label').textContent='copied!';setTimeout(()=>this.querySelector('.copy-label').textContent='copy',1500)">
+              <span class="text-neutral-500 shrink-0">$</span>
+              <span class="truncate"><span class="text-white">read and follow</span> <span class="text-amber">https://github.com/hazat/manifest/blob/main/SPARK.md</span></span>
+              <span class="copy-label text-neutral-600 text-xs border border-neutral-700 rounded px-2 py-0.5 group-hover:text-terminal group-hover:border-terminal transition-colors shrink-0">copy</span>
+            </div>
+          </div>
+
+          <p>
+            Describe what you want to build. Spark handles the rest — cloning, setup, getting the server running.
           </p>
 
           <div class="bg-neutral-950 border border-neutral-800 rounded p-4 sm:p-6 my-8 font-mono text-sm space-y-2">
